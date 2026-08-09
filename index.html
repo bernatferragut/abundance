@@ -35,12 +35,14 @@
   .carte p.note{color:var(--gris);font-size:15px;margin:0 0 14px}
 
   table{width:100%;border-collapse:collapse;font-size:17px}
-  th{text-align:left;font-size:14px;color:var(--gris);font-weight:600;padding:0 0 8px;border-bottom:2px solid var(--ligne)}
-  td{padding:11px 0;border-bottom:1px solid var(--ligne)}
+  th{text-align:left;font-size:14px;color:var(--gris);font-weight:600;padding:0 14px 8px 0;border-bottom:2px solid var(--ligne)}
+  td{padding:11px 14px 11px 0;border-bottom:1px solid var(--ligne)}
   tr:last-child td{border-bottom:none}
   .tk{font-weight:700}
   .desc{color:var(--gris);font-size:15px}
-  .pc{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pc{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:18px}
+  .mont{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--bleu);padding-left:18px}
+  .act{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gris);font-size:15px;padding-left:18px}
   .zero{color:#aab0b8;font-weight:600}
   .hl{background:var(--bleubg)} .hlY{background:var(--ambrebg)}
 
@@ -88,8 +90,8 @@
   .champ input{width:100%;padding:11px 12px;font-size:18px;border:1px solid var(--ligne);
     border-radius:9px;font-variant-numeric:tabular-nums}
   .champ input:focus{outline:2px solid var(--bleu);outline-offset:-1px}
-  .mont{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--bleu)}
-  .act{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gris);font-size:15px}
+  .mont{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--bleu);padding-left:18px}
+  .act{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gris);font-size:15px;padding-left:18px}
   .colcalc{display:none} body.mode-calc .colcalc{display:table-cell}
   @media(max-width:560px){ body.mode-calc .desc, body.mode-calc th.thdesc{display:none} }
   .reste{font-size:14px;color:var(--gris);margin-top:10px}
