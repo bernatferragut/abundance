@@ -4,11 +4,11 @@
   "changeLe": "2026-07-15",
   "verifieLe": "2026-08-09",
   "note": "",
-  "tactique": {
-    "active": false,
-    "titre": "SH",
-    "pourcentage": 5,
-    "ouvertLe": "",
-    "raison": ""
-  }
+"tactique": {
+  "active": true,
+  "titre": "SH",
+  "pourcentage": 5,
+  "ouvertLe": "2026-08-09",
+  "raison": "Couverture pendant la baisse."
+}
 }
