@@ -150,16 +150,20 @@ async function main() {
     try { prev = JSON.parse(readFileSync(STATE_PATH, "utf8")); } catch {}
   }
 
-  const changed = prev.setting !== sig.state;
+  const changed = prev.reglage !== sig.state;
   const lastFlip = sig.flips.at(-1);
 
   const next = {
-    setting: sig.state,
+    reglage: sig.state,
     // Once true, stays true until a human clears it — trades must be confirmed done.
-    actionNeeded: changed ? true : prev.actionNeeded === true,
-    changedOn: changed ? today : (prev.changedOn ?? lastFlip?.date ?? today),
-    checkedOn: today,
+    actionRequise: changed ? true : prev.actionRequise === true,
+    changeLe: changed ? today : (prev.changeLe ?? lastFlip?.date ?? today),
+    verifieLe: today,
     note: prev.note ?? "",
+    // The tactical sleeve is manual only. The bot must never open or close it.
+    tactique: prev.tactique ?? {
+      active: false, titre: "SH", pourcentage: 5, ouvertLe: "", raison: "",
+    },
   };
 
   console.log(`\n  Setting        : ${sig.state}${changed ? `  (CHANGED from ${prev.setting ?? "none"})` : ""}`);
@@ -167,7 +171,8 @@ async function main() {
   console.log(`  ${CFG.risk} vs own MA : ${sig.latest.riskAboveOwnMa ? "above" : "BELOW (forces Y)"}`);
   console.log(`  Pending        : ${sig.pending ? `${sig.pending.count}/${CFG.confirmDays} toward ${sig.pending.state}` : "none"}`);
   console.log(`  Flips in 2y    : ${sig.flips.length}`);
-  console.log(`  Action needed  : ${next.actionNeeded}`);
+  console.log(`  Action requise : ${next.actionRequise}`);
+  console.log(`  Tactique       : ${next.tactique.active ? next.tactique.titre + " " + next.tactique.pourcentage + "%" : "aucune"}`);
 
   writeFileSync(STATE_PATH, JSON.stringify(next, null, 2) + "\n");
   console.log(`\nWrote ${STATE_PATH}`);

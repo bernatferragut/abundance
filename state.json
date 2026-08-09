@@ -1,7 +1,14 @@
 {
-  "setting": "X",
-  "actionNeeded": false,
-  "changedOn": "2026-07-15",
-  "checkedOn": "2026-08-09",
-  "note": ""
+  "reglage": "X",
+  "actionRequise": false,
+  "changeLe": "2026-07-15",
+  "verifieLe": "2026-08-09",
+  "note": "",
+  "tactique": {
+    "active": false,
+    "titre": "SH",
+    "pourcentage": 5,
+    "ouvertLe": "",
+    "raison": ""
+  }
 }

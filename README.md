@@ -1,147 +1,149 @@
-# Our Plan — family status page
+# Notre plan — page familiale
 
-A one-page site that tells the family exactly one thing: **do nothing**, or
-**here is what changed**.
-
-Only you ever edit it. They only ever read it.
+Une page qui dit une seule chose : **ne rien faire**, ou **voici ce qui a changé**.
+Toi seul la modifies. Les autres ne font que la lire.
 
 ---
 
-## Put it online (5 minutes, free)
+## Pourquoi GitHub Pages et pas Google
 
-1. Create a **public** GitHub repo, e.g. `our-plan`.
-2. Upload `index.html` and `state.json` to the root.
-3. Repo → **Settings** → **Pages** → Source: **Deploy from a branch** →
-   Branch `main`, folder `/ (root)` → **Save**.
-4. Wait ~1 minute. It's live at
-   `https://<your-username>.github.io/our-plan/`
-5. Send them the link. Tell them to bookmark it / add to home screen.
+« Google Pages » n'existe pas. **Google Sites** place le HTML dans un iframe
+restreint : le `fetch()` de `state.json` ne fonctionne pas, et Sites ne peut pas
+exécuter un calcul hebdomadaire. **Firebase Hosting** servirait bien la page,
+mais il faudrait quand même un endroit pour calculer le signal, et Cloud
+Scheduler exige un compte de facturation.
 
-> The repo must be public for free GitHub Pages. Nothing private is on the
-> page — no balances, no dollar amounts, no account numbers, no names. Only
-> percentages and tickers. **Keep it that way.**
+GitHub fait les deux gratuitement : l'hébergement **et** le calcul automatique.
 
 ---
 
-## Updating it — the only file you touch
+## Mise en ligne (5 minutes)
 
-`state.json`:
+1. Créer un dépôt **public**, par exemple `notre-plan`.
+2. Téléverser `index.html`, `state.json`, `scripts/` et `.github/`.
+3. **Settings → Pages →** Deploy from a branch → `main` → `/ (root)` → Save.
+4. **Settings → Actions → General →** Workflow permissions →
+   **Read and write permissions** → Save.
+5. **Actions → Update signal → Run workflow** une fois à la main, puis lire le
+   journal pour valider.
+
+Adresse : `https://<ton-nom>.github.io/notre-plan/`
+
+> Le dépôt doit être public. Aucune donnée privée n'y figure : ni montants, ni
+> soldes, ni numéros de compte. Seulement des symboles et des pourcentages.
+> **Garde-le ainsi.**
+
+---
+
+## Le fichier `state.json`
 
 ```json
 {
-  "setting": "X",
-  "actionNeeded": false,
-  "changedOn": "2026-07-15",
-  "checkedOn": "2026-08-09",
-  "note": ""
+  "reglage": "X",
+  "actionRequise": false,
+  "changeLe": "2026-07-15",
+  "verifieLe": "2026-08-09",
+  "note": "",
+  "tactique": {
+    "active": false,
+    "titre": "SH",
+    "pourcentage": 5,
+    "ouvertLe": "",
+    "raison": ""
+  }
 }
 ```
 
-| Field | What it does |
+| Champ | Rôle |
 |---|---|
-| `setting` | `"X"` or `"Y"`. Highlights that column in the RRSP table. |
-| `actionNeeded` | `true` → page says **"Something changed"**. `false` → **"Do nothing"**. |
-| `changedOn` | Date the setting last flipped. Display only. |
-| `checkedOn` | **Update this every time you check.** Drives the stale warning. |
-| `note` | Optional message. Leave `""` to hide the box. |
+| `reglage` | `"X"` ou `"Y"`. Surligne la bonne colonne du REER. |
+| `actionRequise` | `true` → « Quelque chose a changé ». `false` → « Ne rien faire ». |
+| `changeLe` | Date du dernier changement de réglage. Affichage seulement. |
+| `verifieLe` | Mis à jour automatiquement. Déclenche l'avertissement après 14 jours. |
+| `note` | Message optionnel. `""` cache la boîte. |
+| `tactique` | Position tactique manuelle. Voir plus bas. |
 
-The page also carries the full strategy in a collapsible **"How the whole plan works"**
-section, so the reasoning travels with the instructions. Nobody has to find the PDF.
+Le robot met à jour `reglage`, `actionRequise`, `changeLe` et `verifieLe`.
+**Il ne touche jamais à `tactique`** — cette décision reste entièrement humaine.
 
-You can edit it on your phone: open the file on github.com, tap the pencil,
-change the value, commit. Live in about a minute.
-
-### Weekly routine
-
-- **Nothing changed:** update `checkedOn` to today. Commit. Done.
-- **Signal flipped:** set `setting`, set `actionNeeded` to `true`, update both
-  dates. Commit.
-- **They've done the trades:** set `actionNeeded` back to `false`.
+Après avoir fait les transactions, remets `actionRequise` à `false`. C'est la
+seule étape manuelle du fonctionnement normal.
 
 ---
 
-## Automatic updates (recommended)
+## La position tactique (SH / PSQ)
 
-`.github/workflows/update-signal.yml` runs every **Saturday 02:00 UTC**
-(Friday ~22:00 ET, after the US close), fetches SMH and GLD from Yahoo Finance,
-computes the signal, and commits `state.json`. You do nothing.
+Cachée par défaut. Elle apparaît seulement quand `active` vaut `true`.
 
-**Why not compute it in the browser?** Yahoo does not send CORS headers, so a
-page cannot fetch it directly. The usual workaround is a third-party CORS proxy
-— which means the family page breaks (or shows a wrong verdict) whenever that
-proxy is down, rate-limited, or compromised. A GitHub Action runs server-side:
-no CORS, no key, no third party.
-
-### Turn it on
-
-1. Repo → **Settings** → **Actions** → **General** → Workflow permissions →
-   **Read and write permissions** → Save.
-2. Repo → **Actions** → **Update signal** → **Run workflow** (test it by hand
-   the first time and read the log).
-3. After that it runs itself, weekly.
-
-The log prints the setting, the distance to the moving average, whether SMH is
-above its own average, and any pending flip.
-
-### Safety behaviour
-
-- **Prices older than 7 days → refuses to write.** Stale data never becomes a
-  verdict.
-- **Retries 3× with backoff** before failing.
-- **Uses adjusted closes**, so a stock split cannot corrupt the 200-day average
-  and manufacture a false flip.
-- **`actionNeeded` stays `true` until a human clears it.** The bot can raise the
-  flag; only you can lower it — after the trades are actually done.
-- **Fails loudly.** A broken run leaves the old `state.json` untouched and shows
-  a red X in the Actions tab. The page's stale warning appears after 14 days.
-
-### Clearing the flag
-
-Once you've made the trades, edit `state.json` and set `"actionNeeded": false`.
-That's the only manual step.
-
-### Changing the signal
-
-Edit the `CFG` block at the top of `scripts/signal.mjs`. Change it in the PDF too.
-
----
-
-## Local preview
-
-Opening `index.html` directly shows a **"Preview only"** banner with sample data
-— browsers block `fetch()` on `file://`. This is expected and not a bug. To
-preview with real data, run a local server:
-
-```bash
-python3 -m http.server 8000    # then open http://localhost:8000
+```json
+"tactique": {
+  "active": true,
+  "titre": "SH",
+  "pourcentage": 5,
+  "ouvertLe": "2026-08-09",
+  "raison": "Couverture pendant la baisse."
+}
 ```
 
-On the live GitHub Pages site it always reads the real `state.json`.
+- **SH** = inverse du S&P 500. **PSQ** = inverse du Nasdaq 100. **Sans levier.**
+  Jamais SQQQ, SDS ou SOXS : la décote quotidienne transforme une bonne
+  intuition en perte.
+- **Maximum 5 % du total**, payé à même le SGOV du REER, jamais en vendant les
+  autres placements.
+- **Maximum 8 semaines.** La page compte les jours et affiche
+  « ⚠ DÉPASSÉ » après 56 jours.
+- **REER seulement.** Une perte dans un CELI est irrécupérable et détruit des
+  droits de cotisation.
+- **Seulement en Réglage Y.** On ne vend jamais à découvert dans une tendance
+  haussière.
+
+Pour fermer : remettre `active` à `false`.
 
 ---
 
-## Safety behaviour built in
+## Le calcul automatique
 
-- **Stale guard** — if `checkedOn` is more than 14 days old, a red banner
-  appears: *"This page hasn't been checked in N days. Ask before acting."*
-  So if you're ill, travelling, or gone, the page says so instead of quietly
-  showing an old answer.
-- **Fail loud** — if `state.json` can't be read, it shows an error and says
-  *"Do nothing until you can ask."* It never renders a blank or a guess.
-- **Safe default** — an invalid `setting` value falls back to X rather than
-  breaking.
-- **Cache-busted fetch** — they always see the current file, not a stale copy.
+`.github/workflows/update-signal.yml` s'exécute chaque **samedi 02 h 00 UTC**
+(vendredi ~22 h HE, après la fermeture), récupère SMH et GLD depuis Yahoo
+Finance, calcule le signal et publie `state.json`.
+
+**Pourquoi pas dans le navigateur ?** Yahoo n'envoie pas d'en-têtes CORS : une
+page web ne peut pas l'appeler directement. Le contournement habituel est un
+proxy CORS externe — donc la page familiale casse (ou affiche un mauvais
+verdict) dès que ce proxy tombe. Le calcul côté serveur évite tout ça.
+
+### Sécurités intégrées
+
+- Prix de plus de 7 jours → **refuse d'écrire**. Une donnée périmée ne devient
+  jamais un verdict.
+- **3 tentatives** avec délai croissant avant d'abandonner.
+- **Cours ajustés** : un fractionnement d'actions ne peut pas fausser la moyenne
+  200 jours ni fabriquer un faux signal.
+- `actionRequise` ne redevient jamais `false` tout seul. Le robot lève le
+  drapeau ; seul un humain le baisse.
+- Échec bruyant : `state.json` reste intact, un X rouge apparaît dans l'onglet
+  Actions, et l'avertissement de la page apparaît après 14 jours.
 
 ---
 
-## Changing the numbers
+## Aperçu local
 
-The two tables are plain HTML in `index.html`. Search for `TFSA account` or
-`RRSP account` and edit the rows.
+Ouvrir `index.html` directement affiche une bannière **« Aperçu seulement »**
+avec des données d'exemple : les navigateurs bloquent `fetch()` sur `file://`.
+C'est normal. Pour tester avec les vraies données :
 
-**If you change a percentage, change it in the PDF too.** Two sources of truth
-that disagree is worse than either one alone.
+```bash
+python3 -m http.server 8000    # puis http://localhost:8000
+```
 
 ---
 
-Not professional financial advice.
+## Modifier les pourcentages
+
+Les tableaux sont du HTML ordinaire dans `index.html`. Chercher `Compte CELI`
+ou `Compte REER`. **Si un pourcentage change ici, il doit changer dans le PDF
+aussi.** Deux sources de vérité qui se contredisent, c'est pire qu'une seule.
+
+---
+
+Plan familial personnel. Ce n'est pas un conseil financier professionnel.
