@@ -25,11 +25,15 @@ jobs:
 
       - name: Compute signal
         run: node scripts/signal.mjs
+        env:
+          JOUR_SIGNAL: "1"
 
       - name: Commit if changed
+        id: commit
         run: |
           if git diff --quiet -- state.json; then
             echo "No change to state.json"
+            echo "changed=false" >> $GITHUB_OUTPUT
             exit 0
           fi
           git config user.name  "signal-bot"
@@ -37,3 +41,55 @@ jobs:
           git add state.json
           git commit -m "signal: $(date -u +%Y-%m-%d)"
           git push
+          echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Check for regime change
+        id: check_regime
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          # Extract actionRequise from state.json
+          ACTION_REQUIRED=$(node -e "console.log(require('./state.json').actionRequise)")
+          echo "action_required=$ACTION_REQUIRED" >> $GITHUB_OUTPUT
+          if [ "$ACTION_REQUIRED" = "true" ]; then
+            REGLAGE=$(node -e "console.log(require('./state.json').reglage)")
+            echo "reglage=$REGLAGE" >> $GITHUB_OUTPUT
+            echo "🚨 REGIME CHANGE DETECTED: Action required for Regime $REGLAGE"
+          fi
+
+      - name: Create notification issue
+        if: steps.check_regime.outputs.action_required == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reglage = '${{ steps.check_regime.outputs.reglage }}';
+            const today = new Date().toISOString().split('T')[0];
+            
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Action Required: Regime ${reglage} - ${today}`,
+              body: `## Regime Change Detected
+            
+            **New Regime:** ${reglage}
+            **Date:** ${today}
+            **Action Required:** Yes
+            
+            ### Next Steps
+            
+            1. Review the plan at: https://${context.repo.owner}.github.io/${context.repo.repo}/
+            2. Adjust REER holdings to match Regime ${reglage} column
+            3. After completing trades, update \`state.json\`:
+               - Set \`actionRequise: false\`
+               - Commit and push the change
+            4. Close this issue
+            
+            ### Important Reminders
+            
+            - ✅ Only trade in REER/RRSP account
+            - ❌ Never trade in CELI/TFSA account
+            - 📋 Follow the Regime ${reglage} column percentages exactly
+            
+            ---
+            *This issue was created automatically by the signal update workflow.*`,
+              labels: ['signal-change', 'action-required']
+            });

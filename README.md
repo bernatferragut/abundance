@@ -119,10 +119,31 @@ verdict) dès que ce proxy tombe. Le calcul côté serveur évite tout ça.
 - **3 tentatives** avec délai croissant avant d'abandonner.
 - **Cours ajustés** : un fractionnement d'actions ne peut pas fausser la moyenne
   200 jours ni fabriquer un faux signal.
+- **Validation des prix** : rejette les changements de plus de 50 % en une
+  journée (probablement une erreur de données). Conserve l'ancien prix si la
+  validation échoue.
 - `actionRequise` ne redevient jamais `false` tout seul. Le robot lève le
   drapeau ; seul un humain le baisse.
 - Échec bruyant : `state.json` reste intact, un X rouge apparaît dans l'onglet
   Actions, et l'avertissement de la page apparaît après 14 jours.
+
+### Notifications automatiques
+
+Quand le réglage change et que `actionRequise` devient `true`, le workflow crée
+automatiquement une **issue GitHub** avec :
+- Le nouveau réglage (X ou Y)
+- La date du changement
+- Les étapes à suivre pour ajuster le REER
+- Les rappels importants (ne jamais trader dans le CELI, etc.)
+
+**Pour recevoir les notifications :**
+1. **Settings → Notifications** dans ton profil GitHub
+2. Activer les notifications pour **Issues** sur ce dépôt
+3. Choisir ton mode préféré : email, mobile, ou web
+
+Tu peux aussi consulter l'onglet **Issues** du dépôt à tout moment pour voir
+s'il y a une action en attente. Ferme l'issue une fois les transactions
+complétées et `actionRequise` remis à `false`.
 
 ---
 

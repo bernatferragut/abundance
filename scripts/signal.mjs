@@ -137,12 +137,45 @@ export function computeSignal(riskBars, hedgeBars, cfg = CFG) {
 
 const TITRES = ["VT","GLDM","MCHI","SMH","IBIT","SGOV","AIPO","BCI"];
 
-async function fetchPrices() {
+/**
+ * Validate that a new price is reasonable compared to the previous price.
+ * Rejects prices that changed by more than 50% in a single day (likely data error).
+ */
+function validatePrice(symbol, newPrice, prevPrice) {
+  if (!prevPrice || prevPrice <= 0) return true; // No previous price to compare
+  
+  const changePct = Math.abs((newPrice - prevPrice) / prevPrice);
+  const changePercent = (changePct * 100).toFixed(1);
+  
+  if (changePct > 0.50) {
+    console.warn(`  ⚠ ${symbol}: REJECTED — ${newPrice} vs ${prevPrice} (${changePercent}% change exceeds 50% threshold)`);
+    return false;
+  }
+  
+  if (changePct > 0.20) {
+    console.warn(`  ⚠ ${symbol}: Large change — ${newPrice} vs ${prevPrice} (${changePercent}% change)`);
+  }
+  
+  return true;
+}
+
+async function fetchPrices(prevPrices = {}) {
   const out = {};
   for (const t of TITRES) {
     try {
       const bars = await fetchSymbol(t, 2);
-      out[t] = Math.round(bars.at(-1).close * 100) / 100;
+      const newPrice = Math.round(bars.at(-1).close * 100) / 100;
+      
+      // Validate price against previous value
+      if (validatePrice(t, newPrice, prevPrices[t])) {
+        out[t] = newPrice;
+      } else {
+        console.warn(`  prix ${t}: VALIDATION FAILED — ancien prix conserve`);
+        // Keep previous price if validation fails
+        if (prevPrices[t]) {
+          out[t] = prevPrices[t];
+        }
+      }
     } catch (e) {
       console.warn(`  prix ${t}: ECHEC (${e.message}) — ancien prix conserve`);
     }
@@ -161,7 +194,7 @@ async function main() {
   if (ageDays > 7) throw new Error(`Price data is ${ageDays} days old — refusing to update state.`);
 
   console.log("\nPrix de cloture :");
-  const prixNeufs = await fetchPrices();
+  const prixNeufs = await fetchPrices(prev.prix ?? {});
 
   let prev = {};
   if (existsSync(STATE_PATH)) {
