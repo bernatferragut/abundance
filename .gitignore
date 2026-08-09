@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Local artifacts — do not commit these to the public repo
+our-plan-site.zip
+The_Plan.pdf
+
+# Node
+node_modules/
