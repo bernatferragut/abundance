@@ -193,13 +193,13 @@ async function main() {
   const ageDays = Math.floor((Date.now() - new Date(sig.latest.date + "T00:00:00Z").getTime()) / 86400000);
   if (ageDays > 7) throw new Error(`Price data is ${ageDays} days old — refusing to update state.`);
 
-  console.log("\nPrix de cloture :");
-  const prixNeufs = await fetchPrices(prev.prix ?? {});
-
   let prev = {};
   if (existsSync(STATE_PATH)) {
     try { prev = JSON.parse(readFileSync(STATE_PATH, "utf8")); } catch {}
   }
+
+  console.log("\nPrix de cloture :");
+  const prixNeufs = await fetchPrices(prev.prix ?? {});
 
   // Prices refresh every day, but the setting may only move on the weekly run.
   // This preserves the Friday-only discipline: no mid-week flip can appear.
