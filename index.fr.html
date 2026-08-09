@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notre Plan</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --muted:#5f6670; --line:#dfe3e8; --bg:#f7f9fb; --card:#ffffff;
+    --green:#1f7a3d; --greenbg:#e8f5ec; --amber:#8a5a00; --amberbg:#fdf3e0;
+    --blue:#1a4f7a; --bluebg:#e8f1f8; --red:#8f2626; --redbg:#fbeeee;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:20px 16px 60px; background:var(--bg); color:var(--ink);
+    font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:620px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:16px;margin:0 0 22px}
+
+  .status{border-radius:16px;padding:28px 22px;text-align:center;margin-bottom:22px;border:2px solid}
+  .status .big{font-size:40px;line-height:1.15;font-weight:800;margin:0 0 8px}
+  .status .say{font-size:19px;margin:0}
+  .ok  {background:var(--greenbg);border-color:#a8d5b8;color:var(--green)}
+  .act {background:var(--amberbg);border-color:#e0c68a;color:var(--amber)}
+  .err {background:var(--redbg); border-color:#e0b4b4;color:var(--red)}
+
+  .pill{display:inline-block;padding:6px 16px;border-radius:999px;font-size:16px;font-weight:700;margin-top:14px}
+  .pillX{background:var(--bluebg);color:var(--blue);border:1px solid #b3d0e6}
+  .pillY{background:var(--amberbg);color:var(--amber);border:1px solid #e0c68a}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:18px}
+  .card h2{font-size:19px;margin:0 0 4px}
+  .card p.note{color:var(--muted);font-size:15px;margin:0 0 14px}
+
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th{text-align:left;font-size:14px;color:var(--muted);font-weight:600;padding:0 0 8px;border-bottom:2px solid var(--line)}
+  td{padding:11px 0;border-bottom:1px solid var(--line)}
+  tr:last-child td{border-bottom:none}
+  .tk{font-weight:700}
+  .desc{color:var(--muted);font-size:15px}
+  .pc{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .zero{color:#aab0b8;font-weight:600}
+  .hl{background:var(--bluebg)}
+  .hlY{background:var(--amberbg)}
+
+  .rules{background:var(--redbg);border:1px solid #e0b4b4;border-radius:14px;padding:20px;margin-bottom:18px}
+  .rules h2{color:var(--red);font-size:19px;margin:0 0 10px}
+  .rules ul{margin:0;padding-left:22px}
+  .rules li{margin-bottom:8px}
+
+  .calm{background:var(--greenbg);border:1px solid #a8d5b8;border-radius:14px;padding:20px;margin-bottom:18px}
+  .calm h2{color:var(--green);font-size:19px;margin:0 0 8px}
+
+  .meta{color:var(--muted);font-size:14px;text-align:center;margin-top:26px;line-height:1.7}
+  .stale{background:var(--redbg);border:1px solid #e0b4b4;color:var(--red);border-radius:12px;
+         padding:14px;text-align:center;font-weight:600;margin-bottom:18px}
+  .preview{background:#eef2f7;border:1px dashed #9fb0c4;color:#3d5570;border-radius:12px;
+           padding:12px;text-align:center;font-size:14px;margin-bottom:18px}
+  .hidden{display:none}
+
+  .strategy{background:var(--card);border:1px solid var(--line);border-radius:14px;margin-bottom:18px;overflow:hidden}
+  .strategy summary{cursor:pointer;padding:18px 20px;font-size:18px;font-weight:700;list-style:none;
+    display:flex;justify-content:space-between;align-items:center}
+  .strategy summary::-webkit-details-marker{display:none}
+  .chev{color:var(--muted);font-size:24px;transition:transform .18s;display:inline-block}
+  .strategy[open] .chev{transform:rotate(90deg)}
+  .sbody{padding:0 20px 20px;border-top:1px solid var(--line)}
+  .sbody h3{font-size:16px;margin:18px 0 6px;color:var(--blue)}
+  .sbody p{margin:0 0 10px;font-size:16px;line-height:1.6}
+  @media(max-width:420px){ .status .big{font-size:32px} body{font-size:17px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Notre Plan</h1>
+  <p class="sub">Que faire aujourd'hui.</p>
+
+  <div id="preview" class="preview hidden"></div>
+  <div id="stale" class="stale hidden"></div>
+
+  <div id="status" class="status ok">
+    <p class="big" id="statusBig">Chargement…</p>
+    <p class="say" id="statusSay">Vérification du plan.</p>
+    <div id="settingPill"></div>
+  </div>
+
+  <div id="noteCard" class="card hidden">
+    <h2>Une note</h2>
+    <p id="noteText" style="margin:0"></p>
+  </div>
+
+  <div class="card">
+    <h2>Compte CELI</h2>
+    <p class="note">60&nbsp;% de l'argent. Cela ne change jamais. N'achetez et ne vendez jamais rien ici.</p>
+    <table>
+      <thead><tr><th>Acheter</th><th>Ce que c'est</th><th style="text-align:right">Montant</th></tr></thead>
+      <tbody>
+        <tr><td class="tk">VT</td><td class="desc">Un peu de presque toutes les entreprises du monde</td><td class="pc">38&nbsp;%</td></tr>
+        <tr><td class="tk">GLDM</td><td class="desc">Or</td><td class="pc">27&nbsp;%</td></tr>
+        <tr><td class="tk">MCHI</td><td class="desc">Entreprises en Chine</td><td class="pc">13&nbsp;%</td></tr>
+        <tr><td class="tk">SMH</td><td class="desc">Entreprises de puces informatiques</td><td class="pc">10&nbsp;%</td></tr>
+        <tr><td class="tk">AIPO</td><td class="desc">Électricité pour les centres de données IA</td><td class="pc">7&nbsp;%</td></tr>
+        <tr><td class="tk">IBIT</td><td class="desc">Bitcoin</td><td class="pc">5&nbsp;%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h2>Compte REER</h2>
+    <p class="note" id="rrspNote">40&nbsp;% de l'argent. La colonne surlignée est celle à suivre.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Acheter</th><th>Ce que c'est</th>
+          <th style="text-align:right" id="thX">Réglage X</th>
+          <th style="text-align:right" id="thY">Réglage Y</th>
+        </tr>
+      </thead>
+      <tbody id="rrspBody">
+        <tr><td class="tk">SGOV</td><td class="desc">Argent sûr qui rapporte des intérêts</td><td class="pc cx">40&nbsp;%</td><td class="pc cy">50&nbsp;%</td></tr>
+        <tr><td class="tk">SMH</td><td class="desc">Entreprises de puces informatiques</td><td class="pc cx">23&nbsp;%</td><td class="pc cy zero">0&nbsp;%</td></tr>
+        <tr><td class="tk">BCI</td><td class="desc">Pétrole, métaux, aliments et matières premières</td><td class="pc cx">20&nbsp;%</td><td class="pc cy">25&nbsp;%</td></tr>
+        <tr><td class="tk">AIPO</td><td class="desc">Électricité pour les centres de données IA</td><td class="pc cx">10&nbsp;%</td><td class="pc cy zero">0&nbsp;%</td></tr>
+        <tr><td class="tk">IBIT</td><td class="desc">Bitcoin</td><td class="pc cx">7&nbsp;%</td><td class="pc cy zero">0&nbsp;%</td></tr>
+        <tr><td class="tk">GLDM</td><td class="desc">Or</td><td class="pc cx zero">0&nbsp;%</td><td class="pc cy">25&nbsp;%</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="rules">
+    <h2>Des règles qui ne sont jamais enfreintes</h2>
+    <ul>
+      <li>N'achetez et ne vendez jamais dans le <strong>CELI</strong>.</li>
+      <li>N'ajoutez jamais un dixième placement.</li>
+      <li>N'agissez jamais parce que les nouvelles font peur.</li>
+      <li>Seul le REER change, et seulement quand cette page le dit.</li>
+    </ul>
+  </div>
+
+  <div class="calm">
+    <h2>Si vous n'êtes jamais certain</h2>
+    <p style="margin:0"><strong>Ne faites rien, et demandez.</strong> Attendre une semaine n'a presque
+    jamais coûté quoi que ce soit à personne. Agir dans la confusion a coûté très cher à bien des gens.</p>
+  </div>
+
+
+  <details class="strategy">
+    <summary>Comment fonctionne tout le plan &nbsp;<span class="chev">›</span></summary>
+    <div class="sbody">
+
+      <h3>L'idée</h3>
+      <p>Nous possédons neuf choses réparties dans deux comptes. Chaque placement a un <strong>plancher</strong> —
+      le montant que nous gardons quoi qu'il arrive. Ces planchers représentent environ 84&nbsp;% de l'argent, et
+      cette partie n'a jamais besoin d'être vendue.</p>
+      <p><strong>Le CELI détient les planchers. Le REER détient tout ce qui bouge.</strong> Ce n'est pas une
+      question de « bons » placements contre de « mauvais » — c'est la partie immobile et la partie mobile.
+      L'ancre et la voile.</p>
+
+      <h3>Pourquoi on ne touche jamais au CELI</h3>
+      <p>Si un CELI est jugé comme exploitant une entreprise de négociation, le gouvernement peut imposer tout
+      ce qu'il contient aux taux complets. La protection à l'abri de l'impôt est perdue, le droit de cotisation
+      ne revient pas, et aucun nouveau droit n'est créé pour l'argent retiré afin de payer l'impôt. C'est à sens
+      unique et permanent. Les REER sont traités différemment, c'est pourquoi toute l'activité s'y déroule.</p>
+
+      <h3>Les deux réglages</h3>
+      <p><strong>Le réglage X</strong> correspond aux conditions normales — nous possédons plus de puces,
+      d'électricité IA et de bitcoin. <strong>Le réglage Y</strong> correspond aux difficultés — le REER passe à
+      trois placements, la moitié en argent comptant, avec de l'or et des matières premières pour le reste.
+      Le changement vend les choses risquées et achète les choses sûres.</p>
+
+      <h3>Le signal</h3>
+      <p>Deux choses sont vérifiées par rapport à une moyenne de 200 jours : le ratio puces/or, et les puces
+      seules. Les deux doivent être solides pour le réglage X. Si l'un ou l'autre s'affaiblit, cela signifie le
+      réglage Y. Il y a un écart volontaire entre les deux déclencheurs, pour que le plan ne bascule pas d'avant
+      en arrière — il ne change qu'environ une ou deux fois par an.</p>
+
+      <h3>À quoi s'attendre</h3>
+      <p>Environ 6–7&nbsp;% par an dans une année typique, environ 2 chances sur 3 de battre l'inflation, et une
+      baisse d'environ 20&nbsp;% à un moment donné en cours de route.</p>
+      <p><strong>Ce plan perdra de l'argent certaines années. C'est prévu, pas un échec.</strong>
+      Il est conçu pour survivre aux mauvaises années, pas pour les éviter — et il ne fonctionne que s'il est
+      conservé à travers elles. Vendre dans la panique est le seul moyen fiable de transformer une baisse
+      temporaire en perte permanente.</p>
+      <p>Le signal n'est pas une protection contre les krachs. En cas de krach soudain, il ne sauve presque
+      rien. Il aide lors des baisses lentes et continues. L'argent comptant et l'or sont la véritable défense.</p>
+
+      <h3>Une fois par an</h3>
+      <p>Vérifiez que le CELI représente toujours près de 60&nbsp;% du total. Ajustez les placements du CELI
+      uniquement en ajoutant de l'argent neuf — jamais en vendant.</p>
+
+    </div>
+  </details>
+
+  <p class="meta">
+    Réglage modifié pour la dernière fois : <strong id="mChanged">—</strong><br>
+    Page vérifiée pour la dernière fois : <strong id="mChecked">—</strong>
+  </p>
+  <p class="meta" style="font-size:13px">
+    Un plan familial personnel, pas un conseil financier professionnel.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+
+  function fmtDate(s) {
+    if (!s) return "non défini";
+    var d = new Date(s + "T00:00:00");
+    if (isNaN(d)) return s;
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+  }
+  function daysSince(s) {
+    var d = new Date(s + "T00:00:00");
+    if (isNaN(d)) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  }
+
+  function fail(msg) {
+    var st = $("status");
+    st.className = "status err";
+    $("statusBig").textContent = "Impossible de charger le plan";
+    $("statusSay").textContent = msg + " Ne faites rien tant que vous ne pouvez pas demander.";
+    $("settingPill").innerHTML = "";
+  }
+
+  function render(s) {
+    var setting = (s.setting === "Y") ? "Y" : "X";
+    var act = s.actionNeeded === true;
+
+    // Highlight the live column
+    var thX = $("thX"), thY = $("thY");
+    var xs = document.querySelectorAll(".cx"), ys = document.querySelectorAll(".cy");
+    var i;
+    if (setting === "X") {
+      thX.classList.add("hl");
+      for (i = 0; i < xs.length; i++) xs[i].classList.add("hl");
+      $("rrspNote").textContent = "Nous sommes au réglage X. Suivez la colonne du réglage X.";
+    } else {
+      thY.classList.add("hlY");
+      for (i = 0; i < ys.length; i++) ys[i].classList.add("hlY");
+      $("rrspNote").textContent = "Nous sommes au réglage Y. Suivez la colonne du réglage Y.";
+    }
+
+    // Main status
+    var st = $("status");
+    if (act) {
+      st.className = "status act";
+      $("statusBig").textContent = "Quelque chose a changé";
+      $("statusSay").textContent =
+        "Faites correspondre le REER à la colonne du réglage " + setting + " ci-dessous. Ensuite, c'est terminé.";
+    } else {
+      st.className = "status ok";
+      $("statusBig").textContent = "Ne faites rien";
+      $("statusSay").textContent = "Tout est comme il se doit. Rien à acheter ni à vendre aujourd'hui.";
+    }
+    $("settingPill").innerHTML =
+      '<span class="pill ' + (setting === "X" ? "pillX" : "pillY") + '">Nous sommes au réglage ' + setting + "</span>";
+
+    if (s.note) {
+      $("noteText").textContent = s.note;
+      $("noteCard").classList.remove("hidden");
+    }
+
+    $("mChanged").textContent = fmtDate(s.changedOn);
+    $("mChecked").textContent = fmtDate(s.checkedOn);
+
+    // Stale guard: if nobody has checked in a while, say so loudly.
+    var age = daysSince(s.checkedOn);
+    if (age !== null && age > 14) {
+      var w = $("stale");
+      w.textContent = "Cette page n'a pas été vérifiée depuis " + age + " jours. Demandez avant d'agir.";
+      w.classList.remove("hidden");
+    }
+  }
+
+  // Opened from disk (file://)? Browsers block fetch there. Show the built-in
+  // sample so the page can be previewed, clearly marked as NOT live.
+  var FALLBACK = { setting: "X", actionNeeded: false, changedOn: "", checkedOn: "" };
+  var isFile = location.protocol === "file:";
+
+  fetch("state.json?t=" + Date.now())
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(render)
+    .catch(function (e) {
+      if (isFile) {
+        var p = $("preview");
+        p.textContent = "Aperçu uniquement — ouvert depuis un fichier, donc ce sont des données d'exemple, pas le réglage en direct.";
+        p.classList.remove("hidden");
+        render(FALLBACK);
+      } else {
+        fail("La page n'a pas pu lire ses réglages (" + e.message + ").");
+      }
+    });
+})();
+</script>
+</body>
+</html>
