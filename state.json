@@ -10,5 +10,16 @@
     "pourcentage": 5,
     "ouvertLe": "",
     "raison": ""
-  }
+  },
+  "prix": {
+    "VT": 161.3,
+    "GLDM": 85.95,
+    "MCHI": 56.57,
+    "SMH": 582.7,
+    "IBIT": 36.8,
+    "SGOV": 100.48,
+    "AIPO": 30.14,
+    "BCI": 23.83
+  },
+  "prixDate": "2026-08-07"
 }

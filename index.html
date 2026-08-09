@@ -96,15 +96,6 @@
   .prixvieux{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre);
     border-radius:10px;padding:11px;font-size:14px;margin-top:12px}
 
-  .suivi-tot{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;padding:22px;text-align:center;margin-bottom:18px}
-  .suivi-tot .val{font-size:34px;font-weight:800;color:var(--bleu);margin:4px 0}
-  .suivi-tot .lbl{font-size:15px;color:var(--gris)}
-  .gain{font-size:19px;font-weight:700;margin-top:6px}
-  .gp{color:var(--vert)} .gn{color:var(--rouge)}
-  .mini{width:74px;padding:7px 8px;font-size:15px;border:1px solid var(--ligne);border-radius:7px;
-    text-align:right;font-variant-numeric:tabular-nums}
-  .ecart{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
-  .horsband{color:var(--rouge);font-weight:700}
   .cache{display:none}
   @media(max-width:420px){ .statut .gros{font-size:31px} body{font-size:17px} }
 </style>
@@ -117,7 +108,6 @@
 
   <div class="onglets">
     <button class="onglet actif" id="ongPlan" type="button">Plan</button>
-    <button class="onglet" id="ongSuivi" type="button">Suivi</button>
   </div>
 
   <div id="panPlan" class="panneau actif">
@@ -306,44 +296,6 @@ ENTRE LES DEUX  →  on ne bouge pas.
 
   </div><!-- /panPlan -->
 
-  <div id="panSuivi" class="panneau">
-    <div class="suivi-tot">
-      <div class="lbl">Valeur totale du portefeuille</div>
-      <div class="val" id="sTotal">—</div>
-      <div class="gain" id="sGain"></div>
-      <div class="lbl" id="sDate" style="margin-top:8px"></div>
-    </div>
-
-    <div class="calc">
-      <h2>Combien d'actions je détiens</h2>
-      <p class="note">Entrer le nombre d'actions de chaque placement. Tout reste dans ce
-      navigateur seulement — rien n'est envoyé nulle part, rien n'est publié.</p>
-      <div class="rangee">
-        <div class="champ">
-          <label for="invTotal">Montant total investi (US$) — optionnel</label>
-          <input id="invTotal" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 50000">
-        </div>
-      </div>
-      <table style="margin-top:14px">
-        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
-        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
-        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th></tr></thead>
-        <tbody id="corpsSuivi"></tbody>
-      </table>
-      <p class="reste" id="sNote"></p>
-      <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
-        border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
-        Tout effacer</button>
-    </div>
-
-    <div class="calme">
-      <h2>Pourquoi c'est mis à jour une fois par semaine</h2>
-      <p style="margin:0">Regarder son portefeuille tous les jours pousse à réagir, et réagir coûte
-      cher. Les prix ici viennent de la dernière fermeture. Ce n'est pas du temps réel, et c'est
-      voulu. Ce qui compte, c'est la direction sur des années — pas le mouvement d'aujourd'hui.</p>
-    </div>
-  </div><!-- /panSuivi -->
-
   <p class="meta">
     Réglage changé le : <strong id="mChange">—</strong><br>
     Page vérifiée le : <strong id="mVerifie">—</strong>
@@ -454,18 +406,6 @@ ENTRE LES DEUX  →  on ne bouge pas.
   }
 
 
-  /* ---------------- onglets ---------------- */
-  function onglet(actif) {
-    var p = actif === "suivi";
-    $("ongPlan").className  = "onglet" + (p ? "" : " actif");
-    $("ongSuivi").className = "onglet" + (p ? " actif" : "");
-    $("panPlan").className  = "panneau" + (p ? "" : " actif");
-    $("panSuivi").className = "panneau" + (p ? " actif" : "");
-    if (p) majSuivi();
-  }
-  $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
-  $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
-
   /* ---------------- cibles ---------------- */
   var CIBLE_CELI = { VT:33, GLDM:27, IBIT:17, MCHI:13, SMH:10 };
   var CIBLE_REER = {
@@ -521,86 +461,10 @@ ENTRE LES DEUX  →  on ne bouge pas.
     $("resteTxt").textContent = msg;
   }
 
-  /* ---------------- suivi ---------------- */
-  function majSuivi() {
-    var prix = (ETAT && ETAT.prix) || {};
-    var reglage = (ETAT && ETAT.reglage === "Y") ? "Y" : "X";
-    var lignes = [];
-    Object.keys(CIBLE_CELI).forEach(function (t) { lignes.push({ t: t, c: "CELI", cible: CIBLE_CELI[t] }); });
-    Object.keys(CIBLE_REER[reglage]).forEach(function (t) {
-      if (CIBLE_REER[reglage][t] > 0) lignes.push({ t: t, c: "REER", cible: CIBLE_REER[reglage][t] });
-    });
-
-    var corps = $("corpsSuivi");
-    if (!corps.getAttribute("data-fait")) {
-      corps.innerHTML = lignes.map(function (l) {
-        var k = l.c + ":" + l.t;
-        return '<tr><td class="tk">' + l.t + ' <span class="desc">' + l.c + '</span></td>' +
-          '<td style="text-align:right"><input class="mini sAct" data-k="' + k + '" type="number" min="0" step="any" placeholder="0"></td>' +
-          '<td class="mont" data-v="' + k + '"></td><td class="act" data-r="' + k + '"></td>' +
-          '<td class="act">' + l.cible + ' %</td><td class="ecart" data-e="' + k + '"></td></tr>';
-      }).join("");
-      corps.setAttribute("data-fait", "1");
-      corps.querySelectorAll(".sAct").forEach(function (i) {
-        i.value = charger("act:" + i.getAttribute("data-k")) || "";
-        i.addEventListener("input", function () {
-          sauver("act:" + i.getAttribute("data-k"), i.value); majSuivi();
-        });
-      });
-    }
-
-    var total = 0, vals = {};
-    corps.querySelectorAll(".sAct").forEach(function (i) {
-      var k = i.getAttribute("data-k"), t = k.split(":")[1];
-      var n = parseFloat(i.value) || 0, p = prix[t] || 0;
-      vals[k] = n * p; total += vals[k];
-    });
-
-    lignes.forEach(function (l) {
-      var k = l.c + ":" + l.t, v = vals[k] || 0;
-      var base = 0;
-      Object.keys(vals).forEach(function (kk) { if (kk.split(":")[0] === l.c) base += vals[kk]; });
-      var reel = base > 0 ? v / base * 100 : 0;
-      var ec = l.cible > 0 ? (reel / l.cible - 1) * 100 : 0;
-      var hors = base > 0 && Math.abs(ec) > 25;
-      var cv = corps.querySelector('[data-v="' + k + '"]');
-      var cr = corps.querySelector('[data-r="' + k + '"]');
-      var ce = corps.querySelector('[data-e="' + k + '"]');
-      if (cv) cv.textContent = v > 0 ? argent(v) : "—";
-      if (cr) cr.textContent = base > 0 ? reel.toFixed(0) + " %" : "—";
-      if (ce) { ce.textContent = base > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
-                ce.className = "ecart" + (hors ? " horsband" : ""); }
-    });
-
-    $("sTotal").textContent = total > 0 ? argent(total) : "—";
-    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
-    if (total > 0 && inv > 0) {
-      var g = total - inv, pc = g / inv * 100;
-      $("sGain").textContent = (g >= 0 ? "+" : "−") + argent(Math.abs(g)) +
-        "  (" + (g >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + " %)";
-      $("sGain").className = "gain " + (g >= 0 ? "gp" : "gn");
-    } else { $("sGain").textContent = ""; }
-
-    $("sDate").textContent = (ETAT && ETAT.prixDate)
-      ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
-    $("sNote").textContent = total > 0
-      ? "Un écart de plus de 25 % par rapport à la cible est marqué en rouge. Le CELI ne se rééquilibre qu'avec de l'argent neuf."
-      : "Entrer le nombre d'actions pour voir la valeur du portefeuille.";
-  }
-
   $("mCeli").addEventListener("input", majCalc);
   $("mReer").addEventListener("input", majCalc);
-  $("invTotal").addEventListener("input", majSuivi);
-  $("sEffacer").addEventListener("click", function () {
-    if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
-    try { Object.keys(localStorage).forEach(function (k) {
-      if (k.indexOf("act:") === 0 || k === "invTotal" || k === "mCeli" || k === "mReer") localStorage.removeItem(k);
-    }); } catch (e) {}
-    location.reload();
-  });
   $("mCeli").value = charger("mCeli") || "";
   $("mReer").value = charger("mReer") || "";
-  $("invTotal").value = charger("invTotal") || "";
 
   var SECOURS = { reglage: "X", actionRequise: false, changeLe: "", verifieLe: "" };
   var fichierLocal = location.protocol === "file:";
