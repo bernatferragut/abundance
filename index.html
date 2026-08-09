@@ -73,6 +73,38 @@
     padding:14px;text-align:center;font-weight:600;margin-bottom:18px}
   .apercu{background:#eef2f7;border:1px dashed #9fb0c4;color:#3d5570;border-radius:12px;
     padding:12px;text-align:center;font-size:14px;margin-bottom:18px}
+
+  .onglets{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--ligne)}
+  .onglet{padding:10px 18px;cursor:pointer;font-size:16px;font-weight:700;color:var(--gris);
+    border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px}
+  .onglet.actif{color:var(--bleu);border-bottom-color:var(--bleu)}
+  .panneau{display:none} .panneau.actif{display:block}
+
+  .calc{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+  .calc h2{font-size:18px;margin:0 0 4px}
+  .calc .rangee{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .champ{flex:1;min-width:150px}
+  .champ label{display:block;font-size:14px;color:var(--gris);margin-bottom:5px;font-weight:600}
+  .champ input{width:100%;padding:11px 12px;font-size:18px;border:1px solid var(--ligne);
+    border-radius:9px;font-variant-numeric:tabular-nums}
+  .champ input:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+  .mont{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--bleu)}
+  .act{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gris);font-size:15px}
+  .colcalc{display:none} body.mode-calc .colcalc{display:table-cell}
+  @media(max-width:560px){ body.mode-calc .desc, body.mode-calc th.thdesc{display:none} }
+  .reste{font-size:14px;color:var(--gris);margin-top:10px}
+  .prixvieux{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre);
+    border-radius:10px;padding:11px;font-size:14px;margin-top:12px}
+
+  .suivi-tot{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;padding:22px;text-align:center;margin-bottom:18px}
+  .suivi-tot .val{font-size:34px;font-weight:800;color:var(--bleu);margin:4px 0}
+  .suivi-tot .lbl{font-size:15px;color:var(--gris)}
+  .gain{font-size:19px;font-weight:700;margin-top:6px}
+  .gp{color:var(--vert)} .gn{color:var(--rouge)}
+  .mini{width:74px;padding:7px 8px;font-size:15px;border:1px solid var(--ligne);border-radius:7px;
+    text-align:right;font-variant-numeric:tabular-nums}
+  .ecart{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
+  .horsband{color:var(--rouge);font-weight:700}
   .cache{display:none}
   @media(max-width:420px){ .statut .gros{font-size:31px} body{font-size:17px} }
 </style>
@@ -80,8 +112,15 @@
 <body>
 <div class="wrap">
 
-  <h1>Plan Abondance</h1>
+  <h1>Notre plan</h1>
   <p class="sub">Quoi faire aujourd'hui.</p>
+
+  <div class="onglets">
+    <button class="onglet actif" id="ongPlan" type="button">Plan</button>
+    <button class="onglet" id="ongSuivi" type="button">Suivi</button>
+  </div>
+
+  <div id="panPlan" class="panneau actif">
 
   <div id="apercu" class="apercu cache"></div>
   <div id="vieux" class="vieux cache"></div>
@@ -104,17 +143,35 @@
     <p class="petit" id="tactiqueDetail"></p>
   </div>
 
+  <div class="calc">
+    <h2>Calculatrice d'achat</h2>
+    <p class="note">Entrer le montant disponible dans chaque compte. Les colonnes
+    « Montant » et « Actions » apparaîtront dans les tableaux.</p>
+    <div class="rangee">
+      <div class="champ">
+        <label for="mCeli">Montant dans le CELI (US$)</label>
+        <input id="mCeli" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 18000">
+      </div>
+      <div class="champ">
+        <label for="mReer">Montant dans le REER (US$)</label>
+        <input id="mReer" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 12000">
+      </div>
+    </div>
+    <p class="reste" id="resteTxt"></p>
+    <div id="prixVieux" class="prixvieux cache"></div>
+  </div>
+
   <div class="carte">
     <h2>Compte CELI</h2>
-    <p class="note">Ça ne change jamais. On n'achète et on ne vend jamais rien ici.</p>
-    <table>
-      <thead><tr><th>Acheter</th><th>Ce que c'est</th><th style="text-align:right">Montant</th></tr></thead>
+    <p class="note">60 % de l'argent. Ça ne change jamais. On n'achète et on ne vend jamais rien ici.</p>
+    <table data-compte="celi">
+      <thead><tr><th>Acheter</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">%</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr></thead>
       <tbody>
-        <tr><td class="tk">VT</td><td class="desc">Un petit morceau de presque toutes les compagnies du monde</td><td class="pc">33 %</td></tr>
-        <tr><td class="tk">GLDM</td><td class="desc">De l'or</td><td class="pc">27 %</td></tr>
-        <tr><td class="tk">IBIT</td><td class="desc">Du bitcoin</td><td class="pc">17 %</td></tr>
-        <tr><td class="tk">MCHI</td><td class="desc">Des compagnies en Chine</td><td class="pc">13 %</td></tr>
-        <tr><td class="tk">SMH</td><td class="desc">Des compagnies de puces d'ordinateur</td><td class="pc">10 %</td></tr>
+        <tr><td class="tk" data-t="VT">VT</td><td class="desc">Un petit morceau de presque toutes les compagnies du monde</td><td class="pc">33 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">De l'or</td><td class="pc">27 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="IBIT">IBIT</td><td class="desc">Du bitcoin</td><td class="pc">17 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="MCHI">MCHI</td><td class="desc">Des compagnies en Chine</td><td class="pc">13 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="SMH">SMH</td><td class="desc">Des compagnies de puces d'ordinateur</td><td class="pc">10 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
       </tbody>
     </table>
   </div>
@@ -122,19 +179,19 @@
   <div class="carte">
     <h2>Compte REER</h2>
     <p class="note" id="noteReer">40 % de l'argent. La colonne en couleur est celle qu'on suit.</p>
-    <table>
+    <table data-compte="reer">
       <thead>
-        <tr><th>Acheter</th><th>Ce que c'est</th>
+        <tr><th>Acheter</th><th class="thdesc">Ce que c'est</th>
         <th style="text-align:right" id="thX">Réglage X</th>
-        <th style="text-align:right" id="thY">Réglage Y</th></tr>
+        <th style="text-align:right" id="thY">Réglage Y</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr>
       </thead>
       <tbody>
-        <tr><td class="tk">SGOV</td><td class="desc">De l'argent comptant qui rapporte un intérêt</td><td class="pc cx">30 %</td><td class="pc cy">32 %</td></tr>
-        <tr><td class="tk">SMH</td><td class="desc">Des puces d'ordinateur</td><td class="pc cx">22 %</td><td class="pc cy zero">0 %</td></tr>
-        <tr><td class="tk">AIPO</td><td class="desc">L'électricité pour les centres de données</td><td class="pc cx">20 %</td><td class="pc cy">10 %</td></tr>
-        <tr><td class="tk">BCI</td><td class="desc">Pétrole, métaux, nourriture, matières premières</td><td class="pc cx">20 %</td><td class="pc cy">25 %</td></tr>
-        <tr><td class="tk">GLDM</td><td class="desc">De l'or</td><td class="pc cx zero">0 %</td><td class="pc cy">25 %</td></tr>
-        <tr><td class="tk">VT</td><td class="desc">Les compagnies du monde</td><td class="pc cx">8 %</td><td class="pc cy">8 %</td></tr>
+        <tr><td class="tk" data-t="SGOV">SGOV</td><td class="desc">De l'argent comptant qui rapporte un intérêt</td><td class="pc cx">30 %</td><td class="pc cy">32 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="SMH">SMH</td><td class="desc">Des puces d'ordinateur</td><td class="pc cx">22 %</td><td class="pc cy zero">0 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="AIPO">AIPO</td><td class="desc">L'électricité pour les centres de données</td><td class="pc cx">20 %</td><td class="pc cy">10 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="BCI">BCI</td><td class="desc">Pétrole, métaux, nourriture, matières premières</td><td class="pc cx">20 %</td><td class="pc cy">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">De l'or</td><td class="pc cx zero">0 %</td><td class="pc cy">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="VT">VT</td><td class="desc">Les compagnies du monde</td><td class="pc cx">8 %</td><td class="pc cy">8 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
       </tbody>
     </table>
   </div>
@@ -226,7 +283,8 @@ ENTRE LES DEUX  →  on ne bouge pas.
       protègent vraiment.</p>
 
       <h3>Une fois par année</h3>
-      <p>On ajuste le CELI uniquement en ajoutant de l'argent neuf, jamais en vendant.</p>
+      <p>Vérifier que le CELI représente encore environ 60 % du total. On ajuste le CELI uniquement
+      en ajoutant de l'argent neuf, jamais en vendant.</p>
     </div>
   </details>
 
@@ -245,6 +303,46 @@ ENTRE LES DEUX  →  on ne bouge pas.
     <p style="margin:0"><strong>Ne fais rien, et demande.</strong> Attendre une semaine n'a presque
     jamais coûté quoi que ce soit à personne. Agir dans la confusion a coûté très cher à bien du monde.</p>
   </div>
+
+  </div><!-- /panPlan -->
+
+  <div id="panSuivi" class="panneau">
+    <div class="suivi-tot">
+      <div class="lbl">Valeur totale du portefeuille</div>
+      <div class="val" id="sTotal">—</div>
+      <div class="gain" id="sGain"></div>
+      <div class="lbl" id="sDate" style="margin-top:8px"></div>
+    </div>
+
+    <div class="calc">
+      <h2>Combien d'actions je détiens</h2>
+      <p class="note">Entrer le nombre d'actions de chaque placement. Tout reste dans ce
+      navigateur seulement — rien n'est envoyé nulle part, rien n'est publié.</p>
+      <div class="rangee">
+        <div class="champ">
+          <label for="invTotal">Montant total investi (US$) — optionnel</label>
+          <input id="invTotal" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 50000">
+        </div>
+      </div>
+      <table style="margin-top:14px">
+        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
+        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th></tr></thead>
+        <tbody id="corpsSuivi"></tbody>
+      </table>
+      <p class="reste" id="sNote"></p>
+      <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
+        border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
+        Tout effacer</button>
+    </div>
+
+    <div class="calme">
+      <h2>Pourquoi c'est mis à jour une fois par semaine</h2>
+      <p style="margin:0">Regarder son portefeuille tous les jours pousse à réagir, et réagir coûte
+      cher. Les prix ici viennent de la dernière fermeture. Ce n'est pas du temps réel, et c'est
+      voulu. Ce qui compte, c'est la direction sur des années — pas le mouvement d'aujourd'hui.</p>
+    </div>
+  </div><!-- /panSuivi -->
 
   <p class="meta">
     Réglage changé le : <strong id="mChange">—</strong><br>
@@ -335,6 +433,18 @@ ENTRE LES DEUX  →  on ne bouge pas.
     $("mChange").textContent = dateFr(s.changeLe);
     $("mVerifie").textContent = dateFr(s.verifieLe);
 
+    ETAT = s;
+    majCalc();
+    if (s.prixDate) {
+      var ap = joursDepuis(s.prixDate);
+      if (ap !== null && ap > 10) {
+        var pv = $("prixVieux");
+        pv.textContent = "Les prix datent du " + dateFr(s.prixDate) + " (" + ap +
+          " jours). Le nombre d'actions est approximatif — vérifier avant d'acheter.";
+        pv.classList.remove("cache");
+      }
+    }
+
     var age = joursDepuis(s.verifieLe);
     if (age !== null && age > 14) {
       var v = $("vieux");
@@ -342,6 +452,155 @@ ENTRE LES DEUX  →  on ne bouge pas.
       v.classList.remove("cache");
     }
   }
+
+
+  /* ---------------- onglets ---------------- */
+  function onglet(actif) {
+    var p = actif === "suivi";
+    $("ongPlan").className  = "onglet" + (p ? "" : " actif");
+    $("ongSuivi").className = "onglet" + (p ? " actif" : "");
+    $("panPlan").className  = "panneau" + (p ? "" : " actif");
+    $("panSuivi").className = "panneau" + (p ? " actif" : "");
+    if (p) majSuivi();
+  }
+  $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
+  $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
+
+  /* ---------------- cibles ---------------- */
+  var CIBLE_CELI = { VT:33, GLDM:27, IBIT:17, MCHI:13, SMH:10 };
+  var CIBLE_REER = {
+    X: { SGOV:30, SMH:22, AIPO:20, BCI:20, GLDM:0,  VT:8 },
+    Y: { SGOV:32, SMH:0,  AIPO:10, BCI:25, GLDM:25, VT:8 }
+  };
+  var ETAT = null;
+
+  function argent(n) {
+    return "$" + n.toLocaleString("fr-CA", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+  function lire(id) {
+    var v = parseFloat(($(id).value || "").replace(/[^0-9.]/g, ""));
+    return (isFinite(v) && v > 0) ? v : 0;
+  }
+  function sauver(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function charger(k)   { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  /* ---------------- calculatrice ---------------- */
+  function majCalc() {
+    var celi = lire("mCeli"), reer = lire("mReer");
+    var prix = (ETAT && ETAT.prix) || {};
+    var actif = celi > 0 || reer > 0;
+    document.body.className = actif ? "mode-calc" : "";
+    sauver("mCeli", $("mCeli").value); sauver("mReer", $("mReer").value);
+    if (!actif) { $("resteTxt").textContent = ""; return; }
+
+    var reglage = (ETAT && ETAT.reglage === "Y") ? "Y" : "X";
+    var restes = 0, sansPrix = [];
+
+    document.querySelectorAll("[data-t]").forEach(function (cell) {
+      var t = cell.getAttribute("data-t");
+      var tr = cell.parentNode;
+      var dansCeli = tr.closest("table").getAttribute("data-compte") === "celi";
+      var pct = dansCeli ? CIBLE_CELI[t] : CIBLE_REER[reglage][t];
+      var base = dansCeli ? celi : reer;
+      var tds = tr.querySelectorAll("td");
+      var cMont = tds[tds.length - 2], cAct = tds[tds.length - 1];
+
+      if (!base || pct === undefined) { cMont.textContent = ""; cAct.textContent = ""; return; }
+      var montant = base * pct / 100;
+      cMont.textContent = montant > 0 ? argent(montant) : "—";
+
+      var p = prix[t];
+      if (!p) { cAct.textContent = "?"; if (montant > 0 && sansPrix.indexOf(t) < 0) sansPrix.push(t); return; }
+      var n = Math.floor(montant / p);
+      cAct.textContent = montant > 0 ? (n + " × " + p.toFixed(2)) : "—";
+      restes += montant - n * p;
+    });
+
+    var msg = "Actions arrondies vers le bas. Reste non investi : environ " + argent(restes) + ".";
+    if (sansPrix.length) msg += " Prix manquant pour : " + sansPrix.join(", ") + ".";
+    $("resteTxt").textContent = msg;
+  }
+
+  /* ---------------- suivi ---------------- */
+  function majSuivi() {
+    var prix = (ETAT && ETAT.prix) || {};
+    var reglage = (ETAT && ETAT.reglage === "Y") ? "Y" : "X";
+    var lignes = [];
+    Object.keys(CIBLE_CELI).forEach(function (t) { lignes.push({ t: t, c: "CELI", cible: CIBLE_CELI[t] }); });
+    Object.keys(CIBLE_REER[reglage]).forEach(function (t) {
+      if (CIBLE_REER[reglage][t] > 0) lignes.push({ t: t, c: "REER", cible: CIBLE_REER[reglage][t] });
+    });
+
+    var corps = $("corpsSuivi");
+    if (!corps.getAttribute("data-fait")) {
+      corps.innerHTML = lignes.map(function (l) {
+        var k = l.c + ":" + l.t;
+        return '<tr><td class="tk">' + l.t + ' <span class="desc">' + l.c + '</span></td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-k="' + k + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td class="mont" data-v="' + k + '"></td><td class="act" data-r="' + k + '"></td>' +
+          '<td class="act">' + l.cible + ' %</td><td class="ecart" data-e="' + k + '"></td></tr>';
+      }).join("");
+      corps.setAttribute("data-fait", "1");
+      corps.querySelectorAll(".sAct").forEach(function (i) {
+        i.value = charger("act:" + i.getAttribute("data-k")) || "";
+        i.addEventListener("input", function () {
+          sauver("act:" + i.getAttribute("data-k"), i.value); majSuivi();
+        });
+      });
+    }
+
+    var total = 0, vals = {};
+    corps.querySelectorAll(".sAct").forEach(function (i) {
+      var k = i.getAttribute("data-k"), t = k.split(":")[1];
+      var n = parseFloat(i.value) || 0, p = prix[t] || 0;
+      vals[k] = n * p; total += vals[k];
+    });
+
+    lignes.forEach(function (l) {
+      var k = l.c + ":" + l.t, v = vals[k] || 0;
+      var base = 0;
+      Object.keys(vals).forEach(function (kk) { if (kk.split(":")[0] === l.c) base += vals[kk]; });
+      var reel = base > 0 ? v / base * 100 : 0;
+      var ec = l.cible > 0 ? (reel / l.cible - 1) * 100 : 0;
+      var hors = base > 0 && Math.abs(ec) > 25;
+      var cv = corps.querySelector('[data-v="' + k + '"]');
+      var cr = corps.querySelector('[data-r="' + k + '"]');
+      var ce = corps.querySelector('[data-e="' + k + '"]');
+      if (cv) cv.textContent = v > 0 ? argent(v) : "—";
+      if (cr) cr.textContent = base > 0 ? reel.toFixed(0) + " %" : "—";
+      if (ce) { ce.textContent = base > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
+                ce.className = "ecart" + (hors ? " horsband" : ""); }
+    });
+
+    $("sTotal").textContent = total > 0 ? argent(total) : "—";
+    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
+    if (total > 0 && inv > 0) {
+      var g = total - inv, pc = g / inv * 100;
+      $("sGain").textContent = (g >= 0 ? "+" : "−") + argent(Math.abs(g)) +
+        "  (" + (g >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + " %)";
+      $("sGain").className = "gain " + (g >= 0 ? "gp" : "gn");
+    } else { $("sGain").textContent = ""; }
+
+    $("sDate").textContent = (ETAT && ETAT.prixDate)
+      ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
+    $("sNote").textContent = total > 0
+      ? "Un écart de plus de 25 % par rapport à la cible est marqué en rouge. Le CELI ne se rééquilibre qu'avec de l'argent neuf."
+      : "Entrer le nombre d'actions pour voir la valeur du portefeuille.";
+  }
+
+  $("mCeli").addEventListener("input", majCalc);
+  $("mReer").addEventListener("input", majCalc);
+  $("invTotal").addEventListener("input", majSuivi);
+  $("sEffacer").addEventListener("click", function () {
+    if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
+    try { Object.keys(localStorage).forEach(function (k) {
+      if (k.indexOf("act:") === 0 || k === "invTotal" || k === "mCeli" || k === "mReer") localStorage.removeItem(k);
+    }); } catch (e) {}
+    location.reload();
+  });
+  $("mCeli").value = charger("mCeli") || "";
+  $("mReer").value = charger("mReer") || "";
+  $("invTotal").value = charger("invTotal") || "";
 
   var SECOURS = { reglage: "X", actionRequise: false, changeLe: "", verifieLe: "" };
   var fichierLocal = location.protocol === "file:";

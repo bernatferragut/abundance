@@ -135,6 +135,21 @@ export function computeSignal(riskBars, hedgeBars, cfg = CFG) {
 
 /* ------------------------------------------------------------------ main */
 
+const TITRES = ["VT","GLDM","MCHI","SMH","IBIT","SGOV","AIPO","BCI"];
+
+async function fetchPrices() {
+  const out = {};
+  for (const t of TITRES) {
+    try {
+      const bars = await fetchSymbol(t, 2);
+      out[t] = Math.round(bars.at(-1).close * 100) / 100;
+    } catch (e) {
+      console.warn(`  prix ${t}: ECHEC (${e.message}) — ancien prix conserve`);
+    }
+  }
+  return out;
+}
+
 async function main() {
   console.log(`Signal: ${CFG.risk}/${CFG.hedge}, ${CFG.maLength}-DMA, band ±${CFG.bandUp * 100}%, ${CFG.confirmDays}-close confirm\n`);
 
@@ -145,16 +160,26 @@ async function main() {
   const ageDays = Math.floor((Date.now() - new Date(sig.latest.date + "T00:00:00Z").getTime()) / 86400000);
   if (ageDays > 7) throw new Error(`Price data is ${ageDays} days old — refusing to update state.`);
 
+  console.log("\nPrix de cloture :");
+  const prixNeufs = await fetchPrices();
+
   let prev = {};
   if (existsSync(STATE_PATH)) {
     try { prev = JSON.parse(readFileSync(STATE_PATH, "utf8")); } catch {}
   }
 
-  const changed = prev.reglage !== sig.state;
+  // Prices refresh every day, but the setting may only move on the weekly run.
+  // This preserves the Friday-only discipline: no mid-week flip can appear.
+  const jourSignal = process.env.JOUR_SIGNAL === "1";
+  const reglageEffectif = jourSignal ? sig.state : (prev.reglage ?? sig.state);
+  const changed = jourSignal && prev.reglage !== sig.state;
+  if (!jourSignal && prev.reglage && prev.reglage !== sig.state) {
+    console.log(`  (signal calcule ${sig.state} mais on garde ${prev.reglage} — changement le samedi seulement)`);
+  }
   const lastFlip = sig.flips.at(-1);
 
   const next = {
-    reglage: sig.state,
+    reglage: reglageEffectif,
     // Once true, stays true until a human clears it — trades must be confirmed done.
     actionRequise: changed ? true : prev.actionRequise === true,
     changeLe: changed ? today : (prev.changeLe ?? lastFlip?.date ?? today),
@@ -164,6 +189,9 @@ async function main() {
     tactique: prev.tactique ?? {
       active: false, titre: "SH", pourcentage: 5, ouvertLe: "", raison: "",
     },
+    // Merge: a failed symbol keeps its previous price rather than vanishing.
+    prix: { ...(prev.prix ?? {}), ...prixNeufs },
+    prixDate: Object.keys(prixNeufs).length ? sig.latest.date : (prev.prixDate ?? ""),
   };
 
   console.log(`\n  Setting        : ${sig.state}${changed ? `  (CHANGED from ${prev.setting ?? "none"})` : ""}`);
@@ -172,6 +200,7 @@ async function main() {
   console.log(`  Pending        : ${sig.pending ? `${sig.pending.count}/${CFG.confirmDays} toward ${sig.pending.state}` : "none"}`);
   console.log(`  Flips in 2y    : ${sig.flips.length}`);
   console.log(`  Action requise : ${next.actionRequise}`);
+  console.log(`  Prix obtenus   : ${Object.keys(prixNeufs).length} / ${TITRES.length}`);
   console.log(`  Tactique       : ${next.tactique.active ? next.tactique.titre + " " + next.tactique.pourcentage + "%" : "aucune"}`);
 
   writeFileSync(STATE_PATH, JSON.stringify(next, null, 2) + "\n");

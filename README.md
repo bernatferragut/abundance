@@ -126,6 +126,32 @@ verdict) dès que ce proxy tombe. Le calcul côté serveur évite tout ça.
 
 ---
 
+## Calculatrice et onglet Suivi
+
+**Calculatrice d'achat** (onglet Plan) — entrer le montant disponible dans chaque
+compte ; deux colonnes apparaissent avec le montant en dollars et le nombre
+d'actions à acheter. Les actions sont arrondies **vers le bas** et le reste non
+investi est affiché.
+
+**Onglet Suivi** — entrer le nombre d'actions détenues pour voir la valeur du
+portefeuille, la répartition réelle contre la cible, et l'écart. Un écart de plus
+de 25 % s'affiche en rouge.
+
+> **Tout reste dans le navigateur** (`localStorage`). Aucun montant, aucun solde
+> et aucune donnée personnelle n'est publié dans le dépôt. Le bouton
+> « Tout effacer » vide ces données.
+
+Les prix viennent de `state.json`, rafraîchis **chaque jour** par le robot. Le
+**réglage**, lui, ne peut changer que le **samedi** : les prix quotidiens servent
+au suivi, jamais à devancer la règle du vendredi. Si les prix datent de plus de
+10 jours, un avertissement apparaît au-dessus des tableaux.
+
+**Pourquoi pas du temps réel ?** Yahoo bloque les appels directs depuis un
+navigateur, donc les prix passent forcément par le robot. Et c'est tant mieux :
+regarder son portefeuille tous les jours pousse à réagir, et réagir coûte cher.
+
+---
+
 ## Aperçu local
 
 Ouvrir `index.html` directement affiche une bannière **« Aperçu seulement »**
