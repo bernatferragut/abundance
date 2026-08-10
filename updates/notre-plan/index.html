@@ -613,6 +613,8 @@ ENTRE LES DEUX  →  on ne bouge pas.
     X: { SGOV:30, SMH:22, AIPO:20, BCI:20, GLDM:0,  VT:8 },
     Y: { SGOV:32, SMH:0,  AIPO:10, BCI:25, GLDM:25, VT:8 }
   };
+  // Le CELI représente 60 % du portefeuille et le REER 40 % (constante du plan).
+  var POIDS_COMPTE = { CELI: 60, REER: 40 };
   var ETAT = null;
 
   function argent(n) {
@@ -679,7 +681,7 @@ ENTRE LES DEUX  →  on ne bouge pas.
         return '<tr><td class="tk">' + l.t + ' <span class="desc">' + l.c + '</span></td>' +
           '<td style="text-align:right"><input class="mini sAct" data-k="' + k + '" type="number" min="0" step="any" placeholder="0"></td>' +
           '<td class="mont" data-v="' + k + '"></td><td class="act" data-r="' + k + '"></td>' +
-          '<td class="act">' + l.cible + ' %</td><td class="ecart" data-e="' + k + '"></td></tr>';
+          '<td class="act" data-c="' + k + '"></td><td class="ecart" data-e="' + k + '"></td></tr>';
       }).join("");
       corps.setAttribute("data-fait", "1");
       corps.querySelectorAll(".sAct").forEach(function (i) {
@@ -697,24 +699,34 @@ ENTRE LES DEUX  →  on ne bouge pas.
       vals[k] = n * p; total += vals[k];
     });
 
+    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
+    var baseTotal = inv > 0 ? inv : total;   // référence : total investi indiqué, sinon somme saisie
+
     lignes.forEach(function (l) {
       var k = l.c + ":" + l.t, v = vals[k] || 0;
-      var base = 0;
-      Object.keys(vals).forEach(function (kk) { if (kk.split(":")[0] === l.c) base += vals[kk]; });
-      var reel = base > 0 ? v / base * 100 : 0;
-      var ec = l.cible > 0 ? (reel / l.cible - 1) * 100 : 0;
-      var hors = base > 0 && Math.abs(ec) > 25;
+      var cibleTotal = l.cible * POIDS_COMPTE[l.c] / 100;   // % du portefeuille entier
+      var reel = baseTotal > 0 ? v / baseTotal * 100 : 0;
+      var ec = cibleTotal > 0 ? (reel / cibleTotal - 1) * 100 : 0;
+      var hors = baseTotal > 0 && Math.abs(ec) > 25;
       var cv = corps.querySelector('[data-v="' + k + '"]');
       var cr = corps.querySelector('[data-r="' + k + '"]');
+      var cc = corps.querySelector('[data-c="' + k + '"]');
       var ce = corps.querySelector('[data-e="' + k + '"]');
       if (cv) cv.textContent = v > 0 ? argent(v) : "—";
-      if (cr) cr.textContent = base > 0 ? reel.toFixed(0) + " %" : "—";
-      if (ce) { ce.textContent = base > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
+      if (cr) cr.textContent = baseTotal > 0 ? reel.toFixed(1) + " %" : "—";
+      if (cc) {
+        var tC = cibleTotal > 0 ? cibleTotal.toFixed(1) + " %" : "—";
+        if (inv > 0 && prix[l.t]) {
+          var nC = inv * cibleTotal / 100 / prix[l.t];
+          tC += '<br><span class="desc">≈ ' + (nC > 0 ? nC.toFixed(1) : "0") + ' actions</span>';
+        }
+        cc.innerHTML = tC;
+      }
+      if (ce) { ce.textContent = baseTotal > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
                 ce.className = "ecart" + (hors ? " horsband" : ""); }
     });
 
     $("sTotal").textContent = total > 0 ? argent(total) : "—";
-    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
     if (total > 0 && inv > 0) {
       var g = total - inv, pc = g / inv * 100;
       $("sGain").textContent = (g >= 0 ? "+" : "−") + argent(Math.abs(g)) +
@@ -725,8 +737,10 @@ ENTRE LES DEUX  →  on ne bouge pas.
     $("sDate").textContent = (ETAT && ETAT.prixDate)
       ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
     $("sNote").textContent = total > 0
-      ? "Un écart de plus de 25 % par rapport à la cible est marqué en rouge. Le CELI ne se rééquilibre qu'avec de l'argent neuf."
-      : "Entrer le nombre d'actions pour voir la valeur du portefeuille.";
+      ? "Réel et Cible sont en pourcentage du portefeuille entier : le CELI compte pour 60 % et le REER pour 40 %. Base : " +
+        (inv > 0 ? "le montant total investi indiqué (" + argent(inv) + ")." : "la somme des placements entrés — indiquer le montant total investi en haut pour une base fixe.") +
+        " Un écart de plus de 25 % est marqué en rouge."
+      : "Entrer le nombre d'actions pour voir la valeur du portefeuille, puis le montant total investi en haut pour calculer les pourcentages par rapport à ce montant.";
   }
 
   $("mCeli").addEventListener("input", majCalc);
