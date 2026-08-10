@@ -206,6 +206,106 @@
     </table>
   </div>
 
+  <style>
+    .ent table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+    .ent th{text-align:right;font-size:12px;color:var(--gris);font-weight:600;
+      padding:0 0 7px 6px;border-bottom:2px solid var(--ligne);white-space:nowrap}
+    .ent th:first-child{text-align:left;padding-left:0}
+    .ent td{padding:8px 0 8px 6px;border-bottom:1px solid var(--ligne);
+      text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .ent td:first-child{text-align:left;font-weight:700;padding-left:0}
+    .ent tr:last-child td{border-bottom:none}
+    .ent .now{background:var(--bleubg);font-weight:700}
+    .ent .nil{color:#b8bec6}
+    .ent .regle{background:var(--fond);border:1px solid var(--ligne);border-radius:10px;
+      padding:12px 14px;margin:10px 0}
+    .ent .regle b{color:var(--bleu)}
+    @media(max-width:430px){ .ent table{font-size:12.5px} .ent td,.ent th{padding-left:3px} }
+  </style>
+
+  <details class="info ent">
+    <summary>Comment entrer sur le marché en partant du comptant<span class="chev">›</span></summary>
+    <div class="corps">
+
+      <h3>D'abord : tout dans SGOV</h3>
+      <p>Le premier jour, on met <strong>100 % de l'argent dans SGOV</strong>. Ce n'est pas
+      « rester sur le banc » : SGOV rapporte environ 4 % par année pendant qu'on déploie.
+      Il n'y a donc aucune urgence, et aucune pénalité à prendre son temps.</p>
+
+      <h3>Ensuite : par tranches, à des vitesses différentes</h3>
+      <p>Chaque placement entre à une vitesse qui dépend de son niveau actuel. Ce qui a déjà
+      beaucoup baissé entre plus vite ; ce qui est très étiré entre plus lentement.</p>
+
+      <table>
+        <thead>
+          <tr><th>Titre</th><th>Maintenant</th><th>Sem. 4</th><th>Sem. 8</th><th>Sem. 12</th><th>Sem. 20</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>SGOV</td><td class="now">100 %</td><td class="nil">—</td><td class="nil">—</td><td class="nil">—</td><td class="nil">—</td></tr>
+          <tr><td>GLDM</td><td class="now">40 %</td><td>30 %</td><td>30 %</td><td class="nil">—</td><td class="nil">—</td></tr>
+          <tr><td>BCI</td><td class="now">40 %</td><td>30 %</td><td>30 %</td><td class="nil">—</td><td class="nil">—</td></tr>
+          <tr><td>VT</td><td class="now">35 %</td><td>25 %</td><td>20 %</td><td>20 %</td><td class="nil">—</td></tr>
+          <tr><td>IBIT</td><td class="now">30 %</td><td>25 %</td><td>25 %</td><td>20 %</td><td class="nil">—</td></tr>
+          <tr><td>MCHI</td><td class="now">30 %</td><td>25 %</td><td>25 %</td><td>20 %</td><td class="nil">—</td></tr>
+          <tr><td>AIPO</td><td class="now">25 %</td><td>25 %</td><td>25 %</td><td>25 %</td><td class="nil">—</td></tr>
+          <tr><td>SMH</td><td class="now">20 %</td><td>20 %</td><td>20 %</td><td>20 %</td><td>20 %</td></tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:14px;color:var(--gris)">Les pourcentages sont ceux de la cible
+      <em>de ce placement</em>, pas du portefeuille entier. Chaque ligne totalise 100 %.
+      Environ 35 % du portefeuille est investi dès le départ, et tout est en place vers la
+      fin décembre.</p>
+
+      <h3>Pourquoi ces vitesses</h3>
+      <p><strong>GLDM et BCI</strong> entrent vite : l'or est à environ 22 % sous son sommet
+      de janvier et les banques centrales achètent à un rythme record. <strong>IBIT</strong>
+      est à environ la moitié de son sommet — le rabais est déjà là. <strong>VT</strong>
+      détient neuf mille compagnies, donc très peu de risque ponctuel.</p>
+      <p><strong>SMH entre le plus lentement</strong> : il a bondi de plus de 70 % au seul
+      deuxième trimestre, il se situe environ 37 % au-dessus de sa moyenne 200 jours, et
+      82 % des gestionnaires de fonds le décrivent comme la position la plus encombrée
+      jamais mesurée.</p>
+
+      <h3>Les quatre règles</h3>
+      <div class="regle"><b>1. L'accélérateur.</b> Si un placement tombe <strong>15 %</strong>
+      sous son premier prix d'achat, on achète immédiatement les <strong>deux</strong>
+      tranches suivantes. À <strong>25 %</strong> sous, on achète tout le reste. C'est ainsi
+      que la baisse qu'on redoute devient celle qu'on attendait.</div>
+
+      <div class="regle"><b>2. Le calendrier se termine quoi qu'il arrive.</b> À la semaine 20,
+      tout est investi, krach ou pas. Sans cette règle, on ne fait que deviner le marché avec
+      des étapes en plus, et la réserve devient permanente.</div>
+
+      <div class="regle"><b>3. Achats le vendredi seulement.</b> Même discipline que le reste
+      du plan.</div>
+
+      <div class="regle"><b>4. Si le réglage bascule en Y pendant l'entrée</b>, les tranches
+      <em>restantes</em> du REER suivent les poids du Réglage Y. On ne vend rien de ce qui est
+      déjà acheté — on redirige seulement ce qui reste. Le calendrier du CELI ne change jamais.</div>
+
+      <h3>Ce que ça coûte, honnêtement</h3>
+      <p>Investir tout d'un coup bat l'entrée par tranches environ <strong>deux fois sur
+      trois</strong>, parce que les marchés montent plus souvent qu'ils ne baissent. Entrer par
+      tranches coûtera probablement un peu de rendement. Ce qu'on achète en retour, c'est un
+      éventail beaucoup plus étroit de prix d'entrée possibles — et le prix d'entrée est le
+      plus gros risque ponctuel de toute la vie du portefeuille.</p>
+      <p>La vraie raison d'y aller par tranches n'est pas qu'un krach s'en vient. C'est
+      qu'<strong>on ne peut pas distinguer une prédiction de krach du simple bruit</strong>, et
+      que les tranches fonctionnent dans les deux cas.</p>
+
+      <h3>Si le krach arrive vraiment</h3>
+      <p>Rien ne change. L'accélérateur se déclenche, on achète plus bas, et le disjoncteur
+      s'occupe de la tension de crédit. On serait alors parmi les rares à entrer dans un krach
+      avec 65 % de poudre sèche et une règle écrite disant exactement quoi en faire.</p>
+      <p>La seule façon de perdre cet avantage est de dépenser le comptant trop tôt parce que
+      le marché continue de monter et qu'on se sent idiot. <strong>SMH va probablement encore
+      grimper pendant qu'on n'est investi qu'à 20 %.</strong> Ce n'est pas une erreur : c'est
+      exactement là qu'une entrée lente gagne son salaire.</p>
+
+    </div>
+  </details>
+
   <details class="info">
     <summary>Comment on décide : Réglage X ou Réglage Y ?<span class="chev">›</span></summary>
     <div class="corps">
