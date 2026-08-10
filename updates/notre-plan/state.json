@@ -1,0 +1,31 @@
+{
+  "reglage": "X",
+  "actionRequise": false,
+  "changeLe": "2026-07-15",
+  "verifieLe": "2026-08-09",
+  "note": "",
+  "tactique": {
+    "active": false,
+    "titre": "SH",
+    "pourcentage": 5,
+    "ouvertLe": "",
+    "raison": ""
+  },
+  "prix": {
+    "VT": 161.3,
+    "GLDM": 85.95,
+    "MCHI": 56.57,
+    "SMH": 582.7,
+    "IBIT": 36.8,
+    "SGOV": 100.48,
+    "AIPO": 30.14,
+    "BCI": 23.83
+  },
+  "prixDate": "2026-08-07",
+  "disjoncteur": {
+    "actif": false,
+    "ratio": null,
+    "date": "",
+    "indisponible": true
+  }
+}

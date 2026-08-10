@@ -1,0 +1,105 @@
+name: Update signal
+
+on:
+  schedule:
+    # Daily 02:00 UTC — refreshes prices for the tracker tab.
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write   # needed to create the notification issue on regime change
+
+concurrency:
+  group: update-signal
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Is this the weekly signal day?
+        id: jour
+        run: |
+          # Saturday (day 6) = the only day the reglage may change.
+          if [ "$(date -u +%u)" = "6" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "signal=1" >> $GITHUB_OUTPUT
+          else
+            echo "signal=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compute
+        env:
+          JOUR_SIGNAL: ${{ steps.jour.outputs.signal }}
+        run: node scripts/signal.mjs
+
+      - name: Commit if changed
+        id: commit
+        run: |
+          if git diff --quiet -- state.json; then
+            echo "Aucun changement"
+            echo "changed=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          git config user.name  "signal-bot"
+          git config user.email "signal-bot@users.noreply.github.com"
+          git add state.json
+          git commit -m "maj: $(date -u +%Y-%m-%d)"
+          git push
+          echo "changed=true" >> $GITHUB_OUTPUT
+
+      - name: Vérifier le changement de réglage
+        id: check_regime
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          # Extrait actionRequise de state.json
+          ACTION_REQUIRED=$(node -e "console.log(require('./state.json').actionRequise)")
+          echo "action_required=$ACTION_REQUIRED" >> $GITHUB_OUTPUT
+          if [ "$ACTION_REQUIRED" = "true" ]; then
+            REGLAGE=$(node -e "console.log(require('./state.json').reglage)")
+            echo "reglage=$REGLAGE" >> $GITHUB_OUTPUT
+            echo "🚨 CHANGEMENT DE RÉGLAGE DÉTECTÉ : action requise pour le réglage $REGLAGE"
+          fi
+
+      - name: Créer l'issue de notification
+        if: steps.check_regime.outputs.action_required == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reglage = '${{ steps.check_regime.outputs.reglage }}';
+            const today = new Date().toISOString().split('T')[0];
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Action requise : Réglage ${reglage} - ${today}`,
+              body: `## Changement de réglage détecté
+
+            **Nouveau réglage :** ${reglage}
+            **Date :** ${today}
+            **Action requise :** Oui
+
+            ### Prochaines étapes
+
+            1. Consulter le plan : https://${context.repo.owner}.github.io/${context.repo.repo}/
+            2. Ajuster les avoirs du REER pour correspondre à la colonne Réglage ${reglage}
+            3. Une fois les transactions faites, mettre à jour \`state.json\` :
+               - Mettre \`actionRequise\` à \`false\`
+               - Commiter et pousser le changement
+            4. Fermer cette issue
+
+            ### Rappels importants
+
+            - ✅ Seul le compte REER change
+            - ❌ Ne jamais négocier dans le CELI
+            - 📋 Suivre exactement les pourcentages de la colonne Réglage ${reglage}
+
+            ---
+            *Cette issue a été créée automatiquement par le workflow de mise à jour du signal.*`,
+              labels: ['signal-change', 'action-required']
+            });

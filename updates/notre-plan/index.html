@@ -1,0 +1,665 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notre plan</title>
+<style>
+  :root{
+    --encre:#1a1a1a; --gris:#5f6670; --ligne:#dfe3e8; --fond:#f7f9fb; --carte:#fff;
+    --vert:#1f7a3d; --vertbg:#e8f5ec; --ambre:#8a5a00; --ambrebg:#fdf3e0;
+    --bleu:#1a4f7a; --bleubg:#e8f1f8; --rouge:#8f2626; --rougebg:#fbeeee;
+    --mauve:#5b3a86; --mauvebg:#f1ebf9;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:20px 16px 60px;background:var(--fond);color:var(--encre);
+    font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:640px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--gris);font-size:16px;margin:0 0 22px}
+
+  .statut{border-radius:16px;padding:28px 22px;text-align:center;margin-bottom:22px;border:2px solid}
+  .statut .gros{font-size:38px;line-height:1.15;font-weight:800;margin:0 0 8px}
+  .statut .dit{font-size:19px;margin:0}
+  .ok{background:var(--vertbg);border-color:#a8d5b8;color:var(--vert)}
+  .agir{background:var(--ambrebg);border-color:#e0c68a;color:var(--ambre)}
+  .err{background:var(--rougebg);border-color:#e0b4b4;color:var(--rouge)}
+
+  .pastille{display:inline-block;padding:6px 16px;border-radius:999px;font-size:16px;font-weight:700;margin-top:14px}
+  .pX{background:var(--bleubg);color:var(--bleu);border:1px solid #b3d0e6}
+  .pY{background:var(--ambrebg);color:var(--ambre);border:1px solid #e0c68a}
+
+  .carte{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:20px;margin-bottom:18px}
+  .carte h2{font-size:19px;margin:0 0 4px}
+  .carte p.note{color:var(--gris);font-size:15px;margin:0 0 14px}
+
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th{text-align:left;font-size:14px;color:var(--gris);font-weight:600;padding:0 14px 8px 0;border-bottom:2px solid var(--ligne)}
+  td{padding:11px 14px 11px 0;border-bottom:1px solid var(--ligne)}
+  tr:last-child td{border-bottom:none}
+  .tk{font-weight:700}
+  .desc{color:var(--gris);font-size:15px}
+  .pc{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:18px}
+  .zero{color:#aab0b8;font-weight:600}
+  .hl{background:var(--bleubg)} .hlY{background:var(--ambrebg)}
+
+  .tactique{background:var(--mauvebg);border:2px solid #c4addf;border-radius:14px;padding:20px;margin-bottom:18px}
+  .tactique h2{color:var(--mauve);font-size:19px;margin:0 0 6px}
+  .tactique .gros{font-size:26px;font-weight:800;color:var(--mauve);margin:6px 0}
+  .tactique .petit{font-size:14px;color:#6b5a85;margin:8px 0 0}
+
+  .regles{background:var(--rougebg);border:1px solid #e0b4b4;border-radius:14px;padding:20px;margin-bottom:18px}
+  .regles h2{color:var(--rouge);font-size:19px;margin:0 0 10px}
+  .regles ul{margin:0;padding-left:22px} .regles li{margin-bottom:8px}
+
+  .calme{background:var(--vertbg);border:1px solid #a8d5b8;border-radius:14px;padding:20px;margin-bottom:18px}
+  .calme h2{color:var(--vert);font-size:19px;margin:0 0 8px}
+
+  details.info{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;margin-bottom:18px;overflow:hidden}
+  details.info summary{cursor:pointer;padding:18px 20px;font-size:18px;font-weight:700;list-style:none;
+    display:flex;justify-content:space-between;align-items:center}
+  details.info summary::-webkit-details-marker{display:none}
+  .chev{color:var(--gris);font-size:24px;transition:transform .18s;display:inline-block}
+  details.info[open] .chev{transform:rotate(90deg)}
+  .corps{padding:0 20px 20px;border-top:1px solid var(--ligne)}
+  .corps h3{font-size:16px;margin:18px 0 6px;color:var(--bleu)}
+  .corps p{margin:0 0 10px;font-size:16px;line-height:1.6}
+  .form{background:#f2f5f8;border:1px solid var(--ligne);border-radius:10px;padding:14px;
+    font:14px/1.7 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;overflow-x:auto;margin:10px 0}
+
+  .meta{color:var(--gris);font-size:14px;text-align:center;margin-top:26px;line-height:1.7}
+  .vieux{background:var(--rougebg);border:1px solid #e0b4b4;color:var(--rouge);border-radius:12px;
+    padding:14px;text-align:center;font-weight:600;margin-bottom:18px}
+  .apercu{background:#eef2f7;border:1px dashed #9fb0c4;color:#3d5570;border-radius:12px;
+    padding:12px;text-align:center;font-size:14px;margin-bottom:18px}
+
+  .onglets{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--ligne)}
+  .onglet{padding:10px 18px;cursor:pointer;font-size:16px;font-weight:700;color:var(--gris);
+    border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px}
+  .onglet.actif{color:var(--bleu);border-bottom-color:var(--bleu)}
+  .panneau{display:none} .panneau.actif{display:block}
+
+  .calc{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+  .calc h2{font-size:18px;margin:0 0 4px}
+  .calc .rangee{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .champ{flex:1;min-width:150px}
+  .champ label{display:block;font-size:14px;color:var(--gris);margin-bottom:5px;font-weight:600}
+  .champ input{width:100%;padding:11px 12px;font-size:18px;border:1px solid var(--ligne);
+    border-radius:9px;font-variant-numeric:tabular-nums}
+  .champ input:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+  .mont{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--bleu);padding-left:18px}
+  .act{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gris);font-size:15px;padding-left:18px}
+  .colcalc{display:none} body.mode-calc .colcalc{display:table-cell}
+  @media(max-width:560px){ body.mode-calc .desc, body.mode-calc th.thdesc{display:none} }
+  .reste{font-size:14px;color:var(--gris);margin-top:10px}
+  .prixvieux{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre);
+    border-radius:10px;padding:11px;font-size:14px;margin-top:12px}
+
+  .suivi-tot{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;padding:22px;text-align:center;margin-bottom:18px}
+  .suivi-tot .val{font-size:34px;font-weight:800;color:var(--bleu);margin:4px 0}
+  .suivi-tot .lbl{font-size:15px;color:var(--gris)}
+  .gain{font-size:19px;font-weight:700;margin-top:6px}
+  .gp{color:var(--vert)} .gn{color:var(--rouge)}
+  .mini{width:74px;padding:7px 8px;font-size:15px;border:1px solid var(--ligne);border-radius:7px;
+    text-align:right;font-variant-numeric:tabular-nums}
+  .ecart{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
+  .horsband{color:var(--rouge);font-weight:700}
+  .disj{background:#7a1414;color:#fff;border-radius:14px;padding:22px;margin-bottom:18px;text-align:center}
+  .disj .t{font-size:24px;font-weight:800;margin:0 0 8px}
+  .disj p{margin:0;font-size:16px;line-height:1.55}
+  .disj .d{font-size:13px;opacity:.85;margin-top:10px}
+  .cache{display:none}
+  @media(max-width:420px){ .statut .gros{font-size:31px} body{font-size:17px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Notre plan</h1>
+  <p class="sub">Quoi faire aujourd'hui.</p>
+
+  <div class="onglets">
+    <button class="onglet actif" id="ongPlan" type="button">Plan</button>
+    <button class="onglet" id="ongSuivi" type="button">Suivi</button>
+  </div>
+
+  <div id="panPlan" class="panneau actif">
+
+  <div id="disjoncteur" class="disj cache">
+    <p class="t">Disjoncteur déclenché</p>
+    <p id="disjTxt"></p>
+    <p class="d" id="disjDet"></p>
+  </div>
+
+  <div id="apercu" class="apercu cache"></div>
+  <div id="vieux" class="vieux cache"></div>
+
+  <div id="statut" class="statut ok">
+    <p class="gros" id="statutGros">Chargement…</p>
+    <p class="dit" id="statutDit">On vérifie le plan.</p>
+    <div id="pastille"></div>
+  </div>
+
+  <div id="carteNote" class="carte cache">
+    <h2>Une note</h2>
+    <p id="texteNote" style="margin:0"></p>
+  </div>
+
+  <div id="carteTactique" class="tactique cache">
+    <h2>Position tactique — temporaire</h2>
+    <p class="gros" id="tactiqueTexte"></p>
+    <p id="tactiqueRaison" style="margin:0"></p>
+    <p class="petit" id="tactiqueDetail"></p>
+  </div>
+
+  <div class="calc">
+    <h2>Calculatrice d'achat</h2>
+    <p class="note">Entrer le montant disponible dans chaque compte. Les colonnes
+    « Montant » et « Actions » apparaîtront dans les tableaux.</p>
+    <div class="rangee">
+      <div class="champ">
+        <label for="mCeli">Montant dans le CELI (US$)</label>
+        <input id="mCeli" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 18000">
+      </div>
+      <div class="champ">
+        <label for="mReer">Montant dans le REER (US$)</label>
+        <input id="mReer" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 12000">
+      </div>
+    </div>
+    <p class="reste" id="resteTxt"></p>
+    <div id="prixVieux" class="prixvieux cache"></div>
+  </div>
+
+  <div class="carte">
+    <h2>Compte CELI</h2>
+    <p class="note">60 % de l'argent. Ça ne change jamais. On n'achète et on ne vend jamais rien ici.</p>
+    <table data-compte="celi">
+      <thead><tr><th>Acheter</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">%</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr></thead>
+      <tbody>
+        <tr><td class="tk" data-t="VT">VT</td><td class="desc">Un petit morceau de presque toutes les compagnies du monde</td><td class="pc">33 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">De l'or</td><td class="pc">27 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="IBIT">IBIT</td><td class="desc">Du bitcoin</td><td class="pc">17 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="MCHI">MCHI</td><td class="desc">Des compagnies en Chine</td><td class="pc">13 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="SMH">SMH</td><td class="desc">Des compagnies de puces d'ordinateur</td><td class="pc">10 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="carte">
+    <h2>Compte REER</h2>
+    <p class="note" id="noteReer">40 % de l'argent. La colonne en couleur est celle qu'on suit.</p>
+    <table data-compte="reer">
+      <thead>
+        <tr><th>Acheter</th><th class="thdesc">Ce que c'est</th>
+        <th style="text-align:right" id="thX">Réglage X</th>
+        <th style="text-align:right" id="thY">Réglage Y</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="tk" data-t="SGOV">SGOV</td><td class="desc">De l'argent comptant qui rapporte un intérêt</td><td class="pc cx">30 %</td><td class="pc cy">32 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="SMH">SMH</td><td class="desc">Des puces d'ordinateur</td><td class="pc cx">22 %</td><td class="pc cy zero">0 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="AIPO">AIPO</td><td class="desc">L'électricité pour les centres de données</td><td class="pc cx">20 %</td><td class="pc cy">10 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="BCI">BCI</td><td class="desc">Pétrole, métaux, nourriture, matières premières</td><td class="pc cx">20 %</td><td class="pc cy">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">De l'or</td><td class="pc cx zero">0 %</td><td class="pc cy">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="VT">VT</td><td class="desc">Les compagnies du monde</td><td class="pc cx">8 %</td><td class="pc cy">8 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <details class="info">
+    <summary>Comment on décide : Réglage X ou Réglage Y ?<span class="chev">›</span></summary>
+    <div class="corps">
+      <h3>L'idée en une phrase</h3>
+      <p>On compare la force des puces d'ordinateur (SMH) à celle de l'or (GLD). Quand les puces
+      mènent, on est en Réglage X. Quand l'or prend le dessus, on passe en Réglage Y.</p>
+
+      <h3>La moyenne de 200 jours</h3>
+      <p>La « moyenne de 200 jours » est simplement le prix moyen des 200 derniers jours de bourse.
+      Elle lisse le bruit du quotidien et montre la tendance de fond. Si le prix est au-dessus,
+      la tendance monte. En dessous, elle descend.</p>
+
+      <h3>Les deux conditions</h3>
+      <div class="form">
+RÉGLAGE X — il faut LES DEUX :
+   SMH/GLD &gt; sa moyenne 200 jours × 1,05
+   pendant 3 fermetures de suite
+   ET SMH &gt; sa propre moyenne 200 jours
+
+RÉGLAGE Y — il suffit de L'UNE :
+   SMH/GLD &lt; sa moyenne 200 jours × 0,95
+   pendant 3 fermetures de suite
+   OU SMH &lt; sa propre moyenne 200 jours
+
+ENTRE LES DEUX  →  on ne bouge pas.
+      </div>
+
+      <h3>Pourquoi l'espace entre 1,05 et 0,95 ?</h3>
+      <p>Sans cet espace, le plan changerait de réglage environ dix fois par année, souvent pour rien.
+      Avec, il change une ou deux fois par année. Il faut donc dépasser franchement la ligne pour
+      entrer, et redescendre franchement pour sortir.</p>
+
+      <h3>Pourquoi les 3 fermetures de suite ?</h3>
+      <p>Une seule journée bizarre ne devrait pas changer le plan. Trois fermetures de suite dans la
+      même direction, c'est un vrai signal, pas un accident.</p>
+
+      <h3>Pourquoi la deuxième condition sur SMH seul ?</h3>
+      <p>Le rapport SMH/GLD peut rester élevé même si les deux baissent en même temps. La deuxième
+      condition attrape ce cas-là et force le Réglage Y. C'est la protection la plus importante
+      des deux.</p>
+
+      <h3>Le disjoncteur de crédit</h3>
+      <p>Il existe une troisième règle, qui passe avant les deux autres. On surveille l'écart de
+      taux payé par les entreprises les plus fragiles pour emprunter. C'est le premier endroit qui
+      casse quand l'argent se raréfie dans le système — avant les actions.</p>
+      <p>Si cet écart dépasse sa moyenne de 200 jours de plus de 50 % pendant deux fermetures,
+      le plan bascule en <strong>Réglage Y immédiatement</strong>, sans attendre le vendredi. Il
+      revient à la normale quand l'écart repasse sous 1,20 fois sa moyenne.</p>
+      <p>Pourquoi cette exception à la règle du vendredi ? Parce que le disjoncteur ne peut faire
+      qu'une seule chose : mettre à l'abri. Il ne peut jamais forcer le Réglage X. Une exception
+      qui ne va que vers la sécurité ne peut pas augmenter le risque.</p>
+      <p>Il se déclenche très rarement — environ une fois par cycle économique. Les moyennes plus
+      courtes ne servent à rien ici : lors d'un choc soudain elles réagissent exactement à la même
+      vitesse, et lors d'une détérioration lente elles suivent l'écart vers le haut et ne se
+      déclenchent jamais.</p>
+
+      <h3>Qui fait le calcul ?</h3>
+      <p>Un programme automatique récupère les prix chaque vendredi soir après la fermeture des
+      marchés, fait le calcul, et met cette page à jour tout seul. Personne n'a à le faire à la main.</p>
+    </div>
+  </details>
+
+  <details class="info">
+    <summary>Comment tout le plan fonctionne<span class="chev">›</span></summary>
+    <div class="corps">
+      <h3>L'idée</h3>
+      <p>On possède neuf choses réparties dans deux comptes. Chaque placement a un
+      <strong>plancher</strong> : la quantité qu'on garde peu importe ce qui arrive. Ces planchers
+      représentent environ 87 % de l'argent, et cette partie-là n'a jamais besoin d'être vendue.</p>
+      <p><strong>Le CELI garde les planchers. Le REER garde tout ce qui bouge.</strong> Ce n'est pas
+      les « bons » placements d'un bord et les « mauvais » de l'autre — c'est la partie immobile et
+      la partie mobile. L'ancre et la voile.</p>
+
+      <h3>Pourquoi on ne touche jamais au CELI</h3>
+      <p>Si le gouvernement juge qu'un CELI sert à faire du commerce de titres, il peut imposer tout
+      ce qu'il contient au taux plein. La protection fiscale est perdue, les droits de cotisation ne
+      reviennent pas, et aucun nouveau droit n'est créé pour l'argent retiré afin de payer l'impôt.
+      C'est à sens unique et permanent. Les REER sont traités différemment : c'est là que toute
+      l'activité se passe.</p>
+
+      <h3>Pourquoi le bitcoin ne bouge jamais</h3>
+      <p>Le signal se base sur les puces et l'or. Il ne dit absolument rien sur le bitcoin. Ça n'aurait
+      donc aucun sens de vendre du bitcoin à cause d'un signal qui ne le regarde même pas. Le bitcoin
+      reste fixe, dans le CELI, à l'abri de l'impôt.</p>
+
+      <h3>Les deux réglages</h3>
+      <p><strong>Réglage X</strong> : conditions normales. On détient plus de puces et d'énergie.
+      <strong>Réglage Y</strong> : ça va mal. Le REER se replie sur de l'or, des matières premières
+      et beaucoup d'argent comptant.</p>
+
+      <h3>À quoi s'attendre</h3>
+      <p>Environ 8 à 9 % par an dans une année typique, et une baisse d'à peu près 20 % à un moment
+      donné en cours de route.</p>
+      <p><strong>Ce plan va perdre de l'argent certaines années. C'est normal, ce n'est pas un
+      échec.</strong> Il est bâti pour traverser les mauvaises années, pas pour les éviter — et il
+      ne fonctionne que si on le garde pendant ces années-là. Vendre dans la panique est la façon la
+      plus sûre de transformer une baisse temporaire en perte permanente.</p>
+      <p>Le signal n'est pas une protection contre un krach soudain. Dans une chute rapide, il ne
+      sauve presque rien. Il aide dans les baisses lentes. C'est l'argent comptant et l'or qui
+      protègent vraiment.</p>
+
+      <h3>Une fois par année</h3>
+      <p>Vérifier que le CELI représente encore environ 60 % du total. On ajuste le CELI uniquement
+      en ajoutant de l'argent neuf, jamais en vendant.</p>
+    </div>
+  </details>
+
+  <div class="regles">
+    <h2>Les règles qu'on ne brise jamais</h2>
+    <ul>
+      <li>On n'achète et on ne vend jamais dans le <strong>CELI</strong>.</li>
+      <li>On n'ajoute jamais un dixième placement.</li>
+      <li>On n'agit jamais parce que les nouvelles font peur.</li>
+      <li>Seul le REER change, et seulement quand cette page le dit.</li>
+    </ul>
+  </div>
+
+  <div class="calme">
+    <h2>Si jamais tu n'es pas certaine</h2>
+    <p style="margin:0"><strong>Ne fais rien, et demande.</strong> Attendre une semaine n'a presque
+    jamais coûté quoi que ce soit à personne. Agir dans la confusion a coûté très cher à bien du monde.</p>
+  </div>
+
+  </div><!-- /panPlan -->
+
+  <div id="panSuivi" class="panneau">
+    <div class="suivi-tot">
+      <div class="lbl">Valeur totale du portefeuille</div>
+      <div class="val" id="sTotal">—</div>
+      <div class="gain" id="sGain"></div>
+      <div class="lbl" id="sDate" style="margin-top:8px"></div>
+    </div>
+
+    <div class="calc">
+      <h2>Combien d'actions je détiens</h2>
+      <p class="note">Entrer le nombre d'actions de chaque placement. Tout reste dans ce
+      navigateur seulement — rien n'est envoyé nulle part, rien n'est publié.</p>
+      <div class="rangee">
+        <div class="champ">
+          <label for="invTotal">Montant total investi (US$) — optionnel</label>
+          <input id="invTotal" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 50000">
+        </div>
+      </div>
+      <table style="margin-top:14px">
+        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
+        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th></tr></thead>
+        <tbody id="corpsSuivi"></tbody>
+      </table>
+      <p class="reste" id="sNote"></p>
+      <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
+        border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
+        Tout effacer</button>
+    </div>
+
+    <div class="calme">
+      <h2>Pourquoi c'est mis à jour une fois par semaine</h2>
+      <p style="margin:0">Regarder son portefeuille tous les jours pousse à réagir, et réagir coûte
+      cher. Les prix ici viennent de la dernière fermeture. Ce n'est pas du temps réel, et c'est
+      voulu. Ce qui compte, c'est la direction sur des années — pas le mouvement d'aujourd'hui.</p>
+    </div>
+  </div><!-- /panSuivi -->
+
+  <p class="meta">
+    Réglage changé le : <strong id="mChange">—</strong><br>
+    Page vérifiée le : <strong id="mVerifie">—</strong>
+  </p>
+  <p class="meta" style="font-size:13px">
+    Plan familial personnel. Ce n'est pas un conseil financier professionnel.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
+              "septembre","octobre","novembre","décembre"];
+
+  function dateFr(s) {
+    if (!s) return "non défini";
+    var p = String(s).split("-");
+    if (p.length !== 3) return s;
+    var m = MOIS[parseInt(p[1], 10) - 1];
+    if (!m) return s;
+    return parseInt(p[2], 10) + " " + m + " " + p[0];
+  }
+  function joursDepuis(s) {
+    var d = new Date(s + "T00:00:00");
+    if (isNaN(d)) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  }
+
+  function echec(msg) {
+    $("statut").className = "statut err";
+    $("statutGros").textContent = "Impossible de charger le plan";
+    $("statutDit").textContent = msg + " Ne rien faire tant que tu ne peux pas demander.";
+    $("pastille").innerHTML = "";
+  }
+
+  function afficher(s) {
+    var reglage = (s.reglage === "Y") ? "Y" : "X";
+    var agir = s.actionRequise === true;
+    var i, xs = document.querySelectorAll(".cx"), ys = document.querySelectorAll(".cy");
+
+    if (reglage === "X") {
+      $("thX").classList.add("hl");
+      for (i = 0; i < xs.length; i++) xs[i].classList.add("hl");
+      $("noteReer").textContent = "40 % de l'argent. On est en Réglage X — suivre la colonne Réglage X.";
+    } else {
+      $("thY").classList.add("hlY");
+      for (i = 0; i < ys.length; i++) ys[i].classList.add("hlY");
+      $("noteReer").textContent = "40 % de l'argent. On est en Réglage Y — suivre la colonne Réglage Y.";
+    }
+
+    var forceY = !!(s.disjoncteur && s.disjoncteur.actif === true);
+    if (forceY) reglage = "Y";
+
+    if (agir) {
+      $("statut").className = "statut agir";
+      $("statutGros").textContent = "Quelque chose a changé";
+      $("statutDit").textContent =
+        "Ajuster le REER pour qu'il corresponde à la colonne Réglage " + reglage + ". Ensuite, c'est terminé.";
+    } else {
+      $("statut").className = "statut ok";
+      $("statutGros").textContent = "Ne rien faire";
+      $("statutDit").textContent = "Tout est comme ça doit être. Rien à acheter ni à vendre aujourd'hui.";
+    }
+    $("pastille").innerHTML = '<span class="pastille ' + (reglage === "X" ? "pX" : "pY") +
+      '">On est en Réglage ' + reglage + "</span>";
+
+    if (s.note) {
+      $("texteNote").textContent = s.note;
+      $("carteNote").classList.remove("cache");
+    }
+
+    // Position tactique — visible seulement quand elle est ouverte.
+    var t = s.tactique;
+    if (t && t.active === true) {
+      $("tactiqueTexte").textContent = "Détenir " + t.titre + " — " + t.pourcentage + " % du total";
+      $("tactiqueRaison").textContent = t.raison || "Position temporaire décidée à la main.";
+      var d = t.ouvertLe ? joursDepuis(t.ouvertLe) : null;
+      var bout = "";
+      if (d !== null) {
+        bout = " Ouverte depuis " + d + " jour" + (d > 1 ? "s" : "") + " (maximum 56).";
+        if (d > 56) bout += " ⚠ DÉPASSÉ — il faut la fermer.";
+      }
+      $("tactiqueDetail").textContent =
+        "Payée à même l'argent comptant du REER, jamais en vendant les autres placements." + bout;
+      $("carteTactique").classList.remove("cache");
+    }
+
+    $("mChange").textContent = dateFr(s.changeLe);
+    $("mVerifie").textContent = dateFr(s.verifieLe);
+
+    ETAT = s;
+    majCalc();
+
+    // Disjoncteur de credit : prime sur tout le reste.
+    var dj = s.disjoncteur;
+    if (dj && dj.actif === true) {
+      $("disjTxt").textContent =
+        "Le marché du crédit est en tension sévère. Le plan est forcé en Réglage Y, " +
+        "peu importe ce que dit le signal habituel. Suivre la colonne Réglage Y du REER.";
+      $("disjDet").textContent =
+        "Écart de crédit à " + (dj.ratio ? dj.ratio.toFixed(2) : "?") +
+        " fois sa moyenne 200 jours" + (dj.date ? " au " + dateFr(dj.date) : "") +
+        ". Se réarme sous 1,20 fois.";
+      $("disjoncteur").classList.remove("cache");
+    }
+    if (s.prixDate) {
+      var ap = joursDepuis(s.prixDate);
+      if (ap !== null && ap > 10) {
+        var pv = $("prixVieux");
+        pv.textContent = "Les prix datent du " + dateFr(s.prixDate) + " (" + ap +
+          " jours). Le nombre d'actions est approximatif — vérifier avant d'acheter.";
+        pv.classList.remove("cache");
+      }
+    }
+
+    var age = joursDepuis(s.verifieLe);
+    if (age !== null && age > 14) {
+      var v = $("vieux");
+      v.textContent = "Cette page n'a pas été vérifiée depuis " + age + " jours. Demande avant d'agir.";
+      v.classList.remove("cache");
+    }
+  }
+
+
+  /* ---------------- onglets ---------------- */
+  function onglet(actif) {
+    var p = actif === "suivi";
+    $("ongPlan").className  = "onglet" + (p ? "" : " actif");
+    $("ongSuivi").className = "onglet" + (p ? " actif" : "");
+    $("panPlan").className  = "panneau" + (p ? "" : " actif");
+    $("panSuivi").className = "panneau" + (p ? " actif" : "");
+    if (p) majSuivi();
+  }
+  $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
+  $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
+
+  /* ---------------- cibles ---------------- */
+  var CIBLE_CELI = { VT:33, GLDM:27, IBIT:17, MCHI:13, SMH:10 };
+  var CIBLE_REER = {
+    X: { SGOV:30, SMH:22, AIPO:20, BCI:20, GLDM:0,  VT:8 },
+    Y: { SGOV:32, SMH:0,  AIPO:10, BCI:25, GLDM:25, VT:8 }
+  };
+  var ETAT = null;
+
+  function argent(n) {
+    return "$" + n.toLocaleString("fr-CA", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+  function lire(id) {
+    var v = parseFloat(($(id).value || "").replace(/[^0-9.]/g, ""));
+    return (isFinite(v) && v > 0) ? v : 0;
+  }
+  function sauver(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function charger(k)   { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  /* ---------------- calculatrice ---------------- */
+  function majCalc() {
+    var celi = lire("mCeli"), reer = lire("mReer");
+    var prix = (ETAT && ETAT.prix) || {};
+    var actif = celi > 0 || reer > 0;
+    document.body.className = actif ? "mode-calc" : "";
+    sauver("mCeli", $("mCeli").value); sauver("mReer", $("mReer").value);
+    if (!actif) { $("resteTxt").textContent = ""; return; }
+
+    var reglage = (ETAT && ETAT.reglage === "Y") ? "Y" : "X";
+    var restes = 0, sansPrix = [];
+
+    document.querySelectorAll("[data-t]").forEach(function (cell) {
+      var t = cell.getAttribute("data-t");
+      var tr = cell.parentNode;
+      var dansCeli = tr.closest("table").getAttribute("data-compte") === "celi";
+      var pct = dansCeli ? CIBLE_CELI[t] : CIBLE_REER[reglage][t];
+      var base = dansCeli ? celi : reer;
+      var tds = tr.querySelectorAll("td");
+      var cMont = tds[tds.length - 2], cAct = tds[tds.length - 1];
+
+      if (!base || pct === undefined) { cMont.textContent = ""; cAct.textContent = ""; return; }
+      var montant = base * pct / 100;
+      cMont.textContent = montant > 0 ? argent(montant) : "—";
+
+      var p = prix[t];
+      if (!p) { cAct.textContent = "?"; if (montant > 0 && sansPrix.indexOf(t) < 0) sansPrix.push(t); return; }
+      var n = Math.floor(montant / p);
+      cAct.textContent = montant > 0 ? (n + " × " + p.toFixed(2)) : "—";
+      restes += montant - n * p;
+    });
+
+    var msg = "Actions arrondies vers le bas. Reste non investi : environ " + argent(restes) + ".";
+    if (sansPrix.length) msg += " Prix manquant pour : " + sansPrix.join(", ") + ".";
+    $("resteTxt").textContent = msg;
+  }
+
+  /* ---------------- suivi ---------------- */
+  function majSuivi() {
+    var prix = (ETAT && ETAT.prix) || {};
+    var reglage = (ETAT && ETAT.reglage === "Y") ? "Y" : "X";
+    var lignes = [];
+    Object.keys(CIBLE_CELI).forEach(function (t) { lignes.push({ t: t, c: "CELI", cible: CIBLE_CELI[t] }); });
+    Object.keys(CIBLE_REER[reglage]).forEach(function (t) {
+      if (CIBLE_REER[reglage][t] > 0) lignes.push({ t: t, c: "REER", cible: CIBLE_REER[reglage][t] });
+    });
+
+    var corps = $("corpsSuivi");
+    if (!corps.getAttribute("data-fait")) {
+      corps.innerHTML = lignes.map(function (l) {
+        var k = l.c + ":" + l.t;
+        return '<tr><td class="tk">' + l.t + ' <span class="desc">' + l.c + '</span></td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-k="' + k + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td class="mont" data-v="' + k + '"></td><td class="act" data-r="' + k + '"></td>' +
+          '<td class="act">' + l.cible + ' %</td><td class="ecart" data-e="' + k + '"></td></tr>';
+      }).join("");
+      corps.setAttribute("data-fait", "1");
+      corps.querySelectorAll(".sAct").forEach(function (i) {
+        i.value = charger("act:" + i.getAttribute("data-k")) || "";
+        i.addEventListener("input", function () {
+          sauver("act:" + i.getAttribute("data-k"), i.value); majSuivi();
+        });
+      });
+    }
+
+    var total = 0, vals = {};
+    corps.querySelectorAll(".sAct").forEach(function (i) {
+      var k = i.getAttribute("data-k"), t = k.split(":")[1];
+      var n = parseFloat(i.value) || 0, p = prix[t] || 0;
+      vals[k] = n * p; total += vals[k];
+    });
+
+    lignes.forEach(function (l) {
+      var k = l.c + ":" + l.t, v = vals[k] || 0;
+      var base = 0;
+      Object.keys(vals).forEach(function (kk) { if (kk.split(":")[0] === l.c) base += vals[kk]; });
+      var reel = base > 0 ? v / base * 100 : 0;
+      var ec = l.cible > 0 ? (reel / l.cible - 1) * 100 : 0;
+      var hors = base > 0 && Math.abs(ec) > 25;
+      var cv = corps.querySelector('[data-v="' + k + '"]');
+      var cr = corps.querySelector('[data-r="' + k + '"]');
+      var ce = corps.querySelector('[data-e="' + k + '"]');
+      if (cv) cv.textContent = v > 0 ? argent(v) : "—";
+      if (cr) cr.textContent = base > 0 ? reel.toFixed(0) + " %" : "—";
+      if (ce) { ce.textContent = base > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
+                ce.className = "ecart" + (hors ? " horsband" : ""); }
+    });
+
+    $("sTotal").textContent = total > 0 ? argent(total) : "—";
+    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
+    if (total > 0 && inv > 0) {
+      var g = total - inv, pc = g / inv * 100;
+      $("sGain").textContent = (g >= 0 ? "+" : "−") + argent(Math.abs(g)) +
+        "  (" + (g >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + " %)";
+      $("sGain").className = "gain " + (g >= 0 ? "gp" : "gn");
+    } else { $("sGain").textContent = ""; }
+
+    $("sDate").textContent = (ETAT && ETAT.prixDate)
+      ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
+    $("sNote").textContent = total > 0
+      ? "Un écart de plus de 25 % par rapport à la cible est marqué en rouge. Le CELI ne se rééquilibre qu'avec de l'argent neuf."
+      : "Entrer le nombre d'actions pour voir la valeur du portefeuille.";
+  }
+
+  $("mCeli").addEventListener("input", majCalc);
+  $("mReer").addEventListener("input", majCalc);
+  $("invTotal").addEventListener("input", majSuivi);
+  $("sEffacer").addEventListener("click", function () {
+    if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
+    try { Object.keys(localStorage).forEach(function (k) {
+      if (k.indexOf("act:") === 0 || k === "invTotal" || k === "mCeli" || k === "mReer") localStorage.removeItem(k);
+    }); } catch (e) {}
+    location.reload();
+  });
+  $("mCeli").value = charger("mCeli") || "";
+  $("mReer").value = charger("mReer") || "";
+  $("invTotal").value = charger("invTotal") || "";
+
+  var SECOURS = { reglage: "X", actionRequise: false, changeLe: "", verifieLe: "" };
+  var fichierLocal = location.protocol === "file:";
+
+  fetch("state.json?t=" + Date.now())
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(afficher)
+    .catch(function (e) {
+      if (fichierLocal) {
+        var a = $("apercu");
+        a.textContent = "Aperçu seulement — le fichier est ouvert localement, donc ces données sont un exemple, pas le vrai réglage.";
+        a.classList.remove("cache");
+        afficher(SECOURS);
+      } else {
+        echec("La page n'a pas pu lire ses réglages (" + e.message + ").");
+      }
+    });
+})();
+</script>
+</body>
+</html>
