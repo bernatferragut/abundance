@@ -21,5 +21,11 @@
     "AIPO": 30.14,
     "BCI": 23.83
   },
-  "prixDate": "2026-08-07"
+  "prixDate": "2026-08-07",
+  "disjoncteur": {
+    "actif": false,
+    "ratio": null,
+    "date": "",
+    "indisponible": true
+  }
 }

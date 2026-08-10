@@ -41,8 +41,6 @@
   .tk{font-weight:700}
   .desc{color:var(--gris);font-size:15px}
   .pc{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:18px}
-  .mont{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700;color:var(--bleu);padding-left:18px}
-  .act{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--gris);font-size:15px;padding-left:18px}
   .zero{color:#aab0b8;font-weight:600}
   .hl{background:var(--bleubg)} .hlY{background:var(--ambrebg)}
 
@@ -98,6 +96,19 @@
   .prixvieux{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre);
     border-radius:10px;padding:11px;font-size:14px;margin-top:12px}
 
+  .suivi-tot{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;padding:22px;text-align:center;margin-bottom:18px}
+  .suivi-tot .val{font-size:34px;font-weight:800;color:var(--bleu);margin:4px 0}
+  .suivi-tot .lbl{font-size:15px;color:var(--gris)}
+  .gain{font-size:19px;font-weight:700;margin-top:6px}
+  .gp{color:var(--vert)} .gn{color:var(--rouge)}
+  .mini{width:74px;padding:7px 8px;font-size:15px;border:1px solid var(--ligne);border-radius:7px;
+    text-align:right;font-variant-numeric:tabular-nums}
+  .ecart{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
+  .horsband{color:var(--rouge);font-weight:700}
+  .disj{background:#7a1414;color:#fff;border-radius:14px;padding:22px;margin-bottom:18px;text-align:center}
+  .disj .t{font-size:24px;font-weight:800;margin:0 0 8px}
+  .disj p{margin:0;font-size:16px;line-height:1.55}
+  .disj .d{font-size:13px;opacity:.85;margin-top:10px}
   .cache{display:none}
   @media(max-width:420px){ .statut .gros{font-size:31px} body{font-size:17px} }
 </style>
@@ -110,9 +121,16 @@
 
   <div class="onglets">
     <button class="onglet actif" id="ongPlan" type="button">Plan</button>
+    <button class="onglet" id="ongSuivi" type="button">Suivi</button>
   </div>
 
   <div id="panPlan" class="panneau actif">
+
+  <div id="disjoncteur" class="disj cache">
+    <p class="t">Disjoncteur déclenché</p>
+    <p id="disjTxt"></p>
+    <p class="d" id="disjDet"></p>
+  </div>
 
   <div id="apercu" class="apercu cache"></div>
   <div id="vieux" class="vieux cache"></div>
@@ -188,6 +206,106 @@
     </table>
   </div>
 
+  <style>
+    .ent table{width:100%;border-collapse:collapse;font-size:14px;margin:10px 0}
+    .ent th{text-align:right;font-size:12px;color:var(--gris);font-weight:600;
+      padding:0 0 7px 6px;border-bottom:2px solid var(--ligne);white-space:nowrap}
+    .ent th:first-child{text-align:left;padding-left:0}
+    .ent td{padding:8px 0 8px 6px;border-bottom:1px solid var(--ligne);
+      text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+    .ent td:first-child{text-align:left;font-weight:700;padding-left:0}
+    .ent tr:last-child td{border-bottom:none}
+    .ent .now{background:var(--bleubg);font-weight:700}
+    .ent .nil{color:#b8bec6}
+    .ent .regle{background:var(--fond);border:1px solid var(--ligne);border-radius:10px;
+      padding:12px 14px;margin:10px 0}
+    .ent .regle b{color:var(--bleu)}
+    @media(max-width:430px){ .ent table{font-size:12.5px} .ent td,.ent th{padding-left:3px} }
+  </style>
+
+  <details class="info ent">
+    <summary>Comment entrer sur le marché en partant du comptant<span class="chev">›</span></summary>
+    <div class="corps">
+
+      <h3>D'abord : tout dans SGOV</h3>
+      <p>Le premier jour, on met <strong>100 % de l'argent dans SGOV</strong>. Ce n'est pas
+      « rester sur le banc » : SGOV rapporte environ 4 % par année pendant qu'on déploie.
+      Il n'y a donc aucune urgence, et aucune pénalité à prendre son temps.</p>
+
+      <h3>Ensuite : par tranches, à des vitesses différentes</h3>
+      <p>Chaque placement entre à une vitesse qui dépend de son niveau actuel. Ce qui a déjà
+      beaucoup baissé entre plus vite ; ce qui est très étiré entre plus lentement.</p>
+
+      <table>
+        <thead>
+          <tr><th>Titre</th><th>Maintenant</th><th>Sem. 4</th><th>Sem. 8</th><th>Sem. 12</th><th>Sem. 20</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>SGOV</td><td class="now">100 %</td><td class="nil">—</td><td class="nil">—</td><td class="nil">—</td><td class="nil">—</td></tr>
+          <tr><td>GLDM</td><td class="now">40 %</td><td>30 %</td><td>30 %</td><td class="nil">—</td><td class="nil">—</td></tr>
+          <tr><td>BCI</td><td class="now">40 %</td><td>30 %</td><td>30 %</td><td class="nil">—</td><td class="nil">—</td></tr>
+          <tr><td>VT</td><td class="now">35 %</td><td>25 %</td><td>20 %</td><td>20 %</td><td class="nil">—</td></tr>
+          <tr><td>IBIT</td><td class="now">30 %</td><td>25 %</td><td>25 %</td><td>20 %</td><td class="nil">—</td></tr>
+          <tr><td>MCHI</td><td class="now">30 %</td><td>25 %</td><td>25 %</td><td>20 %</td><td class="nil">—</td></tr>
+          <tr><td>AIPO</td><td class="now">25 %</td><td>25 %</td><td>25 %</td><td>25 %</td><td class="nil">—</td></tr>
+          <tr><td>SMH</td><td class="now">20 %</td><td>20 %</td><td>20 %</td><td>20 %</td><td>20 %</td></tr>
+        </tbody>
+      </table>
+
+      <p style="font-size:14px;color:var(--gris)">Les pourcentages sont ceux de la cible
+      <em>de ce placement</em>, pas du portefeuille entier. Chaque ligne totalise 100 %.
+      Environ 35 % du portefeuille est investi dès le départ, et tout est en place vers la
+      fin décembre.</p>
+
+      <h3>Pourquoi ces vitesses</h3>
+      <p><strong>GLDM et BCI</strong> entrent vite : l'or est à environ 22 % sous son sommet
+      de janvier et les banques centrales achètent à un rythme record. <strong>IBIT</strong>
+      est à environ la moitié de son sommet — le rabais est déjà là. <strong>VT</strong>
+      détient neuf mille compagnies, donc très peu de risque ponctuel.</p>
+      <p><strong>SMH entre le plus lentement</strong> : il a bondi de plus de 70 % au seul
+      deuxième trimestre, il se situe environ 37 % au-dessus de sa moyenne 200 jours, et
+      82 % des gestionnaires de fonds le décrivent comme la position la plus encombrée
+      jamais mesurée.</p>
+
+      <h3>Les quatre règles</h3>
+      <div class="regle"><b>1. L'accélérateur.</b> Si un placement tombe <strong>15 %</strong>
+      sous son premier prix d'achat, on achète immédiatement les <strong>deux</strong>
+      tranches suivantes. À <strong>25 %</strong> sous, on achète tout le reste. C'est ainsi
+      que la baisse qu'on redoute devient celle qu'on attendait.</div>
+
+      <div class="regle"><b>2. Le calendrier se termine quoi qu'il arrive.</b> À la semaine 20,
+      tout est investi, krach ou pas. Sans cette règle, on ne fait que deviner le marché avec
+      des étapes en plus, et la réserve devient permanente.</div>
+
+      <div class="regle"><b>3. Achats le vendredi seulement.</b> Même discipline que le reste
+      du plan.</div>
+
+      <div class="regle"><b>4. Si le réglage bascule en Y pendant l'entrée</b>, les tranches
+      <em>restantes</em> du REER suivent les poids du Réglage Y. On ne vend rien de ce qui est
+      déjà acheté — on redirige seulement ce qui reste. Le calendrier du CELI ne change jamais.</div>
+
+      <h3>Ce que ça coûte, honnêtement</h3>
+      <p>Investir tout d'un coup bat l'entrée par tranches environ <strong>deux fois sur
+      trois</strong>, parce que les marchés montent plus souvent qu'ils ne baissent. Entrer par
+      tranches coûtera probablement un peu de rendement. Ce qu'on achète en retour, c'est un
+      éventail beaucoup plus étroit de prix d'entrée possibles — et le prix d'entrée est le
+      plus gros risque ponctuel de toute la vie du portefeuille.</p>
+      <p>La vraie raison d'y aller par tranches n'est pas qu'un krach s'en vient. C'est
+      qu'<strong>on ne peut pas distinguer une prédiction de krach du simple bruit</strong>, et
+      que les tranches fonctionnent dans les deux cas.</p>
+
+      <h3>Si le krach arrive vraiment</h3>
+      <p>Rien ne change. L'accélérateur se déclenche, on achète plus bas, et le disjoncteur
+      s'occupe de la tension de crédit. On serait alors parmi les rares à entrer dans un krach
+      avec 65 % de poudre sèche et une règle écrite disant exactement quoi en faire.</p>
+      <p>La seule façon de perdre cet avantage est de dépenser le comptant trop tôt parce que
+      le marché continue de monter et qu'on se sent idiot. <strong>SMH va probablement encore
+      grimper pendant qu'on n'est investi qu'à 20 %.</strong> Ce n'est pas une erreur : c'est
+      exactement là qu'une entrée lente gagne son salaire.</p>
+
+    </div>
+  </details>
+
   <details class="info">
     <summary>Comment on décide : Réglage X ou Réglage Y ?<span class="chev">›</span></summary>
     <div class="corps">
@@ -228,6 +346,21 @@ ENTRE LES DEUX  →  on ne bouge pas.
       <p>Le rapport SMH/GLD peut rester élevé même si les deux baissent en même temps. La deuxième
       condition attrape ce cas-là et force le Réglage Y. C'est la protection la plus importante
       des deux.</p>
+
+      <h3>Le disjoncteur de crédit</h3>
+      <p>Il existe une troisième règle, qui passe avant les deux autres. On surveille l'écart de
+      taux payé par les entreprises les plus fragiles pour emprunter. C'est le premier endroit qui
+      casse quand l'argent se raréfie dans le système — avant les actions.</p>
+      <p>Si cet écart dépasse sa moyenne de 200 jours de plus de 50 % pendant deux fermetures,
+      le plan bascule en <strong>Réglage Y immédiatement</strong>, sans attendre le vendredi. Il
+      revient à la normale quand l'écart repasse sous 1,20 fois sa moyenne.</p>
+      <p>Pourquoi cette exception à la règle du vendredi ? Parce que le disjoncteur ne peut faire
+      qu'une seule chose : mettre à l'abri. Il ne peut jamais forcer le Réglage X. Une exception
+      qui ne va que vers la sécurité ne peut pas augmenter le risque.</p>
+      <p>Il se déclenche très rarement — environ une fois par cycle économique. Les moyennes plus
+      courtes ne servent à rien ici : lors d'un choc soudain elles réagissent exactement à la même
+      vitesse, et lors d'une détérioration lente elles suivent l'écart vers le haut et ne se
+      déclenchent jamais.</p>
 
       <h3>Qui fait le calcul ?</h3>
       <p>Un programme automatique récupère les prix chaque vendredi soir après la fermeture des
@@ -298,6 +431,44 @@ ENTRE LES DEUX  →  on ne bouge pas.
 
   </div><!-- /panPlan -->
 
+  <div id="panSuivi" class="panneau">
+    <div class="suivi-tot">
+      <div class="lbl">Valeur totale du portefeuille</div>
+      <div class="val" id="sTotal">—</div>
+      <div class="gain" id="sGain"></div>
+      <div class="lbl" id="sDate" style="margin-top:8px"></div>
+    </div>
+
+    <div class="calc">
+      <h2>Combien d'actions je détiens</h2>
+      <p class="note">Entrer le nombre d'actions de chaque placement. Tout reste dans ce
+      navigateur seulement — rien n'est envoyé nulle part, rien n'est publié.</p>
+      <div class="rangee">
+        <div class="champ">
+          <label for="invTotal">Montant total investi (US$) — optionnel</label>
+          <input id="invTotal" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 50000">
+        </div>
+      </div>
+      <table style="margin-top:14px">
+        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
+        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th></tr></thead>
+        <tbody id="corpsSuivi"></tbody>
+      </table>
+      <p class="reste" id="sNote"></p>
+      <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
+        border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
+        Tout effacer</button>
+    </div>
+
+    <div class="calme">
+      <h2>Pourquoi c'est mis à jour une fois par semaine</h2>
+      <p style="margin:0">Regarder son portefeuille tous les jours pousse à réagir, et réagir coûte
+      cher. Les prix ici viennent de la dernière fermeture. Ce n'est pas du temps réel, et c'est
+      voulu. Ce qui compte, c'est la direction sur des années — pas le mouvement d'aujourd'hui.</p>
+    </div>
+  </div><!-- /panSuivi -->
+
   <p class="meta">
     Réglage changé le : <strong id="mChange">—</strong><br>
     Page vérifiée le : <strong id="mVerifie">—</strong>
@@ -350,6 +521,9 @@ ENTRE LES DEUX  →  on ne bouge pas.
       $("noteReer").textContent = "40 % de l'argent. On est en Réglage Y — suivre la colonne Réglage Y.";
     }
 
+    var forceY = !!(s.disjoncteur && s.disjoncteur.actif === true);
+    if (forceY) reglage = "Y";
+
     if (agir) {
       $("statut").className = "statut agir";
       $("statutGros").textContent = "Quelque chose a changé";
@@ -389,6 +563,19 @@ ENTRE LES DEUX  →  on ne bouge pas.
 
     ETAT = s;
     majCalc();
+
+    // Disjoncteur de credit : prime sur tout le reste.
+    var dj = s.disjoncteur;
+    if (dj && dj.actif === true) {
+      $("disjTxt").textContent =
+        "Le marché du crédit est en tension sévère. Le plan est forcé en Réglage Y, " +
+        "peu importe ce que dit le signal habituel. Suivre la colonne Réglage Y du REER.";
+      $("disjDet").textContent =
+        "Écart de crédit à " + (dj.ratio ? dj.ratio.toFixed(2) : "?") +
+        " fois sa moyenne 200 jours" + (dj.date ? " au " + dateFr(dj.date) : "") +
+        ". Se réarme sous 1,20 fois.";
+      $("disjoncteur").classList.remove("cache");
+    }
     if (s.prixDate) {
       var ap = joursDepuis(s.prixDate);
       if (ap !== null && ap > 10) {
@@ -408,12 +595,26 @@ ENTRE LES DEUX  →  on ne bouge pas.
   }
 
 
+  /* ---------------- onglets ---------------- */
+  function onglet(actif) {
+    var p = actif === "suivi";
+    $("ongPlan").className  = "onglet" + (p ? "" : " actif");
+    $("ongSuivi").className = "onglet" + (p ? " actif" : "");
+    $("panPlan").className  = "panneau" + (p ? "" : " actif");
+    $("panSuivi").className = "panneau" + (p ? " actif" : "");
+    if (p) majSuivi();
+  }
+  $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
+  $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
+
   /* ---------------- cibles ---------------- */
   var CIBLE_CELI = { VT:33, GLDM:27, IBIT:17, MCHI:13, SMH:10 };
   var CIBLE_REER = {
     X: { SGOV:30, SMH:22, AIPO:20, BCI:20, GLDM:0,  VT:8 },
     Y: { SGOV:32, SMH:0,  AIPO:10, BCI:25, GLDM:25, VT:8 }
   };
+  // Le CELI représente 60 % du portefeuille et le REER 40 % (constante du plan).
+  var POIDS_COMPTE = { CELI: 60, REER: 40 };
   var ETAT = null;
 
   function argent(n) {
@@ -463,10 +664,98 @@ ENTRE LES DEUX  →  on ne bouge pas.
     $("resteTxt").textContent = msg;
   }
 
+  /* ---------------- suivi ---------------- */
+  function majSuivi() {
+    var prix = (ETAT && ETAT.prix) || {};
+    var reglage = (ETAT && ETAT.reglage === "Y") ? "Y" : "X";
+    var lignes = [];
+    Object.keys(CIBLE_CELI).forEach(function (t) { lignes.push({ t: t, c: "CELI", cible: CIBLE_CELI[t] }); });
+    Object.keys(CIBLE_REER[reglage]).forEach(function (t) {
+      if (CIBLE_REER[reglage][t] > 0) lignes.push({ t: t, c: "REER", cible: CIBLE_REER[reglage][t] });
+    });
+
+    var corps = $("corpsSuivi");
+    if (!corps.getAttribute("data-fait")) {
+      corps.innerHTML = lignes.map(function (l) {
+        var k = l.c + ":" + l.t;
+        return '<tr><td class="tk">' + l.t + ' <span class="desc">' + l.c + '</span></td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-k="' + k + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td class="mont" data-v="' + k + '"></td><td class="act" data-r="' + k + '"></td>' +
+          '<td class="act" data-c="' + k + '"></td><td class="ecart" data-e="' + k + '"></td></tr>';
+      }).join("");
+      corps.setAttribute("data-fait", "1");
+      corps.querySelectorAll(".sAct").forEach(function (i) {
+        i.value = charger("act:" + i.getAttribute("data-k")) || "";
+        i.addEventListener("input", function () {
+          sauver("act:" + i.getAttribute("data-k"), i.value); majSuivi();
+        });
+      });
+    }
+
+    var total = 0, vals = {};
+    corps.querySelectorAll(".sAct").forEach(function (i) {
+      var k = i.getAttribute("data-k"), t = k.split(":")[1];
+      var n = parseFloat(i.value) || 0, p = prix[t] || 0;
+      vals[k] = n * p; total += vals[k];
+    });
+
+    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
+    var baseTotal = inv > 0 ? inv : total;   // référence : total investi indiqué, sinon somme saisie
+
+    lignes.forEach(function (l) {
+      var k = l.c + ":" + l.t, v = vals[k] || 0;
+      var cibleTotal = l.cible * POIDS_COMPTE[l.c] / 100;   // % du portefeuille entier
+      var reel = baseTotal > 0 ? v / baseTotal * 100 : 0;
+      var ec = cibleTotal > 0 ? (reel / cibleTotal - 1) * 100 : 0;
+      var hors = baseTotal > 0 && Math.abs(ec) > 25;
+      var cv = corps.querySelector('[data-v="' + k + '"]');
+      var cr = corps.querySelector('[data-r="' + k + '"]');
+      var cc = corps.querySelector('[data-c="' + k + '"]');
+      var ce = corps.querySelector('[data-e="' + k + '"]');
+      if (cv) cv.textContent = v > 0 ? argent(v) : "—";
+      if (cr) cr.textContent = baseTotal > 0 ? reel.toFixed(1) + " %" : "—";
+      if (cc) {
+        var tC = cibleTotal > 0 ? cibleTotal.toFixed(1) + " %" : "—";
+        if (inv > 0 && prix[l.t]) {
+          var nC = inv * cibleTotal / 100 / prix[l.t];
+          tC += '<br><span class="desc">≈ ' + (nC > 0 ? nC.toFixed(1) : "0") + ' actions</span>';
+        }
+        cc.innerHTML = tC;
+      }
+      if (ce) { ce.textContent = baseTotal > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
+                ce.className = "ecart" + (hors ? " horsband" : ""); }
+    });
+
+    $("sTotal").textContent = total > 0 ? argent(total) : "—";
+    if (total > 0 && inv > 0) {
+      var g = total - inv, pc = g / inv * 100;
+      $("sGain").textContent = (g >= 0 ? "+" : "−") + argent(Math.abs(g)) +
+        "  (" + (g >= 0 ? "+" : "−") + Math.abs(pc).toFixed(1) + " %)";
+      $("sGain").className = "gain " + (g >= 0 ? "gp" : "gn");
+    } else { $("sGain").textContent = ""; }
+
+    $("sDate").textContent = (ETAT && ETAT.prixDate)
+      ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
+    $("sNote").textContent = total > 0
+      ? "Réel et Cible sont en pourcentage du portefeuille entier : le CELI compte pour 60 % et le REER pour 40 %. Base : " +
+        (inv > 0 ? "le montant total investi indiqué (" + argent(inv) + ")." : "la somme des placements entrés — indiquer le montant total investi en haut pour une base fixe.") +
+        " Un écart de plus de 25 % est marqué en rouge."
+      : "Entrer le nombre d'actions pour voir la valeur du portefeuille, puis le montant total investi en haut pour calculer les pourcentages par rapport à ce montant.";
+  }
+
   $("mCeli").addEventListener("input", majCalc);
   $("mReer").addEventListener("input", majCalc);
+  $("invTotal").addEventListener("input", majSuivi);
+  $("sEffacer").addEventListener("click", function () {
+    if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
+    try { Object.keys(localStorage).forEach(function (k) {
+      if (k.indexOf("act:") === 0 || k === "invTotal" || k === "mCeli" || k === "mReer") localStorage.removeItem(k);
+    }); } catch (e) {}
+    location.reload();
+  });
   $("mCeli").value = charger("mCeli") || "";
   $("mReer").value = charger("mReer") || "";
+  $("invTotal").value = charger("invTotal") || "";
 
   var SECOURS = { reglage: "X", actionRequise: false, changeLe: "", verifieLe: "" };
   var fichierLocal = location.protocol === "file:";
