@@ -2,7 +2,7 @@
   "reglage": "X",
   "actionRequise": false,
   "changeLe": "2026-07-15",
-  "verifieLe": "2026-08-11",
+  "verifieLe": "2026-08-12",
   "note": "",
   "tactique": {
     "active": false,
@@ -12,20 +12,20 @@
     "raison": ""
   },
   "prix": {
-    "VT": 160.97,
-    "GLDM": 86.81,
-    "MCHI": 56.93,
-    "SMH": 569.41,
-    "IBIT": 36.23,
-    "SGOV": 100.5,
-    "AIPO": 29.69,
-    "BCI": 24.49
+    "VT": 160.82,
+    "GLDM": 86.46,
+    "MCHI": 55.62,
+    "SMH": 572.93,
+    "IBIT": 35.94,
+    "SGOV": 100.51,
+    "AIPO": 30.21,
+    "BCI": 24.51
   },
-  "prixDate": "2026-08-10",
+  "prixDate": "2026-08-11",
   "disjoncteur": {
     "actif": false,
     "ratio": 0.94,
-    "date": "2026-08-07",
+    "date": "2026-08-10",
     "indisponible": false
   }
 }
