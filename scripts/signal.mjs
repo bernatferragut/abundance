@@ -1,20 +1,29 @@
 #!/usr/bin/env node
 /**
- * Fetches daily closes from Yahoo Finance, computes the X/Y signal, and
- * rewrites state.json. Runs in GitHub Actions — server-side, so no CORS.
+ * Abundance 2.0 — calcul du régime.
  *
- * Node 20+ (global fetch). No dependencies.
+ * Récupère les clôtures quotidiennes (SMH, GLD) et l'écart de crédit, calcule le
+ * régime (RISK ON / NEUTRAL / RISK OFF) et réécrit state.json.
+ * S'exécute dans GitHub Actions — côté serveur, donc pas de CORS.
+ *
+ * Règles :
+ *   - Le 200 jours est le patron : au-dessus = risque autorisé, en dessous = risque réduit.
+ *   - Confirmation à 50 jours (momentum) + force relative SMH vs GLDM (rapport > sa MA 200).
+ *   - SMH > 200j ET SMH > 50j ET SMH/GLDM > sa MA 200  -> RISK ON
+ *   - SMH <= 200j                                         -> RISK OFF
+ *   - Sinon                                               -> NEUTRAL
+ *   - Disjoncteur de crédit : force le RISK OFF (il ne peut aller que vers la sécurité).
+ *
+ * Node 20+ (global fetch). Aucune dépendance.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const CFG = {
   risk: "SMH",
   hedge: "GLD",
-  maLength: 200,
-  bandUp: 0.05,
-  bandDown: 0.05,
-  confirmDays: 3,
-  useAbsoluteFilter: true,
+  maLongue: 200,   // le patron
+  maCourt: 50,     // confirmation / momentum
+  confirmDays: 2,  // fermetures consécutives pour changer de régime
 };
 
 const STATE_PATH = new URL("../state.json", import.meta.url).pathname;
@@ -28,8 +37,6 @@ export function parseYahoo(json) {
     throw new Error(`Yahoo returned no data: ${err}`);
   }
   const ts = res.timestamp;
-  // adjclose is split- and dividend-adjusted. Unadjusted closes corrupt a
-  // moving average across a split and can manufacture a false flip.
   const adj = res.indicators?.adjclose?.[0]?.adjclose;
   const raw = res.indicators?.quote?.[0]?.close;
   const closes = adj ?? raw;
@@ -59,18 +66,18 @@ async function fetchSymbol(symbol, tries = 3) {
       });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const bars = parseYahoo(await r.json());
-      console.log(`  ${symbol}: ${bars.length} bars, latest ${bars.at(-1).date} @ ${bars.at(-1).close.toFixed(2)}`);
+      console.log(`  ${symbol}: ${bars.length} barres, dernière ${bars.at(-1).date} @ ${bars.at(-1).close.toFixed(2)}`);
       return bars;
     } catch (e) {
       lastErr = e;
-      console.warn(`  ${symbol} attempt ${i}/${tries} failed: ${e.message}`);
+      console.warn(`  ${symbol} essai ${i}/${tries} échoué: ${e.message}`);
       if (i < tries) await new Promise((r) => setTimeout(r, 2000 * i));
     }
   }
   throw new Error(`${symbol}: ${lastErr.message}`);
 }
 
-/* ---------------------------------------------------------------- signal */
+/* ---------------------------------------------------------------- régime */
 
 export function alignSeries(a, b) {
   const m = new Map(b.map((x) => [x.date, x.close]));
@@ -91,31 +98,34 @@ export function sma(v, n) {
   return out;
 }
 
-export function computeSignal(riskBars, hedgeBars, cfg = CFG) {
+export function computeRegime(riskBars, hedgeBars, cfg = CFG) {
   const j = alignSeries(riskBars, hedgeBars);
-  if (j.length < cfg.maLength + cfg.confirmDays) {
-    throw new Error(`Need ${cfg.maLength + cfg.confirmDays} overlapping sessions, got ${j.length}`);
+  if (j.length < cfg.maLongue + 1) {
+    throw new Error(`Besoin de ${cfg.maLongue + 1} séances communes, ${j.length} reçues`);
   }
-  const ratios = j.map((p) => p.a / p.b);
-  const rMa = sma(ratios, cfg.maLength);
   const riskCloses = j.map((p) => p.a);
-  const kMa = sma(riskCloses, cfg.maLength);
+  const ratios = j.map((p) => p.a / p.b);
+  const ma200 = sma(riskCloses, cfg.maLongue);
+  const ma50 = sma(riskCloses, cfg.maCourt);
+  const ratioMa200 = sma(ratios, cfg.maLongue);
 
-  let state = "Y", pend = null, cnt = 0;
+  function cible(i) {
+    if (ma200[i] === null) return null;
+    const auDessus200 = riskCloses[i] > ma200[i];
+    const auDessus50 = ma50[i] !== null && riskCloses[i] > ma50[i];
+    const relOk = ratioMa200[i] !== null && ratios[i] > ratioMa200[i];
+    if (!auDessus200) return "OFF";
+    if (auDessus50 && relOk) return "ON";
+    return "NEUTRAL";
+  }
+
+  let state = "NEUTRAL", pend = null, cnt = 0;
   const flips = [];
-  let last = null;
+  let dernier = null;
 
   for (let i = 0; i < j.length; i++) {
-    const ma = rMa[i];
-    if (ma === null) continue;
-    const ratio = ratios[i];
-    const above = !cfg.useAbsoluteFilter || (kMa[i] !== null && riskCloses[i] > kMa[i]);
-
-    let want;
-    if (ratio > ma * (1 + cfg.bandUp) && above) want = "X";
-    else if (ratio < ma * (1 - cfg.bandDown) || !above) want = "Y";
-    else want = state;
-
+    const want = cible(i);
+    if (want === null) continue;
     if (want !== state) {
       if (pend === want) cnt++; else { pend = want; cnt = 1; }
       if (cnt >= cfg.confirmDays) {
@@ -124,13 +134,19 @@ export function computeSignal(riskBars, hedgeBars, cfg = CFG) {
       }
     } else { pend = null; cnt = 0; }
 
-    last = {
+    dernier = {
       date: j[i].date,
-      distancePct: (ratio / ma - 1) * 100,
-      riskAboveOwnMa: above,
+      smhClose: Math.round(riskCloses[i] * 100) / 100,
+      smhMa200: Math.round(ma200[i] * 100) / 100,
+      smhMa50: ma50[i] !== null ? Math.round(ma50[i] * 100) / 100 : null,
+      smhVs200Pct: Math.round((riskCloses[i] / ma200[i] - 1) * 1000) / 10,
+      smhVs50Pct: ma50[i] !== null ? Math.round((riskCloses[i] / ma50[i] - 1) * 1000) / 10 : null,
+      ratioSmhGld: Math.round(ratios[i] * 1000) / 1000,
+      ratioMa200: ratioMa200[i] !== null ? Math.round(ratioMa200[i] * 1000) / 1000 : null,
+      ratioVs200Pct: ratioMa200[i] !== null ? Math.round((ratios[i] / ratioMa200[i] - 1) * 1000) / 10 : null,
     };
   }
-  return { state, latest: last, flips, pending: pend ? { state: pend, count: cnt } : null, sessions: j.length };
+  return { state, dernier, flips, pending: pend ? { state: pend, count: cnt } : null, sessions: j.length };
 }
 
 /* ------------------------------------------------------------------ main */
@@ -143,7 +159,7 @@ const TITRES = ["VT","GLDM","MCHI","SMH","IBIT","SGOV","AIPO","BCI"];
  * erreur de données) et prévient au-delà de 20 %.
  */
 function validatePrice(symbol, newPrice, prevPrice) {
-  if (!prevPrice || prevPrice <= 0) return true; // Aucun prix précédent à comparer
+  if (!prevPrice || prevPrice <= 0) return true;
 
   const changePct = Math.abs((newPrice - prevPrice) / prevPrice);
   const changePercent = (changePct * 100).toFixed(1);
@@ -152,18 +168,16 @@ function validatePrice(symbol, newPrice, prevPrice) {
     console.warn(`  ⚠ ${symbol}: REJETÉ — ${newPrice} vs ${prevPrice} (${changePercent}% de variation, seuil de 50 % dépassé)`);
     return false;
   }
-
   if (changePct > 0.20) {
     console.warn(`  ⚠ ${symbol}: Forte variation — ${newPrice} vs ${prevPrice} (${changePercent}%)`);
   }
-
   return true;
 }
 
 /* ============================ DISJONCTEUR DE CRÉDIT ============================
- * ICE BofA US High Yield OAS, via FRED. Daily, free, no API key.
- * Fires when the spread exceeds its own 200-day average by 50% for 2 closes.
- * Resets below 1.20x. It can ONLY force Y — it can never push toward risk.
+ * ICE BofA US High Yield OAS, via FRED. Quotidien, gratuit, sans clé.
+ * Se déclenche quand l'écart dépasse sa moyenne 200 jours de 50 % pendant 2
+ * fermetures. Se réarme sous 1,20x. Il ne peut QUE mettre à l'abri — jamais vers le risque.
  */
 const FRED_SERIE = "BAMLH0A0HYM2";
 const DISJ = { maLength: 200, seuilHaut: 1.50, seuilBas: 1.20, confirm: 2 };
@@ -228,35 +242,30 @@ async function fetchPrices(prevPrices = {}) {
     try {
       const bars = await fetchSymbol(t, 2);
       const newPrice = Math.round(bars.at(-1).close * 100) / 100;
-
-      // Valide le prix contre la valeur précédente
       if (validatePrice(t, newPrice, prevPrices[t])) {
         out[t] = newPrice;
       } else {
         console.warn(`  prix ${t}: VALIDATION ÉCHOUÉE — ancien prix conservé`);
-        // Conserve l'ancien prix si la validation échoue
-        if (prevPrices[t]) {
-          out[t] = prevPrices[t];
-        }
+        if (prevPrices[t]) out[t] = prevPrices[t];
       }
     } catch (e) {
-      console.warn(`  prix ${t}: ECHEC (${e.message}) — ancien prix conserve`);
+      console.warn(`  prix ${t}: ÉCHEC (${e.message}) — ancien prix conservé`);
     }
   }
   return out;
 }
 
 async function main() {
-  console.log(`Signal: ${CFG.risk}/${CFG.hedge}, ${CFG.maLength}-DMA, band ±${CFG.bandUp * 100}%, ${CFG.confirmDays}-close confirm\n`);
+  console.log(`Abundance 2.0 — régime ${CFG.risk}/${CFG.hedge}, patron ${CFG.maLongue} jours, confirmation ${CFG.confirmDays} fermetures\n`);
 
   const [risk, hedge] = await Promise.all([fetchSymbol(CFG.risk), fetchSymbol(CFG.hedge)]);
-  const sig = computeSignal(risk, hedge);
+  const sig = computeRegime(risk, hedge);
 
   const today = new Date().toISOString().slice(0, 10);
-  const ageDays = Math.floor((Date.now() - new Date(sig.latest.date + "T00:00:00Z").getTime()) / 86400000);
-  if (ageDays > 7) throw new Error(`Price data is ${ageDays} days old — refusing to update state.`);
+  const ageDays = Math.floor((Date.now() - new Date(sig.dernier.date + "T00:00:00Z").getTime()) / 86400000);
+  if (ageDays > 7) throw new Error(`Données vieilles de ${ageDays} jours — refus d'écrire.`);
 
-  console.log("\nDisjoncteur de credit :");
+  console.log("\nDisjoncteur de crédit :");
   const oas = await fetchFred();
 
   let prev = {};
@@ -265,11 +274,11 @@ async function main() {
   }
   const prevLu = prev;
 
-  console.log("\nPrix de cloture :");
+  console.log("\nPrix de clôture :");
   const prixNeufs = await fetchPrices(prev.prix ?? {});
 
-  // The breaker is the one exception to Friday-only: it may fire any day,
-  // because it can ONLY move toward safety. It can never force X.
+  // Le disjoncteur est l'exception à la discipline hebdomadaire : il peut se
+  // déclencher n'importe quel jour, car il ne peut QU'aller vers la sécurité.
   let disj = { actif: false, ratio: null, date: "", indisponible: true };
   if (oas) {
     try {
@@ -281,57 +290,54 @@ async function main() {
         date: d.dernier.date,
         indisponible: false,
       };
-      console.log(`  ecart/moyenne200 = ${disj.ratio}x  ->  ${d.actif ? "DECLENCHE" : "normal"}`);
+      console.log(`  écart/moyenne200 = ${disj.ratio}x  ->  ${d.actif ? "DÉCLENCHÉ" : "normal"}`);
     } catch (e) {
-      console.warn(`  disjoncteur non evalue: ${e.message}`);
+      console.warn(`  disjoncteur non évalué: ${e.message}`);
     }
   } else {
-    console.warn("  FRED indisponible — disjoncteur inactif ce tour, ancien etat conserve");
+    console.warn("  FRED indisponible — disjoncteur inactif ce tour, ancien état conservé");
     if (prevLu.disjoncteur) disj = { ...prevLu.disjoncteur, indisponible: true };
   }
 
-  // Prices refresh every day, but the setting may only move on the weekly run.
-  // This preserves the Friday-only discipline: no mid-week flip can appear.
+  // Les prix se rafraîchissent chaque jour, mais le régime ne change que le
+  // jour du signal (samedi). Le 200 jours bouge lentement : pas de va-et-vient.
   const jourSignal = process.env.JOUR_SIGNAL === "1";
-  let reglageEffectif = jourSignal ? sig.state : (prev.reglage ?? sig.state);
-  if (disj.actif) reglageEffectif = "Y";   // le disjoncteur prime sur tout
-  const changed = prev.reglage !== reglageEffectif;
-  if (!jourSignal && prev.reglage && prev.reglage !== sig.state) {
-    console.log(`  (signal calcule ${sig.state} mais on garde ${prev.reglage} — changement le samedi seulement)`);
+  let regimeEffectif = jourSignal ? sig.state : (prev.regime ?? sig.state);
+  if (disj.actif) regimeEffectif = "OFF";   // le disjoncteur prime sur tout
+  const changed = prev.regime !== regimeEffectif;
+  if (!jourSignal && prev.regime && prev.regime !== sig.state) {
+    console.log(`  (régime calculé ${sig.state} mais on garde ${prev.regime} — changement le samedi seulement)`);
   }
   const lastFlip = sig.flips.at(-1);
 
   const next = {
-    reglage: reglageEffectif,
-    // Once true, stays true until a human clears it — trades must be confirmed done.
+    regime: regimeEffectif,
+    // Une fois vrai, reste vrai tant qu'un humain ne l'a pas remis à false.
     actionRequise: changed ? true : prev.actionRequise === true,
     changeLe: changed ? today : (prev.changeLe ?? lastFlip?.date ?? today),
     verifieLe: today,
     note: prev.note ?? "",
-    // The tactical sleeve is manual only. The bot must never open or close it.
-    tactique: prev.tactique ?? {
-      active: false, titre: "SH", pourcentage: 5, ouvertLe: "", raison: "",
-    },
-    // Merge: a failed symbol keeps its previous price rather than vanishing.
+    // Fusion : un symbole en échec conserve son prix précédent plutôt que disparaître.
     prix: { ...(prev.prix ?? {}), ...prixNeufs },
-    prixDate: Object.keys(prixNeufs).length ? sig.latest.date : (prev.prixDate ?? ""),
+    prixDate: Object.keys(prixNeufs).length ? sig.dernier.date : (prev.prixDate ?? ""),
+    signal: sig.dernier,
     disjoncteur: disj,
   };
 
-  console.log(`\n  Setting        : ${sig.state}${changed ? `  (CHANGED from ${prev.setting ?? "none"})` : ""}`);
-  console.log(`  Distance to MA : ${sig.latest.distancePct >= 0 ? "+" : ""}${sig.latest.distancePct.toFixed(2)}%`);
-  console.log(`  ${CFG.risk} vs own MA : ${sig.latest.riskAboveOwnMa ? "above" : "BELOW (forces Y)"}`);
-  console.log(`  Pending        : ${sig.pending ? `${sig.pending.count}/${CFG.confirmDays} toward ${sig.pending.state}` : "none"}`);
-  console.log(`  Flips in 2y    : ${sig.flips.length}`);
+  console.log(`\n  Régime      : ${regimeEffectif}${changed ? `  (CHANGÉ depuis ${prev.regime ?? "aucun"})` : ""}`);
+  console.log(`  SMH vs 200j : ${sig.dernier.smhVs200Pct >= 0 ? "+" : ""}${sig.dernier.smhVs200Pct.toFixed(2)}%`);
+  console.log(`  SMH vs 50j  : ${sig.dernier.smhVs50Pct >= 0 ? "+" : ""}${sig.dernier.smhVs50Pct.toFixed(2)}%`);
+  console.log(`  SMH/GLDM vs 200j : ${sig.dernier.ratioVs200Pct >= 0 ? "+" : ""}${sig.dernier.ratioVs200Pct.toFixed(2)}%`);
+  console.log(`  En attente  : ${sig.pending ? `${sig.pending.count}/${CFG.confirmDays} vers ${sig.pending.state}` : "aucun"}`);
+  console.log(`  Basculements : ${sig.flips.length}`);
   console.log(`  Action requise : ${next.actionRequise}`);
-  console.log(`  Disjoncteur    : ${disj.actif ? "ACTIF — Reglage Y force" : (disj.indisponible ? "donnees indisponibles" : "normal")}`);
-  console.log(`  Prix obtenus   : ${Object.keys(prixNeufs).length} / ${TITRES.length}`);
-  console.log(`  Tactique       : ${next.tactique.active ? next.tactique.titre + " " + next.tactique.pourcentage + "%" : "aucune"}`);
+  console.log(`  Disjoncteur  : ${disj.actif ? "ACTIF — RISK OFF forcé" : (disj.indisponible ? "données indisponibles" : "normal")}`);
+  console.log(`  Prix obtenus : ${Object.keys(prixNeufs).length} / ${TITRES.length}`);
 
   writeFileSync(STATE_PATH, JSON.stringify(next, null, 2) + "\n");
-  console.log(`\nWrote ${STATE_PATH}`);
+  console.log(`\nÉcrit ${STATE_PATH}`);
 }
 
 if (process.argv[1] && import.meta.url.endsWith(process.argv[1].split("/").pop())) {
-  main().catch((e) => { console.error(`\nFAILED: ${e.message}`); process.exit(1); });
+  main().catch((e) => { console.error(`\nÉCHEC: ${e.message}`); process.exit(1); });
 }
