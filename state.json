@@ -1,30 +1,69 @@
 {
-  "regime": "NEUTRAL",
+  "regime": "ON",
   "actionRequise": true,
   "changeLe": "2026-08-14",
   "verifieLe": "2026-08-14",
   "note": "",
   "prix": {
-    "VT": 162.21,
-    "GLDM": 86.59,
-    "MCHI": 54.62,
-    "SMH": 586.23,
-    "IBIT": 35.58,
+    "VT": 162.16,
+    "GLDM": 86.55,
+    "MCHI": 54.63,
+    "SMH": 586.61,
+    "IBIT": 35.62,
     "SGOV": 100.56,
-    "AIPO": 30.9,
-    "BCI": 24.58
+    "AIPO": 30.93,
+    "BCI": 24.57
   },
   "prixDate": "2026-08-14",
-  "signal": {
+  "regimeSignal": {
     "date": "2026-08-14",
-    "smhClose": 586.23,
+    "vtClose": 162.16,
+    "vtMa200": 147.1,
+    "vtMa50": 156.6,
+    "vtVs200Pct": 10.2,
+    "vtVs50Pct": 3.6
+  },
+  "satellite": {
+    "facteur": 0.5,
+    "smhClose": 586.61,
     "smhMa200": 461.82,
     "smhMa50": 591.46,
-    "smhVs200Pct": 26.9,
-    "smhVs50Pct": -0.9,
-    "ratioSmhGld": 1.46,
-    "ratioMa200": 1.132,
-    "ratioVs200Pct": 29
+    "smhVs200Pct": 27,
+    "smhVs50Pct": -0.8
+  },
+  "cibles": {
+    "ON": {
+      "SGOV": 0,
+      "VT": 10,
+      "SMH": 15,
+      "GLDM": 5,
+      "BCI": 5,
+      "AIPO": 5
+    },
+    "NEUTRAL": {
+      "SGOV": 10,
+      "VT": 10,
+      "SMH": 5,
+      "GLDM": 10,
+      "BCI": 5,
+      "AIPO": 0
+    },
+    "OFF": {
+      "SGOV": 25,
+      "VT": 0,
+      "SMH": 0,
+      "GLDM": 10,
+      "BCI": 5,
+      "AIPO": 0
+    }
+  },
+  "tactiqueCible": {
+    "SGOV": 10,
+    "VT": 10,
+    "SMH": 7.5,
+    "GLDM": 5,
+    "BCI": 5,
+    "AIPO": 2.5
   },
   "disjoncteur": {
     "actif": false,

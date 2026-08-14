@@ -101,6 +101,10 @@
     text-align:right;font-variant-numeric:tabular-nums}
   .ecart{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
   .horsband{color:var(--rouge);font-weight:700}
+  .acte{text-align:right;font-weight:700;font-size:15px;white-space:nowrap;padding-left:14px}
+  .acte.garder{color:var(--vert)}
+  .acte.rebal{color:var(--ambre)}
+  .acte.hors{color:var(--rouge);font-weight:800}
   .disj{background:#7a1414;color:#fff;border-radius:14px;padding:22px;margin-bottom:18px;text-align:center}
   .disj .t{font-size:24px;font-weight:800;margin:0 0 8px}
   .disj p{margin:0;font-size:16px;line-height:1.55}
@@ -152,15 +156,15 @@
 
   <div class="calc">
     <h2>Calculatrice d'achat</h2>
-    <p class="note">Entrer le montant disponible dans chaque partie. Les colonnes « Montant » et
-    « Actions » apparaîtront dans les tableaux.</p>
+    <p class="note">Entrer le montant de chaque partie. Les colonnes « Montant » et
+    « Actions » apparaîtront dans les tableaux. (Le tactique utilise les deux montants.)</p>
     <div class="rangee">
       <div class="champ">
-        <label for="mPerm">Partie permanente (60 %)</label>
+        <label for="mPerm">Permanent — CELI (60 %)</label>
         <input id="mPerm" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
       </div>
       <div class="champ">
-        <label for="mTac">Partie tactique (40 %)</label>
+        <label for="mTac">Tactique — REER (40 %)</label>
         <input id="mTac" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 13000">
       </div>
     </div>
@@ -169,10 +173,10 @@
   </div>
 
   <div class="carte">
-    <h2>Permanent — 60 % de l'argent, on ne vend jamais</h2>
+    <h2>🟦 POSSÉDER — Permanent, 60 % (CELI), on ne vend jamais</h2>
     <p class="note">Ça ne change pas avec le régime. On rééquilibre seulement hors bande, et avec de l'argent neuf — jamais en vendant.</p>
     <table data-compte="perm">
-      <thead><tr><th>Acheter</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">%</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr></thead>
+      <thead><tr><th>Acheter</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">% de la partie</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr></thead>
       <tbody>
         <tr><td class="tk" data-t="VT">VT</td><td class="desc">Posséder l'économie productive du monde</td><td class="pc">40 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
         <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">Parer l'instabilité monétaire et géopolitique</td><td class="pc">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
@@ -182,11 +186,16 @@
       </tbody>
     </table>
     <p class="note" style="margin:12px 0 0">Bandes de rééquilibrage : VT 35–45 %, GLDM 20–30 %, IBIT 10–20 %,
-    MCHI 7,5–12,5 %, SMH 7,5–12,5 %. On laisse les gagnants courir.</p>
+    MCHI 7,5–12,5 %, SMH 7,5–12,5 % (de la partie). On laisse les gagnants courir.</p>
+    <p class="note" style="margin:12px 0 0"><strong>Honnêtement :</strong> le permanent n'est pas conçu
+    pour éviter les grosses baisses. Dans un marché baissier sévère, une baisse d'environ <strong>35 à
+    45 %</strong> est possible, et certains composants — surtout le bitcoin — peuvent chuter beaucoup plus.
+    Sa protection vient de la diversification, de la possession à long terme et du refus des sorties
+    émotionnelles — <em>pas</em> d'un signal de synchronisation.</p>
   </div>
 
   <div class="carte">
-    <h2>Tactique — 40 % de l'argent, un budget de risque</h2>
+    <h2>🟧 S'ADAPTER — Tactique, 40 % (REER), un budget de risque</h2>
     <p class="note" id="noteTac">Pas de pourcentages fixes : le budget suit le régime. La colonne en couleur est celle qu'on suit.</p>
     <table data-compte="tac">
       <thead>
@@ -197,7 +206,7 @@
         <th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr>
       </thead>
       <tbody>
-        <tr><td class="tk" data-t="SGOV">SGOV</td><td class="desc">Liquidité et munitions</td><td class="pc co zero">0 %</td><td class="pc cn">10 %</td><td class="pc cf">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="SGOV">SGOV</td><td class="desc">Munitions / liquidité</td><td class="pc co zero">0 %</td><td class="pc cn">10 %</td><td class="pc cf">25 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
         <tr><td class="tk" data-t="VT">VT</td><td class="desc">Risque cœur</td><td class="pc co">10 %</td><td class="pc cn">10 %</td><td class="pc cf zero">0 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
         <tr><td class="tk" data-t="SMH">SMH</td><td class="desc">Bêta élevée / IA</td><td class="pc co">15 %</td><td class="pc cn">5 %</td><td class="pc cf zero">0 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
         <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">Défense monétaire</td><td class="pc co">5 %</td><td class="pc cn">10 %</td><td class="pc cf">10 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
@@ -205,8 +214,10 @@
         <tr><td class="tk" data-t="AIPO">AIPO</td><td class="desc">Satellite IA / technologie</td><td class="pc co">5 %</td><td class="pc cn zero">0 %</td><td class="pc cf zero">0 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
       </tbody>
     </table>
-    <p class="note" style="margin:12px 0 0">L'idée n'est pas « un krach s'en vient ». C'est : « le marché a cessé de
-    récompenser le risque, je garde de l'option. »</p>
+    <p class="note" style="margin:12px 0 0" id="noteSat">Les % sont du portefeuille entier. Le couple
+    SMH/AIPO s'ajuste au cadran satellite.</p>
+    <p class="note" style="margin:12px 0 0">L'idée n'est pas « un krach s'en vient ». C'est : « le marché
+    a cessé de récompenser le risque, je garde de l'option. »</p>
   </div>
 
   <div class="regles">
@@ -215,56 +226,54 @@
       <li>On ne vend jamais le <strong>permanent</strong>.</li>
       <li>On ne déploie que l'argent déjà désigné pour l'investissement — jamais d'emprunt, jamais de levier.</li>
       <li>On n'agit jamais parce que les nouvelles font peur. Le régime décide, pas les nouvelles.</li>
-      <li>Seule la partie tactique change, et seulement quand cette page le dit.</li>
+      <li>Seule la partie tactique change, et seulement quand la page le dit.</li>
     </ul>
   </div>
 
   <details class="info">
     <summary>Comment on décide : le régime<span class="chev">›</span></summary>
     <div class="corps">
-      <h3>Le 200 jours est le patron</h3>
-      <p>La <strong>moyenne 200 jours</strong> décide de tout : au-dessus, le risque est autorisé ;
-      en dessous, on le réduit. Tout le reste est secondaire. Des règles volontairement ennuyeuses,
-      pour ne pas transformer chaque petite correction en décision de portefeuille.</p>
-
-      <h3>Les règles</h3>
-      <table>
-        <thead><tr><th>Condition</th><th style="text-align:right">Lecture</th></tr></thead>
-        <tbody>
-          <tr><td>Prix > moyenne 200 jours</td><td class="pc" style="color:var(--vert)">🟢 Risque autorisé</td></tr>
-          <tr><td>Prix < moyenne 200 jours</td><td class="pc" style="color:var(--rouge)">🔴 Risque réduit</td></tr>
-          <tr><td>SMH fait mieux que GLDM</td><td class="pc" style="color:var(--vert)">🟢 Confirmation risque</td></tr>
-          <tr><td>GLDM fait mieux que SMH</td><td class="pc" style="color:var(--rouge)">🔴 Confirmation défensive</td></tr>
-          <tr><td>Écarts de crédit se dégradent fortement</td><td class="pc" style="color:var(--rouge)">⚠️ Forçage défensif</td></tr>
-        </tbody>
-      </table>
+      <h3>Le 200 jours de VT est le patron</h3>
+      <p>On ne parie pas sur un seul secteur. On regarde le <strong>marché large (VT)</strong>, parce que
+      c'est lui qu'on possède. <strong>VT au-dessus de sa moyenne 200 jours</strong> → le risque est
+      autorisé. <strong>En dessous</strong> → on le réduit. Tout le reste est secondaire. Des règles
+      volontairement ennuyeuses, pour ne pas transformer chaque petite correction en décision.</p>
 
       <h3>Les trois régimes</h3>
-      <p><strong>🟢 RISK ON</strong> — la tendance est saine, on laisse le portefeuille participer :
+      <p><strong>🟢 RISK ON</strong> — VT au-dessus du 200 jours <em>et</em> momentum sain (VT > 50 jours) :
       SMH 15, VT 10, AIPO 5, BCI 5, GLDM 5, SGOV 0.</p>
-      <p><strong>🟡 NEUTRAL</strong> — quelque chose change, on réduit ce qu'on parie sur le risque :
+      <p><strong>🟡 NEUTRAL</strong> — VT autour de sa ligne 200 ou momentum perdu :
       VT 10, SMH 5, GLDM 10, BCI 5, SGOV 10, AIPO 0.</p>
-      <p><strong>🔴 RISK OFF</strong> — le marché a cessé de récompenser le risque, on garde de
-      l'option : SGOV 25, GLDM 10, BCI 5, et zéro dans les autres.</p>
+      <p><strong>🔴 RISK OFF</strong> — VT sous son 200 jours :
+      SGOV 25, GLDM 10, BCI 5, et zéro dans les autres.</p>
 
-      <h3>La confirmation à 50 jours</h3>
-      <p>Exemple : <strong>SMH > 200 jours</strong> ET <strong>SMH > 50 jours</strong> ET
-      <strong>SMH > GLDM</strong> → on est en RISK ON complet. Si SMH passe sous sa moyenne
-      50 jours mais reste au-dessus de la 200 : <strong>ne pas paniquer</strong>, c'est un
-      avertissement, on passe en NEUTRAL. S'il casse la 200 jours : réduction du risque.</p>
+      <h3>Le cadran satellite SMH</h3>
+      <p>Le régime répond à « dois-je prendre du risque ? ». Le cadran SMH répond à « combien de mon bêta
+      élevé ? ».</p>
+      <table>
+        <thead><tr><th>Condition SMH</th><th style="text-align:right">Part du couple SMH/AIPO</th></tr></thead>
+        <tbody>
+          <tr><td>SMH > 50 jours</td><td class="pc">100 %</td></tr>
+          <tr><td>50 jours > SMH > 200 jours</td><td class="pc">50 %</td></tr>
+          <tr><td>SMH < 200 jours</td><td class="pc">0 %</td></tr>
+        </tbody>
+      </table>
+      <p>La part non utilisée va en SGOV. Exemple : en RISK ON avec le cadran à 50 %, SMH 15 → 7,5 %,
+      AIPO 5 → 2,5 %, et SGOV passe de 0 à 10 %.</p>
 
-      <h3>Le 21 jours, pour entrer</h3>
-      <p>Une fois que la tendance commence vraiment à changer, le 21 jours sert d'entrée :
-      on agit progressivement, on ne saute pas d'un coup. On n'utilise pas le 150 jours au départ.</p>
+      <h3>La marge de manœuvre (deadband ±5 points)</h3>
+      <p>On ne rééquilibre pas à chaque changement. Tant qu'un placement reste à moins de 5 points de sa
+      cible (du portefeuille entier pour le tactique), on ne fait rien — l'onglet Suivi indique
+      GARDER ou RÉÉQUILIBRER. C'est ce qui empêche les transactions inutiles.</p>
 
       <h3>Le disjoncteur de crédit</h3>
       <p>Les écarts de crédit sont le premier endroit qui casse quand l'argent se raréfie. Si l'écart
       dépasse sa moyenne 200 jours de plus de 50 % pendant deux fermetures, on force le RISK OFF
-      immédiatement, sans attendre. Réarmement sous 1,20 fois.</p>
+      immédiatement, sans attendre. Réarmement sous 1,20 fois. Il ne peut qu'aller vers la sécurité.</p>
 
       <h3>Qui fait le calcul ?</h3>
-      <p>Un programme récupère les prix chaque jour et met cette page à jour tout seul. Le régime,
-      lui, ne change que selon les règles ci-dessus.</p>
+      <p>Un programme récupère les prix chaque jour et met cette page à jour tout seul. Le régime et le
+      cadran ne changent que le samedi. Ne pas prédire : observer.</p>
       <p class="form" id="signalLigne" style="margin-top:12px"></p>
     </div>
   </details>
@@ -317,15 +326,16 @@
   <details class="info">
     <summary>Comment tout le plan fonctionne<span class="chev">›</span></summary>
     <div class="corps">
-      <h3>La grande image</h3>
-      <p><strong>60 % — POSSÉDER.</strong> Je ne sais pas à quoi ressemble l'avenir, alors je possède
-      plusieurs avenirs possibles.</p>
-      <p><strong>40 % — S'ADAPTER.</strong> Je ne sais pas quand le régime change, alors je laisse le
-      marché me le dire.</p>
-      <p><strong>SGOV — ATTENDRE.</strong> Quand des occasions apparaissent, j'ai des munitions.</p>
-      <p><strong>200 jours — ÉCOUTER.</strong> Ne pas prédire. Observer.</p>
-      <p><strong>21 jours — BOUGER.</strong> Une fois que la tendance commence à changer, agir
-      progressivement.</p>
+      <h3>Les trois couches</h3>
+      <p><strong>🟦 POSSÉDER — CELI, 60 %.</strong> J'OWN. VT / GLDM / IBIT / MCHI / SMH. Aucun signal de
+      synchronisation. Sa protection vient de la diversification, de la possession à long terme et du
+      refus des sorties émotionnelles — pas d'un signal.</p>
+      <p><strong>🟧 S'ADAPTER — REER, 40 %.</strong> J'ADAPTE. Le 200 jours de VT décide du régime ;
+      SMH décide de l'intensité satellite ; le crédit décide d'un éventuel forçage défensif.</p>
+      <p><strong>🟩 MUNITIONS — SGOV et cotisations neuves.</strong> J'ATTENDS. Les règles de déploiement
+      selon la baisse décident quand accélérer.</p>
+      <p><strong>La philosophie :</strong> POSSÉDER ce en quoi tu crois. S'ADAPTER à ce que fait
+      réellement le marché. GARDER DES MUNITIONS pour quand l'occasion se présente.</p>
 
       <h3>Le travail de chaque placement</h3>
       <table>
@@ -344,9 +354,9 @@
       <p>Mieux que « quel ETF va monter ? » : chaque actif a un <strong>travail</strong>.</p>
 
       <h3>Le rééquilibrage : des bandes, pas un calendrier</h3>
-      <p>On ne rééquilibre pas chaque mois. On utilise des bandes larges d'environ ±5 points. Si
-      IBIT passe de 15 % à 19 %, on ne fait rien. S'il passe à 24 %, on envisage d'en couper un peu.
-      Ça laisse les gagnants courir.</p>
+      <p>On ne rééquilibre pas chaque mois, ni à chaque changement de régime. On utilise des bandes
+      larges d'environ ±5 points (du portefeuille entier pour le tactique). Si SMH passe de 5 % à 7,2 %,
+      on ne fait rien. S'il dépasse ~10 %, on envisage de rééquilibrer. Ça laisse les gagnants courir.</p>
 
       <h3>Une fois par année</h3>
       <p>Vérifier que le permanent représente encore environ 60 % du total. On ajuste uniquement en
@@ -371,9 +381,9 @@
     </div>
 
     <div class="calc">
-      <h2>Combien d'actions je détiens</h2>
-      <p class="note">Entrer le nombre d'actions de chaque placement. Tout reste dans ce
-      navigateur seulement — rien n'est envoyé nulle part, rien n'est publié.</p>
+      <h2>Système d'exploitation : cible → réel → écart → action</h2>
+      <p class="note">Entrer le nombre d'actions détenues. La page compare au régime en cours
+      (avec le cadran satellite), puis indique GARDER ou RÉÉQUILIBRER. Tout reste dans ce navigateur.</p>
       <div class="rangee">
         <div class="champ">
           <label for="invTotal">Montant total investi (US$) — optionnel</label>
@@ -383,7 +393,8 @@
       <table style="margin-top:14px">
         <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
         <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
-        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th></tr></thead>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th>
+        <th style="text-align:right">Action</th></tr></thead>
         <tbody id="corpsSuivi"></tbody>
       </table>
       <p class="reste" id="sNote"></p>
@@ -416,6 +427,7 @@
   var MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
               "septembre","octobre","novembre","décembre"];
   var LIB = { ON: "RISK ON", NEUTRAL: "NEUTRAL", OFF: "RISK OFF" };
+  var ORDRE_TAC = ["SGOV","VT","SMH","GLDM","BCI","AIPO"];
 
   function dateFr(s) {
     if (!s) return "non défini";
@@ -438,6 +450,10 @@
     $("pastille").innerHTML = "";
   }
 
+  function pct(v) {
+    return v % 1 === 0 ? v + " %" : v.toFixed(1) + " %";
+  }
+
   function reglerHL(regime) {
     ["thON","thNEUTRAL","thOFF"].forEach(function (id) {
       $(id).classList.remove("hlON","hlNEUTRAL","hlOFF");
@@ -457,15 +473,36 @@
     if (forceOff) regime = "OFF";
     reglerHL(regime);
 
+    var tc = s.tactiqueCible || CIBLE_TAC[regime];
     var agir = s.actionRequise === true;
+
     $("noteTac").textContent = "Budget de risque — on est en " + LIB[regime] +
-      ". Suivre la colonne « " + LIB[regime] + " ».";
+      ". Suivre la colonne « " + LIB[regime] + " » (colonnes ajustées du cadran satellite).";
+
+    // Affiche la cible EFFECTIVE (cadran satellite) dans la colonne active.
+    var tacTable = document.querySelector('table[data-compte="tac"]');
+    var sel = regime === "ON" ? ".co" : regime === "NEUTRAL" ? ".cn" : ".cf";
+    tacTable.querySelectorAll("tbody tr").forEach(function (tr) {
+      var t = tr.querySelector(".tk").getAttribute("data-t");
+      var cell = tr.querySelector(sel);
+      if (cell && tc[t] !== undefined) {
+        cell.textContent = pct(tc[t]);
+        cell.classList.toggle("zero", tc[t] === 0);
+      }
+    });
+
+    // Note satellite.
+    var sat = s.satellite;
+    var msgSat = "Les % sont du portefeuille entier. Cadran satellite SMH : " +
+      ((sat && sat.facteur !== undefined) ? (sat.facteur * 100) + " % du couple SMH/AIPO" : "—") +
+      " — le reste va en SGOV.";
+    $("noteSat").textContent = msgSat;
 
     if (agir) {
       $("statut").className = "statut agir";
       $("statutGros").textContent = "Quelque chose a changé";
-      $("statutDit").textContent = "Ajuster la partie tactique pour qu'elle corresponde à " +
-        LIB[regime] + ". Ensuite, c'est terminé.";
+      $("statutDit").textContent = "Vérifier l'onglet Suivi : si un écart sort de la marge (±5 points), " +
+        "rééquilibrer la partie tactique vers la colonne " + LIB[regime] + ".";
     } else {
       $("statut").className = "statut ok";
       $("statutGros").textContent = "Ne rien faire";
@@ -473,11 +510,12 @@
     }
     $("pastille").innerHTML = '<span class="pastille p' + regime + '">Régime : ' + LIB[regime] + "</span>";
 
-    var sg = s.signal;
-    $("statutSignal").textContent = sg && sg.smhVs200Pct !== undefined
-      ? "SMH " + (sg.smhVs200Pct >= 0 ? "+" : "") + sg.smhVs200Pct.toFixed(0) +
+    var rs = s.regimeSignal, sat2 = s.satellite;
+    $("statutSignal").textContent = (rs && rs.vtVs200Pct !== undefined)
+      ? "VT " + (rs.vtVs200Pct >= 0 ? "+" : "") + rs.vtVs200Pct.toFixed(0) +
         " % vs sa moyenne 200 jours · " +
-        (sg.smhVs50Pct >= 0 ? "+" : "") + sg.smhVs50Pct.toFixed(0) + " % vs la 50 jours"
+        (rs.vtVs50Pct >= 0 ? "+" : "") + rs.vtVs50Pct.toFixed(0) + " % vs la 50 jours" +
+        " · satellite SMH " + (sat2 && sat2.facteur !== undefined ? sat2.facteur * 100 + " %" : "?")
       : "";
 
     if (s.note) {
@@ -518,15 +556,18 @@
     }
 
     var sl = $("signalLigne");
-    if (sg) {
-      sl.textContent =
-        "Lecture : SMH à " + (sg.smhClose ? sg.smhClose.toFixed(2) : "?") +
-        " · moyenne 200 jours " + (sg.smhMa200 ? sg.smhMa200.toFixed(2) : "?") +
-        " (" + (sg.smhVs200Pct >= 0 ? "+" : "") + (sg.smhVs200Pct || 0).toFixed(1) + " %)" +
-        " · moyenne 50 jours " + (sg.smhMa50 ? sg.smhMa50.toFixed(2) : "?") +
-        " (" + (sg.smhVs50Pct >= 0 ? "+" : "") + (sg.smhVs50Pct || 0).toFixed(1) + " %)" +
-        " · rapport SMH/GLDM " + (sg.ratioSmhGld ? sg.ratioSmhGld.toFixed(3) : "?") +
-        " vs sa moyenne 200 (" + (sg.ratioVs200Pct >= 0 ? "+" : "") + (sg.ratioVs200Pct || 0).toFixed(1) + " %).";
+    if (rs) {
+      var ligne = "VT à " + (rs.vtClose ? rs.vtClose.toFixed(2) : "?") +
+        " · moyenne 200 jours " + (rs.vtMa200 ? rs.vtMa200.toFixed(2) : "?") +
+        " (" + (rs.vtVs200Pct >= 0 ? "+" : "") + (rs.vtVs200Pct || 0).toFixed(1) + " %)" +
+        " · moyenne 50 jours " + (rs.vtMa50 ? rs.vtMa50.toFixed(2) : "?") +
+        " (" + (rs.vtVs50Pct >= 0 ? "+" : "") + (rs.vtVs50Pct || 0).toFixed(1) + " %).";
+      if (sat2 && sat2.smhVs50Pct !== null && sat2.smhVs50Pct !== undefined) {
+        ligne += " SMH " + (sat2.smhVs50Pct >= 0 ? "+" : "") + sat2.smhVs50Pct.toFixed(1) +
+          " % vs sa 50 jours, " + (sat2.smhVs200Pct >= 0 ? "+" : "") + sat2.smhVs200Pct.toFixed(1) +
+          " % vs sa 200 jours → cadran " + (sat2.facteur * 100) + " %.";
+      }
+      sl.textContent = ligne;
     }
   }
 
@@ -543,14 +584,17 @@
   $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
 
   /* ---------------- cibles ---------------- */
+  // Permanent : % de la partie permanente (60 % du portefeuille).
   var CIBLE_PERM = { VT:40, GLDM:25, IBIT:15, MCHI:10, SMH:10 };
+  // Tactique : % du portefeuille ENTIER (somme = 40 %). Le serveur fournit la cible
+  // effective (régime + cadran satellite) dans state.json.tactiqueCible.
   var CIBLE_TAC = {
     ON:      { SGOV:0,  VT:10, SMH:15, GLDM:5, BCI:5,  AIPO:5 },
     NEUTRAL: { SGOV:10, VT:10, SMH:5,  GLDM:10, BCI:5, AIPO:0 },
     OFF:     { SGOV:25, VT:0,  SMH:0,  GLDM:10, BCI:5, AIPO:0 }
   };
-  // Le permanent représente 60 % du portefeuille et le tactique 40 %.
-  var POIDS_COMPTE = { PERM: 60, TAC: 40 };
+  // Deadband en points du portefeuille entier : ±5 pts du tactique, ±3 pts du permanent.
+  var DEADBAND = { PERM: 3, TAC: 5 };
   var ETAT = null;
 
   function argent(n) {
@@ -572,20 +616,22 @@
     sauver("mPerm", $("mPerm").value); sauver("mTac", $("mTac").value);
     if (!actif) { $("resteTxt").textContent = ""; return; }
 
-    var regime = (ETAT && ETAT.regime) || "ON";
+    var regime = (ETAT && ETAT.regime === "NEUTRAL") ? "NEUTRAL" : (ETAT && ETAT.regime === "OFF" ? "OFF" : "ON");
+    var tc = (ETAT && ETAT.tactiqueCible) || CIBLE_TAC[regime];
+    var total = perm + tac;   // le tactique s'exprime en % du portefeuille entier
     var restes = 0, sansPrix = [];
 
     document.querySelectorAll("[data-t]").forEach(function (cell) {
       var t = cell.getAttribute("data-t");
       var tr = cell.parentNode;
       var dansPerm = tr.closest("table").getAttribute("data-compte") === "perm";
-      var pct = dansPerm ? CIBLE_PERM[t] : CIBLE_TAC[regime][t];
-      var base = dansPerm ? perm : tac;
+      var pctV = dansPerm ? CIBLE_PERM[t] : tc[t];
+      var base = dansPerm ? perm : total;
       var tds = tr.querySelectorAll("td");
       var cMont = tds[tds.length - 2], cAct = tds[tds.length - 1];
 
-      if (!base || pct === undefined) { cMont.textContent = ""; cAct.textContent = ""; return; }
-      var montant = base * pct / 100;
+      if (!base || pctV === undefined) { cMont.textContent = ""; cAct.textContent = ""; return; }
+      var montant = base * pctV / 100;
       cMont.textContent = montant > 0 ? argent(montant) : "—";
 
       var p = prix[t];
@@ -600,14 +646,18 @@
     $("resteTxt").textContent = msg;
   }
 
-  /* ---------------- suivi ---------------- */
+  /* ---------------- suivi (système d'exploitation) ---------------- */
   function majSuivi() {
     var prix = (ETAT && ETAT.prix) || {};
     var regime = (ETAT && ETAT.regime === "NEUTRAL") ? "NEUTRAL" : (ETAT && ETAT.regime === "OFF" ? "OFF" : "ON");
+    var tc = (ETAT && ETAT.tactiqueCible) || CIBLE_TAC[regime];
+
     var lignes = [];
-    Object.keys(CIBLE_PERM).forEach(function (t) { lignes.push({ t: t, c: "PERM", cible: CIBLE_PERM[t] }); });
-    Object.keys(CIBLE_TAC[regime]).forEach(function (t) {
-      if (CIBLE_TAC[regime][t] > 0) lignes.push({ t: t, c: "TAC", cible: CIBLE_TAC[regime][t] });
+    Object.keys(CIBLE_PERM).forEach(function (t) {
+      lignes.push({ t: t, c: "PERM", cible: CIBLE_PERM[t] * 0.6 });   // % du portefeuille entier
+    });
+    Object.keys(tc).forEach(function (t) {
+      if (tc[t] > 0) lignes.push({ t: t, c: "TAC", cible: tc[t] });   // déjà % du portefeuille entier
     });
 
     var corps = $("corpsSuivi");
@@ -617,7 +667,8 @@
         return '<tr><td class="tk">' + l.t + ' <span class="desc">' + l.c + '</span></td>' +
           '<td style="text-align:right"><input class="mini sAct" data-k="' + k + '" type="number" min="0" step="any" placeholder="0"></td>' +
           '<td class="mont" data-v="' + k + '"></td><td class="act" data-r="' + k + '"></td>' +
-          '<td class="act" data-c="' + k + '"></td><td class="ecart" data-e="' + k + '"></td></tr>';
+          '<td class="act" data-c="' + k + '"></td><td class="ecart" data-e="' + k + '"></td>' +
+          '<td class="acte" data-a="' + k + '"></td></tr>';
       }).join("");
       corps.setAttribute("data-fait", "1");
       corps.querySelectorAll(".sAct").forEach(function (i) {
@@ -640,26 +691,33 @@
 
     lignes.forEach(function (l) {
       var k = l.c + ":" + l.t, v = vals[k] || 0;
-      var cibleTotal = l.cible * POIDS_COMPTE[l.c] / 100;
-      var reel = baseTotal > 0 ? v / baseTotal * 100 : 0;
-      var ec = cibleTotal > 0 ? (reel / cibleTotal - 1) * 100 : 0;
-      var hors = baseTotal > 0 && Math.abs(ec) > 25;
+      var ciblePct = l.cible;                                  // % du portefeuille entier
+      var reel = baseTotal > 0 ? v / baseTotal * 100 : 0;      // % du portefeuille entier
+      var ecartPts = reel - ciblePct;                          // points du portefeuille entier
+      var seuil = DEADBAND[l.c];
+      var action = baseTotal > 0 ? (Math.abs(ecartPts) > seuil ? "RÉÉQUILIBRER" : "GARDER") : "—";
+
       var cv = corps.querySelector('[data-v="' + k + '"]');
       var cr = corps.querySelector('[data-r="' + k + '"]');
       var cc = corps.querySelector('[data-c="' + k + '"]');
       var ce = corps.querySelector('[data-e="' + k + '"]');
+      var ca = corps.querySelector('[data-a="' + k + '"]');
       if (cv) cv.textContent = v > 0 ? argent(v) : "—";
       if (cr) cr.textContent = baseTotal > 0 ? reel.toFixed(1) + " %" : "—";
       if (cc) {
-        var tC = cibleTotal > 0 ? cibleTotal.toFixed(1) + " %" : "—";
+        var tC = ciblePct % 1 === 0 ? ciblePct.toFixed(0) : ciblePct.toFixed(1);
+        tC = tC + " %";
         if (inv > 0 && prix[l.t]) {
-          var nC = inv * cibleTotal / 100 / prix[l.t];
+          var nC = inv * ciblePct / 100 / prix[l.t];
           tC += '<br><span class="desc">≈ ' + (nC > 0 ? nC.toFixed(1) : "0") + ' actions</span>';
         }
         cc.innerHTML = tC;
       }
-      if (ce) { ce.textContent = baseTotal > 0 ? (ec >= 0 ? "+" : "") + ec.toFixed(0) + " %" : "—";
-                ce.className = "ecart" + (hors ? " horsband" : ""); }
+      if (ce) ce.textContent = baseTotal > 0 ? (ecartPts >= 0 ? "+" : "−") + Math.abs(ecartPts).toFixed(1) + " pts" : "—";
+      if (ca) {
+        ca.textContent = action;
+        ca.className = "acte" + (action === "RÉÉQUILIBRER" ? " rebal" : action === "GARDER" ? " garder" : "");
+      }
     });
 
     $("sTotal").textContent = total > 0 ? argent(total) : "—";
@@ -673,10 +731,10 @@
     $("sDate").textContent = (ETAT && ETAT.prixDate)
       ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
     $("sNote").textContent = total > 0
-      ? "Réel et Cible sont en pourcentage du portefeuille entier : le permanent compte pour 60 % et le tactique pour 40 %. Base : " +
-        (inv > 0 ? "le montant total investi indiqué (" + argent(inv) + ")." : "la somme des placements entrés — indiquer le montant total investi en haut pour une base fixe.") +
-        " Un écart de plus de 25 % est marqué en rouge."
-      : "Entrer le nombre d'actions pour voir la valeur du portefeuille, puis le montant total investi en haut pour calculer les pourcentages par rapport à ce montant.";
+      ? "Réel et Cible sont en % du portefeuille entier. Action : GARDER si l'écart reste dans la marge " +
+        "(±5 pts pour le tactique, ±3 pts pour le permanent ≈ ±5 pts de la partie) ; RÉÉQUILIBRER sinon. " +
+        "Le permanent ne se rééquilibre qu'avec de l'argent neuf — jamais en vendant."
+      : "Entrer le nombre d'actions pour voir la valeur du portefeuille et l'action à prendre (GARDER ou RÉÉQUILIBRER).";
   }
 
   $("mPerm").addEventListener("input", majCalc);

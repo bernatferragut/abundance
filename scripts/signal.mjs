@@ -1,29 +1,35 @@
 #!/usr/bin/env node
 /**
- * Abundance 2.0 — calcul du régime.
+ * Abundance 2.0 — calcul du régime (« système d'exploitation du portefeuille »).
  *
- * Récupère les clôtures quotidiennes (SMH, GLD) et l'écart de crédit, calcule le
- * régime (RISK ON / NEUTRAL / RISK OFF) et réécrit state.json.
- * S'exécute dans GitHub Actions — côté serveur, donc pas de CORS.
+ * Architecture révisée :
+ *   - VT est le PATRON du régime : VT > 200 jours ET momentum 50 jours -> RISK ON ;
+ *     VT < 200 jours -> RISK OFF ; près de la ligne 200 ou momentum perdu -> NEUTRAL.
+ *   - SMH est le CADRAN SATELLITE : > 50 jours -> 100 % ; entre 50 et 200 jours -> 50 % ;
+ *     < 200 jours -> 0 % du couple SMH/AIPO.
+ *   - Disjoncteur de crédit : force le RISK OFF (il ne peut qu'aller vers la sécurité).
  *
- * Règles :
- *   - Le 200 jours est le patron : au-dessus = risque autorisé, en dessous = risque réduit.
- *   - Confirmation à 50 jours (momentum) + force relative SMH vs GLDM (rapport > sa MA 200).
- *   - SMH > 200j ET SMH > 50j ET SMH/GLDM > sa MA 200  -> RISK ON
- *   - SMH <= 200j                                         -> RISK OFF
- *   - Sinon                                               -> NEUTRAL
- *   - Disjoncteur de crédit : force le RISK OFF (il ne peut aller que vers la sécurité).
+ * La cible tactique EFFECTIVE (régime + satellite appliqué) est écrite dans state.json.
+ * Le navigateur n'a qu'à comparer Réel -> Cible -> Écart -> Action (deadband ±5 pts).
  *
  * Node 20+ (global fetch). Aucune dépendance.
  */
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 
 const CFG = {
-  risk: "SMH",
-  hedge: "GLD",
-  maLongue: 200,   // le patron
-  maCourt: 50,     // confirmation / momentum
-  confirmDays: 2,  // fermetures consécutives pour changer de régime
+  regimeTitre: "VT",   // le patron (marché large)
+  satellite: "SMH",    // le cadran (bêta élevée)
+  maRegime: 200,       // le patron
+  maMomentum: 50,      // confirmation / momentum
+  bande200: 0.02,      // zone de respiration autour du 200 jours (2 %)
+  confirmDays: 2,      // fermetures consécutives pour changer de régime
+};
+
+// Cibles tactiques de BASE par régime (somme = 40 %, c.-à-d. la manche tactique).
+const CIBLES_BASE = {
+  ON:      { SGOV: 0,  VT: 10, SMH: 15, GLDM: 5,  BCI: 5, AIPO: 5 },
+  NEUTRAL: { SGOV: 10, VT: 10, SMH: 5,  GLDM: 10, BCI: 5, AIPO: 0 },
+  OFF:     { SGOV: 25, VT: 0,  SMH: 0,  GLDM: 10, BCI: 5, AIPO: 0 },
 };
 
 const STATE_PATH = new URL("../state.json", import.meta.url).pathname;
@@ -79,14 +85,6 @@ async function fetchSymbol(symbol, tries = 3) {
 
 /* ---------------------------------------------------------------- régime */
 
-export function alignSeries(a, b) {
-  const m = new Map(b.map((x) => [x.date, x.close]));
-  return a
-    .filter((x) => m.has(x.date) && x.close > 0 && m.get(x.date) > 0)
-    .map((x) => ({ date: x.date, a: x.close, b: m.get(x.date) }))
-    .sort((x, y) => (x.date < y.date ? -1 : 1));
-}
-
 export function sma(v, n) {
   const out = new Array(v.length).fill(null);
   let s = 0;
@@ -98,55 +96,88 @@ export function sma(v, n) {
   return out;
 }
 
-export function computeRegime(riskBars, hedgeBars, cfg = CFG) {
-  const j = alignSeries(riskBars, hedgeBars);
-  if (j.length < cfg.maLongue + 1) {
-    throw new Error(`Besoin de ${cfg.maLongue + 1} séances communes, ${j.length} reçues`);
+export function computeRegime(vtBars, cfg = CFG) {
+  const closes = vtBars.map((b) => b.close);
+  if (closes.length < cfg.maRegime + 1) {
+    throw new Error(`Besoin de ${cfg.maRegime + 1} séances pour ${cfg.regimeTitre}, ${closes.length} reçues`);
   }
-  const riskCloses = j.map((p) => p.a);
-  const ratios = j.map((p) => p.a / p.b);
-  const ma200 = sma(riskCloses, cfg.maLongue);
-  const ma50 = sma(riskCloses, cfg.maCourt);
-  const ratioMa200 = sma(ratios, cfg.maLongue);
-
-  function cible(i) {
-    if (ma200[i] === null) return null;
-    const auDessus200 = riskCloses[i] > ma200[i];
-    const auDessus50 = ma50[i] !== null && riskCloses[i] > ma50[i];
-    const relOk = ratioMa200[i] !== null && ratios[i] > ratioMa200[i];
-    if (!auDessus200) return "OFF";
-    if (auDessus50 && relOk) return "ON";
-    return "NEUTRAL";
-  }
+  const ma200 = sma(closes, cfg.maRegime);
+  const ma50 = sma(closes, cfg.maMomentum);
 
   let state = "NEUTRAL", pend = null, cnt = 0;
   const flips = [];
   let dernier = null;
 
-  for (let i = 0; i < j.length; i++) {
-    const want = cible(i);
-    if (want === null) continue;
+  for (let i = 0; i < closes.length; i++) {
+    if (ma200[i] === null) continue;
+    const rel200 = closes[i] / ma200[i] - 1;
+    const momentum = ma50[i] !== null && closes[i] > ma50[i];
+    let want;
+    if (rel200 <= 0) want = "OFF";                       // en dessous du 200 jours
+    else if (rel200 < cfg.bande200) want = "NEUTRAL";    // juste autour de la ligne
+    else if (!momentum) want = "NEUTRAL";                // au-dessus mais momentum perdu
+    else want = "ON";
+
     if (want !== state) {
       if (pend === want) cnt++; else { pend = want; cnt = 1; }
       if (cnt >= cfg.confirmDays) {
-        flips.push({ date: j[i].date, from: state, to: want });
+        flips.push({ date: vtBars[i].date, from: state, to: want });
         state = want; pend = null; cnt = 0;
       }
     } else { pend = null; cnt = 0; }
 
     dernier = {
-      date: j[i].date,
-      smhClose: Math.round(riskCloses[i] * 100) / 100,
-      smhMa200: Math.round(ma200[i] * 100) / 100,
-      smhMa50: ma50[i] !== null ? Math.round(ma50[i] * 100) / 100 : null,
-      smhVs200Pct: Math.round((riskCloses[i] / ma200[i] - 1) * 1000) / 10,
-      smhVs50Pct: ma50[i] !== null ? Math.round((riskCloses[i] / ma50[i] - 1) * 1000) / 10 : null,
-      ratioSmhGld: Math.round(ratios[i] * 1000) / 1000,
-      ratioMa200: ratioMa200[i] !== null ? Math.round(ratioMa200[i] * 1000) / 1000 : null,
-      ratioVs200Pct: ratioMa200[i] !== null ? Math.round((ratios[i] / ratioMa200[i] - 1) * 1000) / 10 : null,
+      date: vtBars[i].date,
+      vtClose: Math.round(closes[i] * 100) / 100,
+      vtMa200: Math.round(ma200[i] * 100) / 100,
+      vtMa50: ma50[i] !== null ? Math.round(ma50[i] * 100) / 100 : null,
+      vtVs200Pct: Math.round(rel200 * 1000) / 10,
+      vtVs50Pct: ma50[i] !== null ? Math.round((closes[i] / ma50[i] - 1) * 1000) / 10 : null,
     };
   }
-  return { state, dernier, flips, pending: pend ? { state: pend, count: cnt } : null, sessions: j.length };
+  return { state, dernier, flips, pending: pend ? { state: pend, count: cnt } : null, sessions: closes.length };
+}
+
+/** Cadran satellite : quel pourcentage du couple SMH/AIPO garder ? */
+export function facteurSatellite(smhBars, cfg = CFG) {
+  const closes = smhBars.map((b) => b.close);
+  if (closes.length < cfg.maRegime) {
+    throw new Error(`Besoin de ${cfg.maRegime} séances pour ${cfg.satellite}, ${closes.length} reçues`);
+  }
+  const ma200 = sma(closes, cfg.maRegime);
+  const ma50 = sma(closes, cfg.maMomentum);
+  const i = closes.length - 1;
+  const c = closes[i], m200 = ma200[i], m50 = ma50[i];
+
+  let f;
+  if (m50 !== null && c > m50) f = 1;
+  else if (m200 !== null && c > m200) f = 0.5;
+  else f = 0;
+
+  return {
+    facteur: f,
+    smhClose: Math.round(c * 100) / 100,
+    smhMa200: m200 !== null ? Math.round(m200 * 100) / 100 : null,
+    smhMa50: m50 !== null ? Math.round(m50 * 100) / 100 : null,
+    smhVs200Pct: m200 ? Math.round((c / m200 - 1) * 1000) / 10 : null,
+    smhVs50Pct: m50 ? Math.round((c / m50 - 1) * 1000) / 10 : null,
+  };
+}
+
+/** Applique le cadran satellite à la cible de base : le reste va en SGOV. */
+export function appliquerSatellite(base, sat) {
+  const f = sat.facteur;
+  const smh = base.SMH ?? 0, aipo = base.AIPO ?? 0;
+  const libre = (smh + aipo) * (1 - f);
+  const arr = (x) => Math.round(x * 10) / 10;
+  return {
+    SGOV: arr((base.SGOV ?? 0) + libre),
+    VT: base.VT ?? 0,
+    SMH: arr(smh * f),
+    GLDM: base.GLDM ?? 0,
+    BCI: base.BCI ?? 0,
+    AIPO: arr(aipo * f),
+  };
 }
 
 /* ------------------------------------------------------------------ main */
@@ -155,8 +186,7 @@ const TITRES = ["VT","GLDM","MCHI","SMH","IBIT","SGOV","AIPO","BCI"];
 
 /**
  * Valide qu'un nouveau prix est raisonnable comparé au prix précédent.
- * Rejette les variations de plus de 50 % en une journée (probablement une
- * erreur de données) et prévient au-delà de 20 %.
+ * Rejette les variations de plus de 50 % en une journée et prévient au-delà de 20 %.
  */
 function validatePrice(symbol, newPrice, prevPrice) {
   if (!prevPrice || prevPrice <= 0) return true;
@@ -177,7 +207,7 @@ function validatePrice(symbol, newPrice, prevPrice) {
 /* ============================ DISJONCTEUR DE CRÉDIT ============================
  * ICE BofA US High Yield OAS, via FRED. Quotidien, gratuit, sans clé.
  * Se déclenche quand l'écart dépasse sa moyenne 200 jours de 50 % pendant 2
- * fermetures. Se réarme sous 1,20x. Il ne peut QUE mettre à l'abri — jamais vers le risque.
+ * fermetures. Se réarme sous 1,20x. Il ne peut QUE mettre à l'abri.
  */
 const FRED_SERIE = "BAMLH0A0HYM2";
 const DISJ = { maLength: 200, seuilHaut: 1.50, seuilBas: 1.20, confirm: 2 };
@@ -256,10 +286,11 @@ async function fetchPrices(prevPrices = {}) {
 }
 
 async function main() {
-  console.log(`Abundance 2.0 — régime ${CFG.risk}/${CFG.hedge}, patron ${CFG.maLongue} jours, confirmation ${CFG.confirmDays} fermetures\n`);
+  console.log(`Abundance 2.0 — régime ${CFG.regimeTitre} (patron ${CFG.maRegime}j), satellite ${CFG.satellite}, confirmation ${CFG.confirmDays} fermetures\n`);
 
-  const [risk, hedge] = await Promise.all([fetchSymbol(CFG.risk), fetchSymbol(CFG.hedge)]);
-  const sig = computeRegime(risk, hedge);
+  const [vt, smh] = await Promise.all([fetchSymbol(CFG.regimeTitre), fetchSymbol(CFG.satellite)]);
+  const sig = computeRegime(vt);
+  const sat = facteurSatellite(smh);
 
   const today = new Date().toISOString().slice(0, 10);
   const ageDays = Math.floor((Date.now() - new Date(sig.dernier.date + "T00:00:00Z").getTime()) / 86400000);
@@ -277,8 +308,6 @@ async function main() {
   console.log("\nPrix de clôture :");
   const prixNeufs = await fetchPrices(prev.prix ?? {});
 
-  // Le disjoncteur est l'exception à la discipline hebdomadaire : il peut se
-  // déclencher n'importe quel jour, car il ne peut QU'aller vers la sécurité.
   let disj = { actif: false, ratio: null, date: "", indisponible: true };
   if (oas) {
     try {
@@ -299,16 +328,22 @@ async function main() {
     if (prevLu.disjoncteur) disj = { ...prevLu.disjoncteur, indisponible: true };
   }
 
-  // Les prix se rafraîchissent chaque jour, mais le régime ne change que le
-  // jour du signal (samedi). Le 200 jours bouge lentement : pas de va-et-vient.
+  // Les prix se rafraîchissent chaque jour, mais régime et satellite ne changent
+  // que le jour du signal (samedi). Le 200 jours bouge lentement : pas de va-et-vient.
   const jourSignal = process.env.JOUR_SIGNAL === "1";
   let regimeEffectif = jourSignal ? sig.state : (prev.regime ?? sig.state);
+  let satEffectif = jourSignal ? sat : (prev.satellite ?? sat);
   if (disj.actif) regimeEffectif = "OFF";   // le disjoncteur prime sur tout
-  const changed = prev.regime !== regimeEffectif;
+
+  const regimeChanged = prev.regime !== regimeEffectif;
+  const satChanged = prev.satellite && prev.satellite.facteur !== satEffectif.facteur;
+  const changed = regimeChanged || satChanged;
   if (!jourSignal && prev.regime && prev.regime !== sig.state) {
     console.log(`  (régime calculé ${sig.state} mais on garde ${prev.regime} — changement le samedi seulement)`);
   }
   const lastFlip = sig.flips.at(-1);
+
+  const tactiqueCible = appliquerSatellite(CIBLES_BASE[regimeEffectif], satEffectif);
 
   const next = {
     regime: regimeEffectif,
@@ -320,14 +355,18 @@ async function main() {
     // Fusion : un symbole en échec conserve son prix précédent plutôt que disparaître.
     prix: { ...(prev.prix ?? {}), ...prixNeufs },
     prixDate: Object.keys(prixNeufs).length ? sig.dernier.date : (prev.prixDate ?? ""),
-    signal: sig.dernier,
+    regimeSignal: sig.dernier,
+    satellite: satEffectif,
+    cibles: CIBLES_BASE,
+    tactiqueCible,
     disjoncteur: disj,
   };
 
-  console.log(`\n  Régime      : ${regimeEffectif}${changed ? `  (CHANGÉ depuis ${prev.regime ?? "aucun"})` : ""}`);
-  console.log(`  SMH vs 200j : ${sig.dernier.smhVs200Pct >= 0 ? "+" : ""}${sig.dernier.smhVs200Pct.toFixed(2)}%`);
-  console.log(`  SMH vs 50j  : ${sig.dernier.smhVs50Pct >= 0 ? "+" : ""}${sig.dernier.smhVs50Pct.toFixed(2)}%`);
-  console.log(`  SMH/GLDM vs 200j : ${sig.dernier.ratioVs200Pct >= 0 ? "+" : ""}${sig.dernier.ratioVs200Pct.toFixed(2)}%`);
+  console.log(`\n  Régime      : ${regimeEffectif}${regimeChanged ? `  (CHANGÉ depuis ${prev.regime ?? "aucun"})` : ""}`);
+  console.log(`  VT vs 200j  : ${sig.dernier.vtVs200Pct >= 0 ? "+" : ""}${sig.dernier.vtVs200Pct.toFixed(2)}%`);
+  console.log(`  VT vs 50j   : ${sig.dernier.vtVs50Pct >= 0 ? "+" : ""}${sig.dernier.vtVs50Pct.toFixed(2)}%`);
+  console.log(`  Satellite   : ${satEffectif.facteur * 100}% (SMH vs 50j ${satEffectif.smhVs50Pct >= 0 ? "+" : ""}${satEffectif.smhVs50Pct.toFixed(2)}%)${satChanged ? "  (CHANGÉ)" : ""}`);
+  console.log(`  Cible tactique effective : ${Object.entries(tactiqueCible).map(([t, v]) => `${t} ${v}%`).join(" · ")}`);
   console.log(`  En attente  : ${sig.pending ? `${sig.pending.count}/${CFG.confirmDays} vers ${sig.pending.state}` : "aucun"}`);
   console.log(`  Basculements : ${sig.flips.length}`);
   console.log(`  Action requise : ${next.actionRequise}`);
