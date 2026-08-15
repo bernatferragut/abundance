@@ -2,34 +2,34 @@
   "regime": "ON",
   "actionRequise": true,
   "changeLe": "2026-08-14",
-  "verifieLe": "2026-08-14",
+  "verifieLe": "2026-08-15",
   "note": "",
   "prix": {
-    "VT": 162.16,
-    "GLDM": 86.55,
+    "VT": 162.25,
+    "GLDM": 86.58,
     "MCHI": 54.63,
-    "SMH": 586.61,
-    "IBIT": 35.62,
+    "SMH": 587.82,
+    "IBIT": 35.63,
     "SGOV": 100.56,
     "AIPO": 30.93,
-    "BCI": 24.57
+    "BCI": 24.55
   },
   "prixDate": "2026-08-14",
   "regimeSignal": {
     "date": "2026-08-14",
-    "vtClose": 162.16,
+    "vtClose": 162.25,
     "vtMa200": 147.1,
     "vtMa50": 156.6,
-    "vtVs200Pct": 10.2,
+    "vtVs200Pct": 10.3,
     "vtVs50Pct": 3.6
   },
   "satellite": {
     "facteur": 0.5,
-    "smhClose": 586.61,
+    "smhClose": 587.82,
     "smhMa200": 461.82,
-    "smhMa50": 591.46,
-    "smhVs200Pct": 27,
-    "smhVs50Pct": -0.8
+    "smhMa50": 591.49,
+    "smhVs200Pct": 27.3,
+    "smhVs50Pct": -0.6
   },
   "cibles": {
     "ON": {
