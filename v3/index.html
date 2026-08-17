@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Abundance 3.0 — Calculatrice</title>
+<style>
+  :root{
+    --encre:#1a1a1a; --gris:#5f6670; --ligne:#dfe3e8; --fond:#f7f9fb; --carte:#fff;
+    --vert:#1f7a3d; --vertbg:#e8f5ec; --bleu:#1a4f7a; --bleubg:#e8f1f8; --ambre:#8a5a00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:20px 16px 60px;background:var(--fond);color:var(--encre);
+    font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:640px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--gris);font-size:16px;margin:0 0 22px}
+
+  .calc{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;
+    padding:20px;margin-bottom:18px}
+  .calc h2{font-size:19px;margin:0 0 4px}
+  .calc p.note{color:var(--gris);font-size:15px;margin:0 0 14px}
+
+  .champ label{display:block;font-size:14px;color:var(--gris);margin-bottom:6px;font-weight:600}
+  .champ input[type=number]{width:100%;padding:13px 14px;font-size:22px;font-weight:700;
+    border:1px solid var(--ligne);border-radius:10px;font-variant-numeric:tabular-nums}
+  .champ input:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+
+  .total{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;
+    padding:20px;text-align:center;margin-bottom:18px}
+  .total .lbl{font-size:14px;color:var(--gris)}
+  .total .val{font-size:30px;font-weight:800;color:var(--bleu);margin:2px 0}
+
+  table{width:100%;border-collapse:collapse;font-size:17px}
+  th{text-align:left;font-size:14px;color:var(--gris);font-weight:600;padding:0 12px 8px 0;
+    border-bottom:2px solid var(--ligne)}
+  td{padding:12px 12px 12px 0;border-bottom:1px solid var(--ligne);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr.total td{border-top:2px solid var(--ligne);font-weight:700;border-bottom:none}
+  .tk{font-weight:700;white-space:nowrap}
+  .desc{color:var(--gris);font-size:14px}
+  .d{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+  .mont{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--bleu);font-weight:700}
+  .actions{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700}
+  .actions .dollar{color:var(--gris);font-size:14px;font-weight:600;display:block}
+  input.prix{width:96px;padding:7px 8px;font-size:15px;text-align:right;border:1px solid var(--ligne);
+    border-radius:7px;font-variant-numeric:tabular-nums}
+  input.prix:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+
+  .reste{background:var(--vertbg);border:1px solid #a8d5b8;color:var(--vert);
+    border-radius:12px;padding:14px;font-size:15px;margin-bottom:18px}
+  .avert{background:#fdf3e0;border:1px solid #e0c68a;color:var(--ambre);
+    border-radius:12px;padding:14px;font-size:15px;margin-bottom:18px}
+  .apercu{background:#eef2f7;border:1px dashed #9fb0c4;color:#3d5570;border-radius:12px;
+    padding:12px;text-align:center;font-size:14px;margin-bottom:18px}
+
+  .meta{color:var(--gris);font-size:14px;text-align:center;margin-top:26px;line-height:1.7}
+  @media(max-width:560px){ .desc{display:none} table{font-size:16px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Abundance 3.0</h1>
+  <p class="sub">Une seule question : combien d'actions acheter.</p>
+
+  <div id="apercu" class="apercu cache"></div>
+
+  <div class="calc">
+    <h2>Montant à investir</h2>
+    <p class="note">Entrer l'argent neuf disponible. La page répartit selon le plan et calcule le nombre d'actions.</p>
+    <div class="champ">
+      <label for="mInvest">Argent à investir (US$)</label>
+      <input id="mInvest" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
+    </div>
+  </div>
+
+  <div class="total">
+    <div class="lbl">Montant total à investir</div>
+    <div class="val" id="totVal">—</div>
+    <div class="lbl" id="totDate"></div>
+  </div>
+
+  <div class="calc">
+    <h2>Le plan</h2>
+    <p class="note">Les prix viennent de la dernière clôture (Yahoo Finance). On peut les corriger à la main.
+    Les actions sont arrondies vers le bas — on n'achète pas de fraction ici.</p>
+    <table>
+      <thead>
+        <tr><th>Placement</th><th>Ce que c'est</th><th style="text-align:right">Cible</th>
+        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
+        <th style="text-align:right">Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr data-t="IBIT"><td class="tk">IBIT</td><td class="desc">Bitcoin — iShares Bitcoin Trust</td>
+          <td class="d">25 %</td><td class="mont"></td><td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>
+          <td class="actions"></td></tr>
+        <tr data-t="GLDM"><td class="tk">GLDM</td><td class="desc">Or — SPDR Gold MiniShares</td>
+          <td class="d">25 %</td><td class="mont"></td><td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>
+          <td class="actions"></td></tr>
+        <tr data-t="SPCX"><td class="tk">SPCX</td><td class="desc">SpaceX — Space Exploration Technologies</td>
+          <td class="d">25 %</td><td class="mont"></td><td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>
+          <td class="actions"></td></tr>
+        <tr data-t="MCHI"><td class="tk">MCHI</td><td class="desc">Chine — iShares MSCI China</td>
+          <td class="d">10 %</td><td class="mont"></td><td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>
+          <td class="actions"></td></tr>
+        <tr data-t="BSOL"><td class="tk">BSOL</td><td class="desc">Solana — Bitwise Solana Staking ETF</td>
+          <td class="d">5 %</td><td class="mont"></td><td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>
+          <td class="actions"></td></tr>
+        <tr data-t="BCI"><td class="tk">BCI</td><td class="desc">Matières premières — abrdn All Commodity</td>
+          <td class="d">10 %</td><td class="mont"></td><td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>
+          <td class="actions"></td></tr>
+        <tr class="total"><td class="tk">Total</td><td></td><td class="d">100 %</td>
+          <td class="mont" id="totMont"></td><td></td><td class="actions" id="totAct"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="reste" class="reste cache"></div>
+  <div id="avert" class="avert cache"></div>
+
+  <p class="meta">
+    Plan familial personnel. Ce n'est pas un conseil financier professionnel.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
+              "septembre","octobre","novembre","décembre"];
+  var CIBLE = { IBIT:25, GLDM:25, SPCX:25, MCHI:10, BSOL:5, BCI:10 };
+  var PRIX_SECOURS = { IBIT:36.42, GLDM:87.45, SPCX:146.23, MCHI:55.06, BSOL:10.37, BCI:24.94 };
+  var prix = null, prixDate = null;
+
+  function dateFr(s) {
+    if (!s) return "date inconnue";
+    var p = String(s).split("-");
+    if (p.length !== 3) return s;
+    var m = MOIS[parseInt(p[1], 10) - 1];
+    return m ? parseInt(p[2], 10) + " " + m + " " + p[0] : s;
+  }
+  function joursDepuis(s) {
+    var d = new Date(s + "T00:00:00");
+    if (isNaN(d)) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  }
+  function argent(n) {
+    return "$" + n.toLocaleString("fr-CA", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  function lireInvest() {
+    var v = parseFloat(($("mInvest").value || "").replace(/[^0-9.]/g, ""));
+    return (isFinite(v) && v > 0) ? v : 0;
+  }
+  function sauver(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function charger(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+  function prixTicker(t) {
+    var input = document.querySelector('tr[data-t="' + t + '"] .prix');
+    if (!input) return 0;
+    var v = parseFloat(input.value);
+    return (isFinite(v) && v > 0) ? v : 0;
+  }
+
+  function maj() {
+    var inv = lireInvest();
+    sauver("v3Invest", $("mInvest").value);
+
+    var restes = 0, investi = 0, sansPrix = [];
+    document.querySelectorAll("tbody tr[data-t]").forEach(function (tr) {
+      var t = tr.getAttribute("data-t");
+      var pct = CIBLE[t];
+      var montant = inv * pct / 100;
+      tr.querySelector(".mont").textContent = inv > 0 ? argent(montant) : "—";
+
+      var p = prixTicker(t);
+      var act = tr.querySelector(".actions");
+      if (inv <= 0) { act.innerHTML = ""; return; }
+      if (!p) { act.textContent = "?"; sansPrix.push(t); return; }
+      var n = Math.floor(montant / p);
+      var cout = n * p;
+      restes += montant - cout;
+      investi += cout;
+      act.innerHTML = (n > 0 ? n : 0) + ' <span class="dollar">≈ ' + argent(cout) + '</span>';
+    });
+
+    $("totVal").textContent = inv > 0 ? argent(inv) : "—";
+    $("totMont").textContent = inv > 0 ? argent(inv) : "—";
+    $("totAct").innerHTML = inv > 0 ? argent(investi) : "";
+
+    var dateTxt = prixDate ? "Prix de la clôture du " + dateFr(prixDate) : "";
+    $("totDate").textContent = inv > 0 ? dateTxt : "";
+
+    var r = $("reste");
+    if (inv > 0) {
+      var msg = "Reste non investi après arrondi des actions : environ " + argent(restes) + ".";
+      if (sansPrix.length) msg += " Prix manquant pour : " + sansPrix.join(", ") + ". Le corriger à la main.";
+      r.textContent = msg;
+      r.classList.remove("cache");
+    } else { r.classList.add("cache"); }
+
+    var a = $("avert");
+    if (prixDate) {
+      var age = joursDepuis(prixDate);
+      if (age !== null && age > 10) {
+        a.textContent = "Les prix datent du " + dateFr(prixDate) + " (" + age +
+          " jours). Le nombre d'actions est approximatif — vérifier avant d'acheter.";
+        a.classList.remove("cache");
+      } else { a.classList.add("cache"); }
+    } else { a.classList.add("cache"); }
+  }
+
+  $("mInvest").addEventListener("input", maj);
+  document.querySelectorAll(".prix").forEach(function (input) {
+    input.addEventListener("input", function () {
+      var t = input.closest("tr").getAttribute("data-t");
+      sauver("v3Prix:" + t, input.value);
+      maj();
+    });
+  });
+
+  function initialiser(p) {
+    prix = p && p.prix ? p.prix : null;
+    prixDate = p && p.prixDate ? p.prixDate : null;
+    document.querySelectorAll("tbody tr[data-t]").forEach(function (tr) {
+      var t = tr.getAttribute("data-t");
+      var input = tr.querySelector(".prix");
+      var garde = charger("v3Prix:" + t);
+      var val = garde !== null && garde !== "" ? garde : (prix && prix[t] ? String(prix[t]) : "");
+      input.value = val;
+    });
+    $("mInvest").value = charger("v3Invest") || "";
+    maj();
+  }
+
+  var fichierLocal = location.protocol === "file:";
+  fetch("state.json?t=" + Date.now())
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(initialiser)
+    .catch(function () {
+      if (fichierLocal) {
+        var a = $("apercu");
+        a.textContent = "Aperçu seulement — fichier ouvert localement : prix d'exemple, pas la vraie clôture.";
+        a.classList.remove("cache");
+      }
+      initialiser({ prix: PRIX_SECOURS, prixDate: null });
+    });
+})();
+</script>
+</body>
+</html>
