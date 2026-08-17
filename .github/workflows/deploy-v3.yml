@@ -1,0 +1,66 @@
+name: Deploy Abundance 3.0
+
+on:
+  push:
+    branches: [v.3.0]
+  workflow_dispatch:
+  schedule:
+    # Quotidien 02:10 UTC — rafraîchit les prix de la calculatrice.
+    - cron: "10 2 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-v3
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v.3.0
+          path: src
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Rafraîchir les prix
+        run: node src/v3/scripts/fetch-prices.mjs
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site
+
+      - name: Synchroniser v3/ vers main (site live)
+        run: |
+          cd site
+          rm -rf v3
+          cp -r ../src/v3 ./v3
+          git config user.name "abundance3-bot"
+          git config user.email "abundance3-bot@users.noreply.github.com"
+          git add v3
+          if git diff --cached --quiet; then
+            echo "Aucun changement pour main"
+          else
+            git commit -m "maj v3.0: $(date -u +%Y-%m-%d)"
+            git push origin main
+            echo "main mis à jour"
+          fi
+
+      - name: Garder la branche v.3.0 à jour (skip ci)
+        run: |
+          cd src
+          git config user.name "abundance3-bot"
+          git config user.email "abundance3-bot@users.noreply.github.com"
+          git add v3/state.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement de prix"
+          else
+            git commit -m "maj prix v3.0 [skip ci]: $(date -u +%Y-%m-%d)"
+            git push origin v.3.0
+          fi
