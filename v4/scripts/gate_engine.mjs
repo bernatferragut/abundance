@@ -49,13 +49,20 @@ const CFG = {
 };
 
 // Tickers du portefeuille (prix pour la page) — ordre d'affichage.
-const TITRES = ["VT", "GLDM", "IBIT", "SMH", "BSOL", "MCHI", "BCI", "SGOV"];
+const TITRES = ["VT", "GLDM", "IBIT", "MCHI", "SMH", "AIPO", "BCI", "SGOV"];
 
-// Cibles d'allocation P3 (rulebook §4) — la source de vérité de l'exécution.
+// ---- Architecture finale deux comptes (conforme CRA) ----
+// TFSA (60 %) : le cœur PERMANENT — achat seulement, jamais vendre, max 4 transactions/an.
+const CORE_TFSA = { VT: 40, GLDM: 27.5, IBIT: 15, MCHI: 7.5, SMH: 10 };
+const BANDES_TFSA = {           // % de la partie TFSA — vérifiées au trimestre
+  VT: [35, 45], GLDM: [22.5, 32.5], IBIT: [10, 20], MCHI: [5, 10], SMH: [7.5, 12.5],
+};
+// REER/RRSP (40 %) : la manche TACTIQUE — moteur P3, matrices par régime (100 % de la manche).
+// BSOL et SPCX sont exclus (liquidité d'ETF pure, zéro SpaceX).
 const CIBLES = {
-  BULL:     { VT: 35, GLDM: 10, IBIT: 15, SMH: 15, BSOL: 10, MCHI: 10, BCI: 5,  SGOV: 0  },
-  NEUTRAL:  { VT: 30, GLDM: 15, IBIT: 10, SMH: 10, BSOL: 5,  MCHI: 10, BCI: 5,  SGOV: 15 },
-  BEARISH:  { VT: 20, GLDM: 30, IBIT: 5,  SMH: 0,  BSOL: 0,  MCHI: 5,  BCI: 10, SGOV: 30 },
+  BULL:     { VT: 35, GLDM: 25, SMH: 15, BCI: 10, AIPO: 15, SGOV: 0  },
+  NEUTRAL:  { VT: 30, GLDM: 20, SMH: 10, BCI: 10, AIPO: 15, SGOV: 15 },
+  BEARISH:  { VT: 15, GLDM: 30, SMH: 0,  BCI: 15, AIPO: 0,  SGOV: 40 },
 };
 
 /* ---------------------------------------------------------------- utilitaires */
@@ -424,7 +431,9 @@ async function main() {
 
   /* ---- Prix du portefeuille ------------------------------------------------------ */
   console.log("\nPrix de clôture :");
-  const prix = { ...prevPrix };
+  // On repart uniquement des tickers actuels (un symbole retiré, ex. BSOL, disparaît).
+  const prix = {};
+  for (const t of TITRES) if (prevPrix[t] !== undefined) prix[t] = prevPrix[t];
   for (const t of TITRES) {
     if (t === "VT" && vt !== null) { prix[t] = vt; continue; }
     const p = await fetchLatest(t, prevPrix);
@@ -455,6 +464,10 @@ async function main() {
     },
     atr,
     cibles: CIBLES,
+    comptes: {
+      tfse: { pct: 60, cible: CORE_TFSA, bandes: BANDES_TFSA },
+      reer: { pct: 40, cibles: CIBLES },
+    },
     fallback,
     resetAnnuel,
     macroErr: macroErr ?? prev.macroErr ?? null,

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Abundance 4.0 — P3 : le plan du point de contrôle</title>
+<title>Abundance 4.0 — P3 : deux comptes, un moteur</title>
 <style>
   :root{
     --encre:#1a1a1a; --gris:#5f6670; --ligne:#dfe3e8; --fond:#f7f9fb; --carte:#fff;
@@ -56,6 +56,14 @@
   .carte{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:20px;margin-bottom:18px}
   .carte h2{font-size:19px;margin:0 0 4px}
   .carte p.note{color:var(--gris);font-size:15px;margin:0 0 14px}
+  .compte{border-radius:14px;padding:20px;margin-bottom:18px;border:1px solid}
+  .compte h2{font-size:19px;margin:0 0 4px}
+  .compte p.note{font-size:15px;margin:0 0 14px}
+  .ct-tfsa{background:var(--bleubg);border-color:#b3d0e6;color:var(--bleu)}
+  .ct-tfsa p.note{color:#3d5570}
+  .ct-reer{background:#fdf1e6;border-color:#e5c9a3;color:var(--ambre)}
+  .ct-reer p.note{color:#6b5120}
+  .compte table{color:var(--encre)}
 
   table{width:100%;border-collapse:collapse;font-size:16px}
   th{text-align:left;font-size:13px;color:var(--gris);font-weight:600;padding:0 10px 8px 0;border-bottom:2px solid var(--ligne)}
@@ -78,6 +86,8 @@
   .champ input{width:100%;padding:13px 14px;font-size:22px;font-weight:700;
     border:1px solid var(--ligne);border-radius:10px;font-variant-numeric:tabular-nums}
   .champ input:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+  .rangee{display:flex;gap:14px;flex-wrap:wrap;margin-top:12px}
+  .champ{flex:1;min-width:150px}
 
   .total{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;
     padding:20px;text-align:center;margin-bottom:18px}
@@ -105,6 +115,7 @@
   .corps{padding:0 20px 20px;border-top:1px solid var(--ligne)}
   .corps h3{font-size:16px;margin:18px 0 6px;color:var(--bleu)}
   .corps p{margin:0 0 10px;font-size:16px;line-height:1.6}
+  .corps ul{padding-left:22px;margin:0 0 10px}
   .corps table{font-size:15px}
   .calme{background:var(--vertbg);border:1px solid #a8d5b8;border-radius:14px;padding:20px;margin-bottom:18px}
   .calme h2{color:var(--vert);font-size:19px;margin:0 0 8px}
@@ -129,7 +140,8 @@
   </div>
 
   <h1>Abundance 4.0 — P3</h1>
-  <p class="sub">Le plan du point de contrôle. Un régime, une allocation, un geste à la fois.</p>
+  <p class="sub">Deux comptes, un moteur : le cœur permanent (TFSA) ne se vend jamais ;
+  la manche tactique (REER) suit le régime P3 chaque semaine.</p>
 
   <div id="apercu" class="apercu cache"></div>
   <div id="bnVieux" class="banniere bn-vieux cache"></div>
@@ -152,7 +164,7 @@
     </div>
 
     <div class="scorebox">
-      <div class="lbl"><span>Score composite</span><span class="scv" id="scoreVal">—</span></div>
+      <div class="lbl"><span>Score composite (moteur P3)</span><span class="scv" id="scoreVal">—</span></div>
       <div class="scorebar">
         <div class="scorefill" id="scoreFill" style="width:0"></div>
         <span class="scoremark m40"></span><span class="scoremark m70"></span>
@@ -161,44 +173,85 @@
       <p style="font-size:14px;color:var(--gris);margin:12px 0 0" id="scoreDet"></p>
     </div>
 
-    <div class="carte">
-      <h2>La matrice d'allocation</h2>
-      <p class="note" id="noteMatrice">Le régime en cours colore la colonne à suivre. Les déviations
-      (Bull / Bearish) sont tactiques et temporaires ; le point de contrôle (Neutral) est la maison.</p>
+    <div class="compte ct-tfsa">
+      <h2>🟦 TFSA — LE CŒUR PERMANENT · 60 % du portefeuille</h2>
+      <p class="note">On achète et on garde pour toujours. Jamais de vente. Rééquilibrage uniquement
+      avec de l'argent neuf (cotisations), maximum 4 transactions par année pour rester sous le radar
+      de l'ARC.</p>
       <table>
-        <thead>
-          <tr><th>Placement</th><th class="thdesc">Ce que c'est</th>
-          <th style="text-align:right" id="thBULL">🟢 BULL</th>
-          <th style="text-align:right" id="thNEUTRAL">🟡 NEUTRAL</th>
-          <th style="text-align:right" id="thBEARISH">🔴 BEARISH</th></tr>
-        </thead>
-        <tbody id="corpsMatrice"></tbody>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th>
+        <th style="text-align:right">% de la partie</th><th style="text-align:right">% du total</th>
+        <th style="text-align:right">Bande</th></tr></thead>
+        <tbody id="corpsTfsa"></tbody>
       </table>
-      <p class="note" style="margin:12px 0 0">BSOL plafonné (10 / 5 / 0), SGOV plafonné à 30 % en Bearish,
-      SMH et BSOL en circuit coupé en Bearish. Chaque ligne fait un travail précis.</p>
+      <p class="note" style="margin:12px 0 0">Bandes vérifiées au trimestre (janv., avr., juil., oct.).
+      Hors bande ? On achète seulement le sous-pondéré avec de l'argent neuf. Pas d'argent neuf ? On ne
+      fait rien, même si ça dérive.</p>
+    </div>
+
+    <div class="compte ct-reer">
+      <h2>🟧 REER — LA MANCHE TACTIQUE · 40 % du portefeuille</h2>
+      <p class="note" id="noteReer">Le moteur P3 tourne chaque vendredi (clôture). Transactions illimitées —
+      permises dans le REER. Suivre la colonne du régime en cours.</p>
+      <table>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th>
+        <th style="text-align:right" id="thBULL">🟢 BULL</th>
+        <th style="text-align:right" id="thNEUTRAL">🟡 NEUTRAL</th>
+        <th style="text-align:right" id="thBEARISH">🔴 BEARISH</th></tr></thead>
+        <tbody id="corpsReer"></tbody>
+      </table>
+      <p class="note" style="margin:12px 0 0">Un changement de régime qui bouge un placement de plus de
+      15 points est exécuté en 3 tranches hebdomadaires (33 / 33 / 34 %). Le disjoncteur ATR peut forcer
+      la sécurité immédiatement. BSOL et SPCX sont exclus — ETF purs et liquides uniquement.</p>
     </div>
 
     <div class="calc carte">
-      <h2>Calculatrice d'achat</h2>
-      <p class="note">Entrer l'argent neuf disponible. La page répartit selon la colonne du régime en cours
-      et calcule le nombre d'actions (arrondies vers le bas).</p>
-      <div class="champ">
-        <label for="mInvest">Argent à investir (US$)</label>
-        <input id="mInvest" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
+      <h2>Calculatrice d'achat (deux comptes)</h2>
+      <p class="note">Entrer l'argent neuf pour chaque compte. La page répartit selon le cœur permanent
+      (TFSA) et la matrice du régime en cours (REER), puis calcule le nombre d'actions (arrondies vers le bas).</p>
+      <div class="rangee">
+        <div class="champ">
+          <label for="mCoeur">TFSA — Cœur permanent (60 %)</label>
+          <input id="mCoeur" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
+        </div>
+        <div class="champ">
+          <label for="mTac">REER — Manche tactique (40 %)</label>
+          <input id="mTac" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 13000">
+        </div>
       </div>
       <div class="total" style="margin-top:14px">
         <div class="lbl">Montant total à investir</div>
         <div class="val" id="totVal">—</div>
         <div class="lbl" id="totDate"></div>
       </div>
+      <h3 style="font-size:16px;color:var(--bleu);margin:4px 0 8px">🟦 Cœur permanent (TFSA)</h3>
       <table>
         <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
         <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
         <th style="text-align:right">Actions</th></tr></thead>
-        <tbody id="corpsCalc"></tbody>
+        <tbody id="corpsCalcTfsa"></tbody>
+      </table>
+      <h3 style="font-size:16px;color:var(--ambre);margin:16px 0 8px">🟧 Manche tactique (REER)</h3>
+      <table>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
+        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
+        <th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="corpsCalcReer"></tbody>
       </table>
       <p class="note" style="margin:14px 0 0" id="resteCalc"></p>
     </div>
+
+    <details class="info">
+      <summary>L'exposition totale du portefeuille (les deux comptes)<span class="chev">›</span></summary>
+      <div class="corps">
+        <p>Voici l'exposition effective (TFSA 60 % + REER 40 %) selon le régime en cours :</p>
+        <table>
+          <thead><tr><th>Placement</th><th style="text-align:right">🟢 BULL</th>
+          <th style="text-align:right">🟡 NEUTRAL</th><th style="text-align:right">🔴 BEARISH</th></tr></thead>
+          <tbody id="corpsComb"></tbody>
+        </table>
+      </div>
+    </details>
 
     <details class="info">
       <summary>Comment le moteur décide : le score composite<span class="chev">›</span></summary>
@@ -219,21 +272,28 @@
     </details>
 
     <details class="info">
-      <summary>Le plan, régime par régime<span class="chev">›</span></summary>
+      <summary>Le plan, compte par compte<span class="chev">›</span></summary>
       <div class="corps">
-        <h3>Le point de contrôle (POC)</h3>
-        <p>Le <strong>Neutral</strong> est le centre structurel du portefeuille, son état par défaut quand
-        la macro est ambiguë. Les déviations Bull et Bearish sont tactiques, temporaires et
-        <strong>moyenne-réversives</strong> : on revient au POC.</p>
-        <h3>🟢 BULL (RISK ON) — on profite</h3>
-        <p>VT 35 · GLDM 10 · IBIT 15 · SMH 15 · BSOL 10 · MCHI 10 · BCI 5 · SGOV 0.</p>
-        <h3>🟡 NEUTRAL (POC) — la maison</h3>
-        <p>VT 30 · GLDM 15 · IBIT 10 · SMH 10 · BSOL 5 · MCHI 10 · BCI 5 · SGOV 15.</p>
-        <h3>🔴 BEARISH (RISK OFF) — on se défend</h3>
-        <p>VT 20 · GLDM 30 · IBIT 5 · SMH 0 · BSOL 0 · MCHI 5 · BCI 10 · SGOV 30.</p>
+        <h3>🟦 TFSA — le cœur permanent (60 %)</h3>
+        <p>VT 40 · GLDM 27,5 · IBIT 15 · MCHI 7,5 · SMH 10 (de la partie). Aucun signal, aucune vente.
+        Bande VT 35–45, GLDM 22,5–32,5, IBIT 10–20, MCHI 5–10, SMH 7,5–12,5. Rééquilibrage uniquement
+        avec de l'argent neuf, max 4 transactions/an.</p>
+        <h3>🟧 REER — la manche tactique (40 %)</h3>
+        <p>Le point de contrôle (NEUTRAL) est la maison : VT 30 · GLDM 20 · SMH 10 · BCI 10 · AIPO 15 ·
+        SGOV 15.</p>
+        <p><strong>🟢 BULL (RISK ON)</strong> — on profite : VT 35 · GLDM 25 · SMH 15 · BCI 10 · AIPO 15 ·
+        SGOV 0.</p>
+        <p><strong>🔴 BEARISH (RISK OFF)</strong> — on se défend : VT 15 · GLDM 30 · SMH 0 · BCI 15 ·
+        AIPO 0 · SGOV 40.</p>
         <h3>La réinitialisation annuelle</h3>
-        <p>Chaque <strong>1er janvier</strong>, le portefeuille revient de force au Neutral, quoi que dise le
-        score, pour verrouiller les gains cycliques et remettre le risque à zéro.</p>
+        <p>Chaque <strong>1er janvier</strong>, la manche tactique revient de force au Neutral, quoi que dise
+        le score, pour verrouiller les gains cycliques et remettre le risque à zéro.</p>
+        <h3>Pourquoi ce découpage ?</h3>
+        <p>L'ARC surveille le <strong>TFSA</strong> : faire du « négoce actif » (transactions fréquentes,
+        détention courte) peut imposer les gains à 100 % comme revenu d'entreprise. Le TFSA achète donc la
+        fondation et ne la vend jamais — quitte à subir 15 % de retenue américaine sur les dividendes. Le
+        <strong>REER</strong>, lui, autorise le négoce actif (l'impôt est payé au retrait, plus tard) et
+        bénéficie même d'une retenue américaine de 0 % grâce au traité fiscal.</p>
       </div>
     </details>
 
@@ -246,12 +306,14 @@
         <strong>Bearish</strong> (défense d'urgence). Il s'applique immédiatement, sans attendre le vendredi.</p>
         <h3>Les tranches étalées</h3>
         <p>Quand un changement de régime exige un écart de <strong>plus de 15 points</strong> sur un placement
-        (ex. BSOL 10 → 0), la réallocation est découpée : <strong>33 % la semaine 1, 33 % la semaine 2,
-        34 % la semaine 3</strong>. Si le disjoncteur ATR est déclenché, on exécute <strong>50 % immédiatement</strong>
-        et le reste sur deux semaines.</p>
-        <h3>Protection contre le glissement (BSOL)</h3>
-        <p>Avant d'échanger du BSOL via Jupiter, le module crypto vérifie la <strong>profondeur de marché à 1 %</strong> :
-        si la commande dépasse 30 % de cette profondeur, elle est découpée en 3 swaps espacés d'une heure.</p>
+        (ex. SGOV 0 → 40, ou SMH 15 → 0), la réallocation est découpée : <strong>33 % la semaine 1, 33 % la
+        semaine 2, 34 % la semaine 3</strong>. Si le disjoncteur ATR est déclenché, on exécute
+        <strong>50 % immédiatement</strong> et le reste sur deux semaines.</p>
+        <h3>Contraintes d'exécution</h3>
+        <p><strong>TFSA :</strong> seules des <strong>ordres d'achat</strong> sont permis, avec de l'argent
+        neuf — aucune vente, maximum 4 transactions par année. <strong>REER :</strong> ordres delta automatisés
+        via IBKR, sans limite. <strong>BSOL (Solana) et SPCX (SpaceX) sont exclus</strong> pour garder une
+        liquidité d'ETF pure et simple.</p>
       </div>
     </details>
 
@@ -260,31 +322,19 @@
       <div class="corps">
         <h3>Qui calcule quoi</h3>
         <p>Le rulebook P3 décrit un moteur <strong>Python (gate_engine.py)</strong> sur un cluster local de
-        Mac mini M4, qui agrège OHLCV, les ratios macro, le VIX et exécute via IBKR (TradFi) et Jupiter (crypto).
-        Cette page est le <strong>portail public</strong> : un port Node sans dépendance de ce même moteur tourne
-        dans GitHub Actions et publie <code>state.json</code> que la page lit.</p>
+        Mac mini M4, qui agrège OHLCV, les ratios macro, le VIX et exécute via IBKR. Cette page est le
+        <strong>portail public</strong> : un port Node sans dépendance de ce même moteur tourne dans GitHub
+        Actions et publie <code>state.json</code> que la page lit.</p>
         <h3>Le cycle hebdomadaire</h3>
         <p>Vendredi 15:30 : ingestion des données → 16:00 : le moteur sort <code>{ régime, score }</code> →
-        16:05 : on lit les poids réels → 16:10 : on génère les ordres delta → 16:15-17:00 : exécution →
-        17:15 : journalisation.</p>
+        16:05 : on lit les poids réels → 16:10 : on génère les ordres delta du REER → 16:15-17:00 :
+        exécution → 17:15 : journalisation.</p>
         <h3>Surveillance</h3>
         <p>Un LLM sur le cluster surveille le flux et alerte si le régime oscille Bull ↔ Bearish plus de
-        3 fois en 6 semaines (whipsaw), si le glissement cumulé dépasse 0,50 % en une réallocation, ou si
-        un swap BSOL échoue.</p>
+        3 fois en 6 semaines (whipsaw), si le glissement cumulé du REER dépasse 0,50 % en une réallocation,
+        ou si une <strong>vente TFSA</strong> est tentée (ne devrait jamais arriver — verrouillée dans le code).</p>
       </div>
     </details>
-
-    <div class="regles">
-      <h2>Les règles qu'on ne brise jamais</h2>
-      <ul>
-        <li><strong>Pas de « ressenti ».</strong> Le moteur suit strictement le score composite. Aucune
-        dérogation manuelle, sauf le disjoncteur ATR.</li>
-        <li><strong>Zéro SpaceX (SPCX).</strong> Explicitement exclu du système.</li>
-        <li><strong>BSOL plafonné.</strong> 10 % max en Bull, 5 % en Neutral, 0 % en Bearish.</li>
-        <li><strong>Reset annuel.</strong> Le 1er janvier, retour forcé au Neutral, quoi qu'il arrive.</li>
-        <li><strong>Repli.</strong> Si les données VPOC/VAL sont corrompues ou manquantes → Neutral + alerte.</li>
-      </ul>
-    </div>
 
     <details class="info">
       <summary>Comment ça marche, en clair<span class="chev">›</span></summary>
@@ -296,7 +346,7 @@
 
         <h3>Question 1 — L'économie mondiale est-elle en santé ou malade ? (le check « Macro »)</h3>
         <p>Imagine l'économie mondiale comme un moteur de voiture.</p>
-        <ul style="padding-left:22px;margin:0 0 10px">
+        <ul>
           <li>Le système regarde deux choses : le <strong>prix du cuivre</strong> (le cuivre sert partout —
           usines, câbles, bâtiments) et <strong>le coût d'emprunt des entreprises</strong> (combien ça coûte
           aux entreprises risquées d'emprunter).</li>
@@ -308,7 +358,7 @@
 
         <h3>Question 2 — Le marché boursier monte-t-il ou descend-il ? (le check « Momentum »)</h3>
         <p>Le système regarde maintenant le grand marché (VT).</p>
-        <ul style="padding-left:22px;margin:0 0 10px">
+        <ul>
           <li>Il trace une <strong>« ligne lissée »</strong> (la moyenne Hull) qui filtre les hauts et les bas
           quotidiens pour voir la vraie direction.</li>
           <li><strong>Si cette ligne monte</strong> → le système pense : « La tendance est notre amie. »</li>
@@ -318,7 +368,7 @@
         <h3>Question 3 — Où achètent les grosses baleines ? (le check « Volume »)</h3>
         <p>C'est la partie la plus maligne. Le système ne s'intéresse pas qu'au prix — il regarde
         <strong>où la majorité du volume d'échange (l'argent) change de mains</strong>.</p>
-        <ul style="padding-left:22px;margin:0 0 10px">
+        <ul>
           <li>Imagine un stade. Le <strong>Volume Point of Control (VPOC)</strong> est l'endroit où 70 % de la
           foule est assise. C'est le « centre de gravité ».</li>
           <li><strong>Si le prix actuel est AU-DESSUS du VPOC</strong> → les baleines achètent et poussent le
@@ -344,46 +394,59 @@
           </tbody>
         </table>
         <p style="margin-top:10px">
-          <strong>Score de 70 ou plus</strong> → 🟢 <strong>BULL</strong> (soleil. On déploie tout le capital
-          dans la croissance : actions, IA, bitcoin).<br>
-          <strong>Score entre 40 et 69</strong> → 🟡 <strong>NEUTRAL</strong> (nuageux. On garde un mélange
-          équilibré et un peu de réserve).<br>
-          <strong>Score sous 40</strong> → 🔴 <strong>BEARISH</strong> (orageux. On vend le risqué, on se cache
-          dans l'or et le cash).
+          <strong>Score de 70 ou plus</strong> → 🟢 <strong>BULL</strong> (soleil. Le REER déploie le risque :
+          actions, IA, matières premières).<br>
+          <strong>Score entre 40 et 69</strong> → 🟡 <strong>NEUTRAL</strong> (nuageux. La manche garde un
+          mélange équilibré et de la réserve).<br>
+          <strong>Score sous 40</strong> → 🔴 <strong>BEARISH</strong> (orageux. Le REER vend le risqué, se
+          cache dans l'or, les matières premières et le cash).
         </p>
 
         <h3>La dérogation d'urgence (le disjoncteur)</h3>
         <p>Même si le score dit « Bull » le vendredi, le système a un bouton de panique.</p>
-        <ul style="padding-left:22px;margin:0 0 10px">
+        <ul>
           <li>Il surveille sans cesse la violence des mouvements quotidiens (la volatilité).</li>
           <li>Si le marché se met à sauter dans tous les sens comme des montagnes russes (pic d'ATR), le
-          système <strong>ignore immédiatement</strong> le score du vendredi et force le portefeuille en
+          système <strong>ignore immédiatement</strong> le score du vendredi et force la manche tactique en
           Neutral ou Bearish <strong>en pleine semaine</strong>.</li>
           <li>Pourquoi ? Parce que pendant un krach, attendre vendredi est trop tard. Cette dérogation te
           protège des chutes soudaines « cygne noir ».</li>
         </ul>
 
         <h3>Et la règle d'or : pas de gestes brusques</h3>
-        <p>Si le système doit vendre beaucoup de risqué (bitcoin, actions IA) parce qu'on passe de Bull à
-        Bearish, il <strong>ne vend pas tout d'un coup</strong>.</p>
-        <ul style="padding-left:22px;margin:0 0 10px">
-          <li>Il vend en <strong>trois tranches hebdomadaires</strong> (33 % par semaine).</li>
+        <p>Si la manche tactique doit vendre beaucoup de risqué (actions IA, semi-conducteurs) parce qu'on
+        passe de Bull à Bearish, elle <strong>ne vend pas tout d'un coup</strong>.</p>
+        <ul>
+          <li>Elle vend en <strong>trois tranches hebdomadaires</strong> (33 % par semaine).</li>
           <li>Pourquoi ? Parce que tout vendre le même jour, en pleine panique, ferait baisser le prix contre
           toi. En étalant, tu obtiens de meilleurs prix et tu n'affoles pas le marché.</li>
         </ul>
 
         <h3>En résumé (pour un enfant de 5 ans)</h3>
         <blockquote style="margin:0 0 10px;padding:12px 16px;background:var(--fond);border-left:4px solid var(--bleu);border-radius:8px;font-size:16px">
-          <em>« Chaque vendredi, l'ordinateur vérifie si l'économie mondiale est heureuse, si le marché
-          boursier monte, et si les gros investisseurs achètent ou vendent. Si les trois disent « oui », on
-          avance vite. Si deux disent « non », on ralentit. Si les trois disent « non », on cache notre argent
-          dans l'or et le cash. Et si le marché se met à tressauter sauvagement, on n'attend pas vendredi —
-          on se cache immédiatement. »</em>
+          <em>« Le coffre-fort de la maison (TFSA) achète les briques et ne les vend jamais. La boîte à
+          outils (REER) regarde la météo chaque vendredi : s'il fait soleil, elle prend des outils pour
+          construire ; s'il y a un orage, elle les range dans l'or et le cash. Et si le vent se met à hurler
+          en pleine semaine, elle ne tient pas compte du vendredi — elle se met à l'abri tout de suite. »</em>
         </blockquote>
         <p>Voilà. Pas de ressenti, pas de nouvelles à la télé, pas d'interviews de PDG. Juste des chiffres
         froids et durs qui posent trois questions simples. C'est pour ça que ça marche.</p>
       </div>
     </details>
+
+    <div class="regles">
+      <h2>Les règles qu'on ne brise jamais</h2>
+      <ul>
+        <li><strong>TFSA : coffre verrouillé.</strong> Achat seulement, avec de l'argent neuf. <strong>Zéro
+        vente</strong>, maximum 4 transactions par année (sous le radar de l'ARC).</li>
+        <li><strong>REER : moteur automatique.</strong> Suit le score composite P3. Aucune dérogation
+        manuelle, sauf le disjoncteur ATR.</li>
+        <li><strong>Zéro SpaceX (SPCX) et zéro BSOL (Solana).</strong> Exclus pour une liquidité d'ETF pure.</li>
+        <li><strong>Reset annuel.</strong> Le 1er janvier, retour forcé de la manche tactique au Neutral,
+        quoi qu'il arrive.</li>
+        <li><strong>Repli.</strong> Si les données VPOC/VAL sont corrompues ou manquantes → Neutral + alerte.</li>
+      </ul>
+    </div>
 
     <div class="calme">
       <h2>Si jamais tu n'es pas certaine</h2>
@@ -400,23 +463,34 @@
       <div class="lbl" id="sDate" style="margin-top:8px"></div>
     </div>
 
-    <div class="carte">
-      <h2>Système d'exécution : cible → réel → écart → action</h2>
-      <p class="note">Entrer le nombre d'actions détenues. La page compare au régime en cours, puis indique
-      GARDER ou RÉÉQUILIBRER. Un écart de plus de 15 points est exécuté en 3 tranches hebdomadaires.
-      Tout reste dans ce navigateur.</p>
-      <div class="champ" style="margin-bottom:12px">
-        <label for="invTotal">Montant total investi (US$) — optionnel</label>
-        <input id="invTotal" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 50000" style="padding:10px 12px;font-size:17px;font-weight:600">
-      </div>
+    <div class="compte ct-tfsa">
+      <h2>🟦 TFSA — Cœur permanent : bandes</h2>
+      <p class="note">Entrer le nombre d'actions détenues dans le TFSA. La page compare au cœur fixe et
+      indique si un placement sort de sa bande. Hors bande → <strong>acheter</strong> le sous-pondéré avec de
+      l'argent neuf (jamais vendre).</p>
+      <table>
+        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
+        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Bande</th>
+        <th style="text-align:right">Action</th></tr></thead>
+        <tbody id="corpsSuiviTfsa"></tbody>
+      </table>
+      <p style="font-size:14px;color:#3d5570;margin-top:12px" id="noteSuiviTfsa"></p>
+    </div>
+
+    <div class="compte ct-reer">
+      <h2>🟧 REER — Manche tactique : cible → réel → écart → action</h2>
+      <p class="note">Entrer le nombre d'actions détenues dans le REER. La page compare à la matrice du
+      régime en cours, puis indique GARDER ou RÉÉQUILIBRER. Un écart de plus de 15 points est exécuté en
+      3 tranches hebdomadaires.</p>
       <table>
         <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
         <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
         <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th>
         <th style="text-align:right">Action</th></tr></thead>
-        <tbody id="corpsSuivi"></tbody>
+        <tbody id="corpsSuiviReer"></tbody>
       </table>
-      <p style="font-size:14px;color:var(--gris);margin-top:12px" id="sNote"></p>
+      <p style="font-size:14px;color:#6b5120;margin-top:12px" id="noteSuiviReer"></p>
       <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
         border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
         Tout effacer</button>
@@ -446,18 +520,19 @@
   var MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
               "septembre","octobre","novembre","décembre"];
   var LIB = { BULL: "BULL (RISK ON)", NEUTRAL: "NEUTRAL (POC)", BEARISH: "BEARISH (RISK OFF)" };
-  var ORDER = ["VT","GLDM","IBIT","SMH","BSOL","MCHI","BCI","SGOV"];
   var DESC = {
     VT: "Actions mondiales — Vanguard Total World",
     GLDM: "Or — SPDR Gold MiniShares",
     IBIT: "Bitcoin — iShares Bitcoin Trust",
-    SMH: "Semi-conducteurs / IA — VanEck",
-    BSOL: "Solana en staking — Bitwise Solana Staking ETF",
     MCHI: "Chine / émergents — iShares MSCI China",
+    SMH: "Semi-conducteurs / IA — VanEck",
+    AIPO: "Satellite IA / croissance — Renaissance IPO ETF",
     BCI: "Matières premières — abrdn All Commodity",
     SGOV: "Bons du Trésor US — iShares 0-3 Month"
   };
-  var DEADBAND = 5; // points du portefeuille entier
+  var ORDRE_CŒUR = ["VT","GLDM","IBIT","MCHI","SMH"];
+  var ORDRE_TAC = ["VT","GLDM","SMH","BCI","AIPO","SGOV"];
+  var DEADBAND = 5; // points de la manche REER
   var ETAT = null;
 
   function dateFr(s) {
@@ -473,7 +548,8 @@
     return Math.floor((Date.now() - d.getTime()) / 86400000);
   }
   function pct(v) {
-    return v % 1 === 0 ? v + " %" : v.toFixed(1) + " %";
+    v = Number(v);
+    return v % 1 === 0 ? v + " %" : String(v).replace(".", ",") + " %";
   }
   function argent(n) {
     return "$" + n.toLocaleString("fr-CA", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -484,11 +560,14 @@
   }
   function sauver(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function charger(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
-  function ciblesActives() {
-    var r = ETAT.regime;
-    return (ETAT.cibles && ETAT.cibles[r]) || {};
-  }
   function regime() { return ETAT ? ETAT.regime : "NEUTRAL"; }
+  function coeur() { return (ETAT && ETAT.comptes && ETAT.comptes.tfse) || {}; }
+  function reer() { return (ETAT && ETAT.comptes && ETAT.comptes.reer) || {}; }
+  function ciblesReer() {
+    var r = regime();
+    var c = reer().cibles || {};
+    return c[r] || {};
+  }
 
   function echec(msg) {
     $("statut").className = "statut err";
@@ -504,13 +583,11 @@
     var map = { BULL: ["thBULL","hlBULL"], NEUTRAL: ["thNEUTRAL","hlNEUTRAL"], BEARISH: ["thBEARISH","hlBEARISH"] };
     var m = map[r];
     $(m[0]).classList.add(m[1]);
-    // Surligne aussi les cellules de la colonne active dans la matrice.
-    document.querySelectorAll("#corpsMatrice tr").forEach(function (tr) {
+    document.querySelectorAll("#corpsReer tr").forEach(function (tr) {
       tr.querySelectorAll("td").forEach(function (td) {
         td.classList.remove("hlBULL","hlNEUTRAL","hlBEARISH");
       });
-      var col = { BULL: 2, NEUTRAL: 3, BEARISH: 4 }[r];
-      var cell = tr.querySelectorAll("td")[col];
+      var cell = tr.querySelectorAll("td")[2 + { BULL: 0, NEUTRAL: 1, BEARISH: 2 }[r]];
       if (cell) cell.classList.add(m[1]);
     });
   }
@@ -524,11 +601,11 @@
     if (s.fallback) {
       $("statut").className = "statut err";
       $("statutGros").textContent = "Repli : données manquantes";
-      $("statutDit").textContent = "Le plan est forcé en Neutral par sécurité. L'alerte est journalisée.";
+      $("statutDit").textContent = "La manche tactique est forcée en Neutral par sécurité. L'alerte est journalisée.";
     } else if (agir) {
       $("statut").className = "statut agir";
       $("statutGros").textContent = "Quelque chose a changé";
-      $("statutDit").textContent = "Vérifier l'onglet Suivi : rapprocher les poids réels de la colonne " + LIB[r] + ".";
+      $("statutDit").textContent = "Vérifier l'onglet Suivi : rapprocher la manche REER de la colonne " + LIB[r] + ".";
     } else {
       $("statut").className = "statut ok";
       $("statutGros").textContent = "Ne rien faire";
@@ -548,8 +625,8 @@
         (c.yieldAdjust >= 0 ? "+" : "") + c.yieldAdjust + ".";
     }
 
-    $("noteMatrice").textContent = "Régime en cours : " + LIB[r] +
-      ". Suivre la colonne « " + LIB[r] + " ». Les déviations sont tactiques et temporaires ; le point de contrôle (Neutral) est la maison.";
+    $("noteReer").textContent = "Le moteur P3 tourne chaque vendredi (clôture). Régime en cours : " + LIB[r] +
+      ". Suivre la colonne « " + LIB[r] + " » (100 % de la manche).";
 
     // Détail du signal
     var tbody = $("tableDetail").querySelector("tbody");
@@ -575,7 +652,6 @@
     ligne("D · Courbe 10Y−3M (−10 / 0 / +5)", (c.yieldAdjust >= 0 ? "+" : "") + c.yieldAdjust,
       co ? "10Y " + co.t10 + " % · 3M " + co.t3 + " % · écart " + co.ecartPct + " pts" : "—");
 
-    // ATR
     var atr = s.atr || {};
     if (atr.pctAnnualise !== null && atr.pctAnnualise !== undefined) {
       var msg = "Disjoncteur ATR 14 j annualisé : <strong>" + atr.pctAnnualise + " %</strong>.";
@@ -586,20 +662,19 @@
 
     $("statutSignal").textContent = sc !== null ? "Score composite " + sc + "/100 → état " + LIB[r] : "";
 
-    // Bannières
     function show(id, ok) { if (ok) $(id).classList.remove("cache"); else $(id).classList.add("cache"); }
     var a = s.atr || {};
     if (a.force) {
       $("bnATR").textContent = "🚨 Disjoncteur ATR déclenché : volatilité annualisée " +
-        a.pctAnnualise + " %. Plan forcé en " + LIB[a.force] + " immédiatement.";
+        a.pctAnnualise + " %. Manche tactique forcée en " + LIB[a.force] + " immédiatement.";
     }
     show("bnATR", !!a.force);
     if (s.resetAnnuel) {
-      $("bnReset").textContent = "🗓️ Réinitialisation annuelle : retour forcé au Neutral pour l'année.";
+      $("bnReset").textContent = "🗓️ Réinitialisation annuelle : retour forcé de la manche tactique au Neutral.";
     }
     show("bnReset", s.resetAnnuel === true);
     if (s.fallback) {
-      $("bnFallback").textContent = "⚠️ Repli de sécurité : données VPOC/VAL manquantes. Le plan reste en Neutral jusqu'à ce que les données reviennent.";
+      $("bnFallback").textContent = "⚠️ Repli de sécurité : données VPOC/VAL manquantes. La manche reste en Neutral jusqu'à ce que les données reviennent.";
     }
     show("bnFallback", s.fallback === true);
 
@@ -616,96 +691,143 @@
     } else show("bnVieux", false);
 
     afficherMatrice();
+    afficherComb();
     majCalc();
   }
 
-  /* ------------------------------- matrice ------------------------------- */
+  /* ------------------------------- matrices ------------------------------- */
   function afficherMatrice() {
-    var c = ETAT.cibles || {};
-    var corps = $("corpsMatrice");
-    if (corps.getAttribute("data-fait")) return;
-    corps.setAttribute("data-fait", "1");
-    corps.innerHTML = ORDER.map(function (t) {
-      var zB = c.BULL[t] === 0, zN = c.NEUTRAL[t] === 0, zF = c.BEARISH[t] === 0;
-      return '<tr>' +
-        '<td class="tk" data-t="' + t + '">' + t + '</td>' +
-        '<td class="desc">' + DESC[t] + '</td>' +
-        '<td class="d ' + (zB ? "zero" : "") + '">' + pct(c.BULL[t]) + '</td>' +
-        '<td class="d ' + (zN ? "zero" : "") + '">' + pct(c.NEUTRAL[t]) + '</td>' +
-        '<td class="d ' + (zF ? "zero" : "") + '">' + pct(c.BEARISH[t]) + '</td>' +
-        '</tr>';
-    }).join("") +
-      '<tr class="total"><td class="tk">Total</td><td></td>' +
-      '<td class="d">100 %</td><td class="d">100 %</td><td class="d">100 %</td></tr>';
+    var t = coeur(), c = reer().cibles || {};
+    var corps = $("corpsTfsa");
+    if (!corps.getAttribute("data-fait")) {
+      corps.setAttribute("data-fait", "1");
+      corps.innerHTML = ORDRE_CŒUR.map(function (tk) {
+        var bande = (t.bandes || {})[tk] || [0, 100];
+        return '<tr><td class="tk">' + tk + '</td><td class="desc">' + DESC[tk] + '</td>' +
+          '<td class="d">' + pct(t.cible[tk]) + '</td>' +
+          '<td class="d">' + pct(t.cible[tk] * (t.pct || 60) / 100) + '</td>' +
+          '<td class="d" style="color:var(--gris);font-size:13px">' + bande[0] + "–" + bande[1] + ' %</td></tr>';
+      }).join("") +
+        '<tr class="total"><td class="tk">Total</td><td></td><td class="d">100 %</td>' +
+        '<td class="d">' + (t.pct || 60) + ' %</td><td></td></tr>';
+    }
+
+    var c2 = $("corpsReer");
+    if (!c2.getAttribute("data-fait")) {
+      c2.setAttribute("data-fait", "1");
+      c2.innerHTML = ORDRE_TAC.map(function (tk) {
+        return '<tr><td class="tk">' + tk + '</td><td class="desc">' + DESC[tk] + '</td>' +
+          '<td class="d ' + (c.BULL[tk] === 0 ? "zero" : "") + '">' + pct(c.BULL[tk]) + '</td>' +
+          '<td class="d ' + (c.NEUTRAL[tk] === 0 ? "zero" : "") + '">' + pct(c.NEUTRAL[tk]) + '</td>' +
+          '<td class="d ' + (c.BEARISH[tk] === 0 ? "zero" : "") + '">' + pct(c.BEARISH[tk]) + '</td></tr>';
+      }).join("") +
+        '<tr class="total"><td class="tk">Total</td><td></td>' +
+        '<td class="d">100 %</td><td class="d">100 %</td><td class="d">100 %</td></tr>';
+    }
     reglerHL(regime());
   }
 
-  /* ----------------------------- calculatrice ----------------------------- */
-  function majCalc() {
-    var inv = lire("mInvest");
-    sauver("v4Invest", $("mInvest").value);
-    var prix = (ETAT && ETAT.prix) || {};
-    var cibles = ciblesActives();
-    var corps = $("corpsCalc");
+  /* --------------------------- exposition combinée --------------------------- */
+  function afficherComb() {
+    var corps = $("corpsComb");
+    if (corps.getAttribute("data-fait")) return;
+    corps.setAttribute("data-fait", "1");
+    var t = coeur().cible || {}, c = reer().cibles || {};
+    var tous = ["VT","GLDM","IBIT","MCHI","SMH","AIPO","BCI","SGOV"];
+    corps.innerHTML = tous.map(function (tk) {
+      var base = t[tk] || 0;
+      var b = (c.BULL[tk] || 0), n = (c.NEUTRAL[tk] || 0), f = (c.BEARISH[tk] || 0);
+      var pB = base * 0.6 + b * 0.4, pN = base * 0.6 + n * 0.4, pF = base * 0.6 + f * 0.4;
+      function z(x) { return x === 0 ? " zero" : ""; }
+      return '<tr><td class="tk">' + tk + '</td>' +
+        '<td class="d' + z(pB) + '">' + pct(pB) + '</td>' +
+        '<td class="d' + z(pN) + '">' + pct(pN) + '</td>' +
+        '<td class="d' + z(pF) + '">' + pct(pF) + '</td></tr>';
+    }).join("") +
+      '<tr class="total"><td class="tk">Total</td><td class="d">100 %</td>' +
+      '<td class="d">100 %</td><td class="d">100 %</td></tr>';
+  }
 
-    if (!corps.getAttribute("data-fait")) {
-      corps.setAttribute("data-fait", "1");
-      corps.innerHTML = ORDER.map(function (t) {
-        return '<tr data-t="' + t + '"><td class="tk">' + t + '</td>' +
-          '<td class="desc">' + DESC[t] + '</td>' +
-          '<td class="d cible"></td>' +
-          '<td class="mont"></td>' +
-          '<td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>' +
-          '<td class="actions"></td></tr>';
-      }).join("") +
-        '<tr class="total"><td class="tk">Total</td><td></td><td class="d">100 %</td>' +
-        '<td class="mont" id="totMont"></td><td></td><td class="actions" id="totAct"></td></tr>';
-      corps.querySelectorAll(".prix").forEach(function (input) {
-        var t = input.closest("tr").getAttribute("data-t");
-        var garde = charger("v4Prix:" + t);
-        var val = garde !== null && garde !== "" ? garde : (prix[t] ? String(prix[t]) : "");
-        input.value = val;
-        input.addEventListener("input", function () {
-          sauver("v4Prix:" + t, input.value);
-          majCalc();
-        });
+  /* ----------------------------- calculatrice ----------------------------- */
+  function fabriquerCalc(id, ordre, cibleFn) {
+    var corps = $(id);
+    if (corps.getAttribute("data-fait")) return corps;
+    corps.setAttribute("data-fait", "1");
+    corps.innerHTML = ordre.map(function (t) {
+      return '<tr data-t="' + t + '"><td class="tk">' + t + '</td>' +
+        '<td class="desc">' + DESC[t] + '</td>' +
+        '<td class="d cible"></td>' +
+        '<td class="mont"></td>' +
+        '<td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>' +
+        '<td class="actions"></td></tr>';
+    }).join("") +
+      '<tr class="total"><td class="tk">Total</td><td></td><td class="d">100 %</td>' +
+      '<td class="mont" id="tot' + id + 'Mont"></td><td></td><td class="actions" id="tot' + id + 'Act"></td></tr>';
+    corps.querySelectorAll(".prix").forEach(function (input) {
+      var t = input.closest("tr").getAttribute("data-t");
+      var garde = charger("v4Prix:" + t);
+      var val = garde !== null && garde !== "" ? garde : ((ETAT.prix[t]) ? String(ETAT.prix[t]) : "");
+      input.value = val;
+      input.addEventListener("input", function () {
+        sauver("v4Prix:" + t, input.value);
+        majCalc();
       });
+    });
+    return corps;
+  }
+
+  function majCalc() {
+    var invCoeur = lire("mCoeur"), invTac = lire("mTac");
+    sauver("v4Coeur", $("mCoeur").value); sauver("v4Tac", $("mTac").value);
+    var prix = (ETAT && ETAT.prix) || {};
+    var coeurObj = coeur(), ciblesC = coeurObj.cible || {};
+    var ciblesT = ciblesReer();
+    var corpsC = fabriquerCalc("corpsCalcTfsa", ORDRE_CŒUR, null);
+    var corpsT = fabriquerCalc("corpsCalcReer", ORDRE_TAC, null);
+
+    function traiter(corps, mont, cibles, totMontId, totActId) {
+      var restes = 0, investi = 0, sansPrix = [];
+      corps.querySelectorAll("tr[data-t]").forEach(function (tr) {
+        var t = tr.getAttribute("data-t");
+        var pctV = cibles[t] !== undefined ? cibles[t] : 0;
+        tr.querySelector(".cible").textContent = pct(pctV);
+        tr.querySelector(".cible").classList.toggle("zero", pctV === 0);
+        var montant = mont * pctV / 100;
+        tr.querySelector(".mont").textContent = mont > 0 ? argent(montant) : "—";
+
+        var input = tr.querySelector(".prix");
+        var p = parseFloat(input.value);
+        p = (isFinite(p) && p > 0) ? p : 0;
+        var act = tr.querySelector(".actions");
+        if (mont <= 0) { act.innerHTML = ""; return; }
+        if (!p) { act.textContent = "?"; if (montant > 0) sansPrix.push(t); return; }
+        var n = Math.floor(montant / p);
+        var cout = n * p;
+        restes += montant - cout;
+        investi += cout;
+        act.innerHTML = (n > 0 ? n : 0) + ' <span class="dollar">≈ ' + argent(cout) + '</span>';
+      });
+      if (totMontId) $(totMontId).textContent = mont > 0 ? argent(mont) : "—";
+      if (totActId) $(totActId).innerHTML = mont > 0 ? argent(investi) : "";
+      return { restes: restes, sansPrix: sansPrix };
     }
 
-    var restes = 0, investi = 0, sansPrix = [];
-    corps.querySelectorAll("tr[data-t]").forEach(function (tr) {
-      var t = tr.getAttribute("data-t");
-      var pctV = cibles[t] !== undefined ? cibles[t] : 0;
-      tr.querySelector(".cible").textContent = pct(pctV);
-      tr.querySelector(".cible").classList.toggle("zero", pctV === 0);
-      var montant = inv * pctV / 100;
-      tr.querySelector(".mont").textContent = inv > 0 ? argent(montant) : "—";
+    var rC = traiter(corpsC, invCoeur, ciblesC, "totcorpsCalcTfsaMont", "totcorpsCalcTfsaAct");
+    var rT = traiter(corpsT, invTac, ciblesT, "totcorpsCalcReerMont", "totcorpsCalcReerAct");
 
-      var input = tr.querySelector(".prix");
-      var p = parseFloat(input.value);
-      p = (isFinite(p) && p > 0) ? p : 0;
-      var act = tr.querySelector(".actions");
-      if (inv <= 0) { act.innerHTML = ""; return; }
-      if (!p) { act.textContent = "?"; if (montant > 0) sansPrix.push(t); return; }
-      var n = Math.floor(montant / p);
-      var cout = n * p;
-      restes += montant - cout;
-      investi += cout;
-      act.innerHTML = (n > 0 ? n : 0) + ' <span class="dollar">≈ ' + argent(cout) + '</span>';
-    });
-
-    $("totVal").textContent = inv > 0 ? argent(inv) : "—";
-    $("totMont").textContent = inv > 0 ? argent(inv) : "—";
-    $("totAct").innerHTML = inv > 0 ? argent(investi) : "";
+    var total = invCoeur + invTac;
+    $("totVal").textContent = total > 0 ? argent(total) : "—";
     var dateTxt = ETAT && ETAT.prixDate ? "Prix de la clôture du " + dateFr(ETAT.prixDate) : "";
-    $("totDate").textContent = inv > 0 ? dateTxt : "";
+    $("totDate").textContent = total > 0 ? dateTxt : "";
 
     var msg = "";
-    if (inv > 0) {
-      msg = "Actions arrondies vers le bas. Reste non investi : environ " + argent(restes) + ".";
-      if (sansPrix.length) msg += " Prix manquant pour : " + sansPrix.join(", ") + ". Le corriger à la main.";
+    if (total > 0) {
+      msg = "Actions arrondies vers le bas. Reste non investi : environ " +
+        argent(rC.restes + rT.restes) + ".";
+      var manq = rC.sansPrix.concat(rT.sansPrix);
+      if (manq.length) msg += " Prix manquant pour : " + manq.join(", ") + ". Le corriger à la main.";
     } else {
-      msg = "Entrer un montant pour voir la répartition et le nombre d'actions.";
+      msg = "Entrer un montant pour chaque compte afin de voir la répartition et le nombre d'actions.";
     }
     $("resteCalc").textContent = msg;
   }
@@ -713,69 +835,110 @@
   /* -------------------------------- suivi -------------------------------- */
   function majSuivi() {
     var prix = (ETAT && ETAT.prix) || {};
-    var cibles = ciblesActives();
-    var corps = $("corpsSuivi");
+    var coeurObj = coeur(), bandes = coeurObj.bandes || {}, ciblesC = coeurObj.cible || {};
+    var ciblesT = ciblesReer();
 
-    if (!corps.getAttribute("data-fait")) {
-      corps.setAttribute("data-fait", "1");
-      corps.innerHTML = ORDER.map(function (t) {
+    var corpsT = $("corpsSuiviTfsa");
+    if (!corpsT.getAttribute("data-fait")) {
+      corpsT.setAttribute("data-fait", "1");
+      corpsT.innerHTML = ORDRE_CŒUR.map(function (t) {
         return '<tr><td class="tk">' + t + '</td>' +
-          '<td style="text-align:right"><input class="mini sAct" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-compte="tfsa" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td class="mont" data-v="' + t + '"></td><td class="mont" data-r="' + t + '"></td>' +
+          '<td class="mont" data-c="' + t + '"></td><td class="ecart" data-b="' + t + '"></td>' +
+          '<td class="acte" data-a="' + t + '"></td></tr>';
+      }).join("");
+    }
+    var corpsR = $("corpsSuiviReer");
+    if (!corpsR.getAttribute("data-fait")) {
+      corpsR.setAttribute("data-fait", "1");
+      corpsR.innerHTML = ORDRE_TAC.map(function (t) {
+        return '<tr><td class="tk">' + t + '</td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-compte="reer" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
           '<td class="mont" data-v="' + t + '"></td><td class="mont" data-r="' + t + '"></td>' +
           '<td class="mont" data-c="' + t + '"></td><td class="ecart" data-e="' + t + '"></td>' +
           '<td class="acte" data-a="' + t + '"></td></tr>';
       }).join("");
-      corps.querySelectorAll(".sAct").forEach(function (i) {
-        i.value = charger("v4act:" + i.getAttribute("data-t")) || "";
-        i.addEventListener("input", function () {
-          sauver("v4act:" + i.getAttribute("data-t"), i.value);
-          majSuivi();
-        });
-      });
     }
-
-    var total = 0, vals = {};
-    corps.querySelectorAll(".sAct").forEach(function (i) {
-      var t = i.getAttribute("data-t");
-      var n = parseFloat(i.value) || 0, p = prix[t] || 0;
-      vals[t] = n * p;
-      total += vals[t];
-    });
-
-    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
-    var baseTotal = inv > 0 ? inv : total;
-
-    var gros = 0;
-    ORDER.forEach(function (t) {
-      var v = vals[t] || 0;
-      var ciblePct = cibles[t] !== undefined ? cibles[t] : 0;
-      var reel = baseTotal > 0 ? v / baseTotal * 100 : 0;
-      var ecartPts = reel - ciblePct;
-      var action = baseTotal > 0 ? (Math.abs(ecartPts) > DEADBAND ? "RÉÉQUILIBRER" : "GARDER") : "—";
-      if (Math.abs(ecartPts) > DEADBAND) gros = Math.max(gros, Math.abs(ecartPts));
-
-      var cv = corps.querySelector('[data-v="' + t + '"]');
-      var cr = corps.querySelector('[data-r="' + t + '"]');
-      var cc = corps.querySelector('[data-c="' + t + '"]');
-      var ce = corps.querySelector('[data-e="' + t + '"]');
-      var ca = corps.querySelector('[data-a="' + t + '"]');
-      if (cv) cv.textContent = v > 0 ? argent(v) : "—";
-      if (cr) cr.textContent = baseTotal > 0 ? reel.toFixed(1) + " %" : "—";
-      if (cc) cc.textContent = pct(ciblePct);
-      if (ce) ce.textContent = baseTotal > 0 ? (ecartPts >= 0 ? "+" : "−") + Math.abs(ecartPts).toFixed(1) + " pts" : "—";
-      if (ca) {
-        ca.textContent = action;
-        ca.className = "acte" + (action === "RÉÉQUILIBRER" ? (Math.abs(ecartPts) > 15 ? " hors" : " rebal") : action === "GARDER" ? " garder" : "");
+    document.querySelectorAll(".sAct").forEach(function (i) {
+      var key = "v4act:" + i.getAttribute("data-compte") + ":" + i.getAttribute("data-t");
+      if (!i.getAttribute("data-init")) {
+        i.setAttribute("data-init", "1");
+        i.value = charger(key) || "";
+        i.addEventListener("input", function () { sauver(key, i.value); majSuivi(); });
       }
     });
 
+    var vals = {}, total = 0;
+    document.querySelectorAll(".sAct").forEach(function (i) {
+      var k = i.getAttribute("data-compte") + ":" + i.getAttribute("data-t");
+      var n = parseFloat(i.value) || 0, p = prix[i.getAttribute("data-t")] || 0;
+      vals[k] = n * p;
+      total += vals[k];
+    });
+
+    // TFSA : bandes
+    var totT = 0;
+    ORDRE_CŒUR.forEach(function (t) {
+      totT += vals["tfsa:" + t] || 0;
+    });
+    var grosTfsa = 0, grosReer = 0;
+    ORDRE_CŒUR.forEach(function (t) {
+      var v = vals["tfsa:" + t] || 0;
+      var ciblePct = ciblesC[t] || 0;
+      var bande = bandes[t] || [0, 100];
+      var reel = totT > 0 ? v / totT * 100 : 0;
+      var action, etat;
+      if (totT <= 0) { action = "—"; etat = ""; }
+      else if (reel < bande[0] || reel > bande[1]) { action = "ACHETER si argent neuf"; etat = " rebal"; }
+      else { action = "GARDER"; etat = " garder"; }
+      if (reel < bande[0] || reel > bande[1]) grosTfsa = 1;
+      var ctd = corpsT.querySelector('[data-t="' + t + '"]');
+      if (ctd) {
+        var cells = ctd.querySelectorAll("td");
+        cells[2].textContent = v > 0 ? argent(v) : "—";
+        cells[3].textContent = totT > 0 ? reel.toFixed(1) + " %" : "—";
+        cells[4].textContent = pct(ciblePct);
+        cells[5].textContent = bande[0] + "–" + bande[1] + " %";
+        cells[6].textContent = action;
+        cells[6].className = "acte" + etat;
+      }
+    });
+    $("noteSuiviTfsa").textContent = totT > 0
+      ? (grosTfsa ? "⚠ Un placement sort de sa bande : acheter le sous-pondéré avec de l'argent neuf (jamais vendre). Maximum 4 transactions par année." : "Tout est dans sa bande. Ne rien vendre, rien acheter.")
+      : "Entrer le nombre d'actions TFSA pour vérifier les bandes.";
+
+    // REER : cible → réel → écart
+    var totR = 0;
+    ORDRE_TAC.forEach(function (t) { totR += vals["reer:" + t] || 0; });
+    ORDRE_TAC.forEach(function (t) {
+      var v = vals["reer:" + t] || 0;
+      var ciblePct = ciblesT[t] !== undefined ? ciblesT[t] : 0;
+      var reel = totR > 0 ? v / totR * 100 : 0;
+      var ecartPts = reel - ciblePct;
+      var action, etat;
+      if (totR <= 0) { action = "—"; etat = ""; }
+      else if (Math.abs(ecartPts) > DEADBAND) { action = "RÉÉQUILIBRER"; etat = Math.abs(ecartPts) > 15 ? " hors" : " rebal"; grosReer = Math.max(grosReer, Math.abs(ecartPts)); }
+      else { action = "GARDER"; etat = " garder"; }
+      var ctr = corpsR.querySelector('[data-t="' + t + '"]');
+      if (ctr) {
+        var cells = ctr.querySelectorAll("td");
+        cells[2].textContent = v > 0 ? argent(v) : "—";
+        cells[3].textContent = totR > 0 ? reel.toFixed(1) + " %" : "—";
+        cells[4].textContent = pct(ciblePct);
+        cells[5].textContent = totR > 0 ? (ecartPts >= 0 ? "+" : "−") + Math.abs(ecartPts).toFixed(1) + " pts" : "—";
+        cells[6].textContent = action;
+        cells[6].className = "acte" + etat;
+      }
+    });
+
+    var noteR = "Réel et Cible en % de la manche REER. GARDER si l'écart reste dans ±" + DEADBAND +
+      " pts ; RÉÉQUILIBRER sinon.";
+    if (grosReer > 15) noteR += " ⚠ Écart supérieur à 15 points : exécuter en 3 tranches hebdomadaires (33 / 33 / 34 %).";
+    $("noteSuiviReer").textContent = noteR;
+
     $("sTotal").textContent = total > 0 ? argent(total) : "—";
     $("sDate").textContent = (ETAT && ETAT.prixDate) ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
-
-    var note = "Réel et Cible en % du portefeuille entier. GARDER si l'écart reste dans ±" + DEADBAND +
-      " pts ; RÉÉQUILIBRER sinon.";
-    if (gros > 15) note += " ⚠ Écart supérieur à 15 points détecté : exécuter en 3 tranches hebdomadaires (33 % / 33 % / 34 %).";
-    $("sNote").textContent = note;
   }
 
   /* -------------------------------- onglets ------------------------------- */
@@ -790,20 +953,20 @@
   $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
   $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
 
-  $("mInvest").addEventListener("input", majCalc);
-  $("invTotal").addEventListener("input", majSuivi);
+  $("mCoeur").addEventListener("input", majCalc);
+  $("mTac").addEventListener("input", majCalc);
   $("sEffacer").addEventListener("click", function () {
     if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
     try {
       Object.keys(localStorage).forEach(function (k) {
         if (k.indexOf("v4Prix:") === 0 || k.indexOf("v4act:") === 0 ||
-            k === "v4Invest" || k === "invTotal") localStorage.removeItem(k);
+            k === "v4Coeur" || k === "v4Tac") localStorage.removeItem(k);
       });
     } catch (e) {}
     location.reload();
   });
-  $("mInvest").value = charger("v4Invest") || "";
-  $("invTotal").value = charger("invTotal") || "";
+  $("mCoeur").value = charger("v4Coeur") || "";
+  $("mTac").value = charger("v4Tac") || "";
 
   var SECOURS = { regime: "NEUTRAL", actionRequise: false, changeLe: "", verifieLe: "" };
   var fichierLocal = location.protocol === "file:";
