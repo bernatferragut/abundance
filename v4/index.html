@@ -59,10 +59,10 @@
   .compte{border-radius:14px;padding:20px;margin-bottom:18px;border:1px solid}
   .compte h2{font-size:19px;margin:0 0 4px}
   .compte p.note{font-size:15px;margin:0 0 14px}
-  .ct-tfsa{background:var(--bleubg);border-color:#b3d0e6;color:var(--bleu)}
-  .ct-tfsa p.note{color:#3d5570}
   .ct-reer{background:#fdf1e6;border-color:#e5c9a3;color:var(--ambre)}
   .ct-reer p.note{color:#6b5120}
+  .ct-celi{background:var(--bleubg);border-color:#b3d0e6;color:var(--bleu)}
+  .ct-celi p.note{color:#3d5570}
   .compte table{color:var(--encre)}
 
   table{width:100%;border-collapse:collapse;font-size:16px}
@@ -122,12 +122,13 @@
 
   .meta{color:var(--gris);font-size:14px;text-align:center;margin-top:26px;line-height:1.7}
   .cache{display:none}
-  .onglets{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--ligne)}
-  .onglet{padding:10px 18px;cursor:pointer;font-size:16px;font-weight:700;color:var(--gris);
+  .onglets{display:flex;gap:6px;margin-bottom:20px;border-bottom:2px solid var(--ligne);flex-wrap:wrap}
+  .onglet{padding:10px 16px;cursor:pointer;font-size:15px;font-weight:700;color:var(--gris);
     border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px}
   .onglet.actif{color:var(--bleu);border-bottom-color:var(--bleu)}
   .panneau{display:none} .panneau.actif{display:block}
-  @media(max-width:520px){ .desc{display:none} table{font-size:15px} .statut .gros{font-size:29px} }
+  @media(max-width:520px){ .desc{display:none} table{font-size:15px} .statut .gros{font-size:29px}
+    .onglet{padding:9px 10px;font-size:14px} }
 </style>
 </head>
 <body>
@@ -140,8 +141,8 @@
   </div>
 
   <h1>Abundance 4.0 — P3</h1>
-  <p class="sub">Deux comptes, un moteur : le cœur permanent (TFSA) ne se vend jamais ;
-  la manche tactique (REER) suit le régime P3 chaque semaine.</p>
+  <p class="sub">Deux comptes, un moteur : la manche tactique (REER) suit le régime P3 chaque semaine ;
+  le cœur permanent (CELI/TFSA) ne se vend jamais.</p>
 
   <div id="apercu" class="apercu cache"></div>
   <div id="bnVieux" class="banniere bn-vieux cache"></div>
@@ -151,7 +152,8 @@
 
   <div class="onglets">
     <button class="onglet actif" id="ongPlan" type="button">Plan</button>
-    <button class="onglet" id="ongSuivi" type="button">Suivi</button>
+    <button class="onglet" id="ongCalc" type="button">Calculatrice d'achats</button>
+    <button class="onglet" id="ongSuivi" type="button">Suivi portefeuille</button>
   </div>
 
   <div id="panPlan" class="panneau actif">
@@ -173,22 +175,6 @@
       <p style="font-size:14px;color:var(--gris);margin:12px 0 0" id="scoreDet"></p>
     </div>
 
-    <div class="compte ct-tfsa">
-      <h2>🟦 TFSA — LE CŒUR PERMANENT · 60 % du portefeuille</h2>
-      <p class="note">On achète et on garde pour toujours. Jamais de vente. Rééquilibrage uniquement
-      avec de l'argent neuf (cotisations), maximum 4 transactions par année pour rester sous le radar
-      de l'ARC.</p>
-      <table>
-        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th>
-        <th style="text-align:right">% de la partie</th><th style="text-align:right">% du total</th>
-        <th style="text-align:right">Bande</th></tr></thead>
-        <tbody id="corpsTfsa"></tbody>
-      </table>
-      <p class="note" style="margin:12px 0 0">Bandes vérifiées au trimestre (janv., avr., juil., oct.).
-      Hors bande ? On achète seulement le sous-pondéré avec de l'argent neuf. Pas d'argent neuf ? On ne
-      fait rien, même si ça dérive.</p>
-    </div>
-
     <div class="compte ct-reer">
       <h2>🟧 REER — LA MANCHE TACTIQUE · 40 % du portefeuille</h2>
       <p class="note" id="noteReer">Le moteur P3 tourne chaque vendredi (clôture). Transactions illimitées —
@@ -205,46 +191,26 @@
       la sécurité immédiatement. BSOL et SPCX sont exclus — ETF purs et liquides uniquement.</p>
     </div>
 
-    <div class="calc carte">
-      <h2>Calculatrice d'achat (deux comptes)</h2>
-      <p class="note">Entrer l'argent neuf pour chaque compte. La page répartit selon le cœur permanent
-      (TFSA) et la matrice du régime en cours (REER), puis calcule le nombre d'actions (arrondies vers le bas).</p>
-      <div class="rangee">
-        <div class="champ">
-          <label for="mCoeur">TFSA — Cœur permanent (60 %)</label>
-          <input id="mCoeur" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
-        </div>
-        <div class="champ">
-          <label for="mTac">REER — Manche tactique (40 %)</label>
-          <input id="mTac" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 13000">
-        </div>
-      </div>
-      <div class="total" style="margin-top:14px">
-        <div class="lbl">Montant total à investir</div>
-        <div class="val" id="totVal">—</div>
-        <div class="lbl" id="totDate"></div>
-      </div>
-      <h3 style="font-size:16px;color:var(--bleu);margin:4px 0 8px">🟦 Cœur permanent (TFSA)</h3>
+    <div class="compte ct-celi">
+      <h2>🟦 CELI (TFSA) — LE CŒUR PERMANENT · 60 % du portefeuille</h2>
+      <p class="note">On achète et on garde pour toujours. Jamais de vente. Rééquilibrage uniquement
+      avec de l'argent neuf (cotisations), maximum 4 transactions par année pour rester sous le radar
+      de l'ARC.</p>
       <table>
-        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
-        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
-        <th style="text-align:right">Actions</th></tr></thead>
-        <tbody id="corpsCalcTfsa"></tbody>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th>
+        <th style="text-align:right">% de la partie</th><th style="text-align:right">% du total</th>
+        <th style="text-align:right">Bande</th></tr></thead>
+        <tbody id="corpsCeli"></tbody>
       </table>
-      <h3 style="font-size:16px;color:var(--ambre);margin:16px 0 8px">🟧 Manche tactique (REER)</h3>
-      <table>
-        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
-        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
-        <th style="text-align:right">Actions</th></tr></thead>
-        <tbody id="corpsCalcReer"></tbody>
-      </table>
-      <p class="note" style="margin:14px 0 0" id="resteCalc"></p>
+      <p class="note" style="margin:12px 0 0">Bandes vérifiées au trimestre (janv., avr., juil., oct.).
+      Hors bande ? On achète seulement le sous-pondéré avec de l'argent neuf. Pas d'argent neuf ? On ne
+      fait rien, même si ça dérive.</p>
     </div>
 
     <details class="info">
       <summary>L'exposition totale du portefeuille (les deux comptes)<span class="chev">›</span></summary>
       <div class="corps">
-        <p>Voici l'exposition effective (TFSA 60 % + REER 40 %) selon le régime en cours :</p>
+        <p>Voici l'exposition effective (REER 40 % + CELI 60 %) selon le régime en cours :</p>
         <table>
           <thead><tr><th>Placement</th><th style="text-align:right">🟢 BULL</th>
           <th style="text-align:right">🟡 NEUTRAL</th><th style="text-align:right">🔴 BEARISH</th></tr></thead>
@@ -274,10 +240,6 @@
     <details class="info">
       <summary>Le plan, compte par compte<span class="chev">›</span></summary>
       <div class="corps">
-        <h3>🟦 TFSA — le cœur permanent (60 %)</h3>
-        <p>VT 40 · GLDM 27,5 · IBIT 15 · MCHI 7,5 · SMH 10 (de la partie). Aucun signal, aucune vente.
-        Bande VT 35–45, GLDM 22,5–32,5, IBIT 10–20, MCHI 5–10, SMH 7,5–12,5. Rééquilibrage uniquement
-        avec de l'argent neuf, max 4 transactions/an.</p>
         <h3>🟧 REER — la manche tactique (40 %)</h3>
         <p>Le point de contrôle (NEUTRAL) est la maison : VT 30 · GLDM 20 · SMH 10 · BCI 10 · AIPO 15 ·
         SGOV 15.</p>
@@ -285,15 +247,19 @@
         SGOV 0.</p>
         <p><strong>🔴 BEARISH (RISK OFF)</strong> — on se défend : VT 15 · GLDM 30 · SMH 0 · BCI 15 ·
         AIPO 0 · SGOV 40.</p>
+        <h3>🟦 CELI (TFSA) — le cœur permanent (60 %)</h3>
+        <p>VT 40 · GLDM 27,5 · IBIT 15 · MCHI 7,5 · SMH 10 (de la partie). Aucun signal, aucune vente.
+        Bande VT 35–45, GLDM 22,5–32,5, IBIT 10–20, MCHI 5–10, SMH 7,5–12,5. Rééquilibrage uniquement
+        avec de l'argent neuf, max 4 transactions/an.</p>
         <h3>La réinitialisation annuelle</h3>
         <p>Chaque <strong>1er janvier</strong>, la manche tactique revient de force au Neutral, quoi que dise
         le score, pour verrouiller les gains cycliques et remettre le risque à zéro.</p>
         <h3>Pourquoi ce découpage ?</h3>
-        <p>L'ARC surveille le <strong>TFSA</strong> : faire du « négoce actif » (transactions fréquentes,
-        détention courte) peut imposer les gains à 100 % comme revenu d'entreprise. Le TFSA achète donc la
-        fondation et ne la vend jamais — quitte à subir 15 % de retenue américaine sur les dividendes. Le
-        <strong>REER</strong>, lui, autorise le négoce actif (l'impôt est payé au retrait, plus tard) et
-        bénéficie même d'une retenue américaine de 0 % grâce au traité fiscal.</p>
+        <p>L'ARC surveille le <strong>CELI (TFSA)</strong> : faire du « négoce actif » (transactions
+        fréquentes, détention courte) peut imposer les gains à 100 % comme revenu d'entreprise. Le CELI
+        achète donc la fondation et ne la vend jamais — quitte à subir 15 % de retenue américaine sur les
+        dividendes. Le <strong>REER</strong>, lui, autorise le négoce actif (l'impôt est payé au retrait,
+        plus tard) et bénéficie même d'une retenue américaine de 0 % grâce au traité fiscal.</p>
       </div>
     </details>
 
@@ -310,7 +276,7 @@
         semaine 2, 34 % la semaine 3</strong>. Si le disjoncteur ATR est déclenché, on exécute
         <strong>50 % immédiatement</strong> et le reste sur deux semaines.</p>
         <h3>Contraintes d'exécution</h3>
-        <p><strong>TFSA :</strong> seules des <strong>ordres d'achat</strong> sont permis, avec de l'argent
+        <p><strong>CELI :</strong> seules des <strong>ordres d'achat</strong> sont permis, avec de l'argent
         neuf — aucune vente, maximum 4 transactions par année. <strong>REER :</strong> ordres delta automatisés
         via IBKR, sans limite. <strong>BSOL (Solana) et SPCX (SpaceX) sont exclus</strong> pour garder une
         liquidité d'ETF pure et simple.</p>
@@ -332,7 +298,7 @@
         <h3>Surveillance</h3>
         <p>Un LLM sur le cluster surveille le flux et alerte si le régime oscille Bull ↔ Bearish plus de
         3 fois en 6 semaines (whipsaw), si le glissement cumulé du REER dépasse 0,50 % en une réallocation,
-        ou si une <strong>vente TFSA</strong> est tentée (ne devrait jamais arriver — verrouillée dans le code).</p>
+        ou si une <strong>vente CELI</strong> est tentée (ne devrait jamais arriver — verrouillée dans le code).</p>
       </div>
     </details>
 
@@ -424,7 +390,7 @@
 
         <h3>En résumé (pour un enfant de 5 ans)</h3>
         <blockquote style="margin:0 0 10px;padding:12px 16px;background:var(--fond);border-left:4px solid var(--bleu);border-radius:8px;font-size:16px">
-          <em>« Le coffre-fort de la maison (TFSA) achète les briques et ne les vend jamais. La boîte à
+          <em>« Le coffre-fort de la maison (CELI) achète les briques et ne les vend jamais. La boîte à
           outils (REER) regarde la météo chaque vendredi : s'il fait soleil, elle prend des outils pour
           construire ; s'il y a un orage, elle les range dans l'or et le cash. Et si le vent se met à hurler
           en pleine semaine, elle ne tient pas compte du vendredi — elle se met à l'abri tout de suite. »</em>
@@ -437,7 +403,7 @@
     <div class="regles">
       <h2>Les règles qu'on ne brise jamais</h2>
       <ul>
-        <li><strong>TFSA : coffre verrouillé.</strong> Achat seulement, avec de l'argent neuf. <strong>Zéro
+        <li><strong>CELI : coffre verrouillé.</strong> Achat seulement, avec de l'argent neuf. <strong>Zéro
         vente</strong>, maximum 4 transactions par année (sous le radar de l'ARC).</li>
         <li><strong>REER : moteur automatique.</strong> Suit le score composite P3. Aucune dérogation
         manuelle, sauf le disjoncteur ATR.</li>
@@ -456,26 +422,55 @@
 
   </div><!-- /panPlan -->
 
+  <div id="panCalc" class="panneau">
+    <div class="carte">
+      <h2>Calculatrice d'achat (deux comptes)</h2>
+      <p class="note">Entrer l'argent neuf pour chaque compte. La page répartit selon la matrice du régime
+      en cours (REER) et le cœur permanent (CELI), puis calcule le nombre d'actions (arrondies vers le bas).</p>
+      <div class="rangee">
+        <div class="champ">
+          <label for="mReer">REER — Manche tactique (40 %)</label>
+          <input id="mReer" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 13000">
+        </div>
+        <div class="champ">
+          <label for="mCeli">CELI — Cœur permanent (60 %)</label>
+          <input id="mCeli" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
+        </div>
+      </div>
+      <div class="total" style="margin-top:14px">
+        <div class="lbl">Montant total à investir</div>
+        <div class="val" id="totVal">—</div>
+        <div class="lbl" id="totDate"></div>
+      </div>
+      <h3 style="font-size:16px;color:var(--ambre);margin:4px 0 8px">🟧 Manche tactique (REER)</h3>
+      <table>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
+        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
+        <th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="corpsCalcReer"></tbody>
+      </table>
+      <h3 style="font-size:16px;color:var(--bleu);margin:16px 0 8px">🟦 Cœur permanent (CELI)</h3>
+      <table>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
+        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
+        <th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="corpsCalcCeli"></tbody>
+      </table>
+      <p class="note" style="margin:14px 0 0" id="resteCalc"></p>
+    </div>
+
+    <div class="calme">
+      <h2>Rappel</h2>
+      <p style="margin:0">Dans le <strong>CELI</strong>, on n'achète qu'avec de l'argent neuf (max
+      4 transactions/an). Dans le <strong>REER</strong>, on suit la colonne du régime en cours.</p>
+    </div>
+  </div><!-- /panCalc -->
+
   <div id="panSuivi" class="panneau">
     <div class="total">
       <div class="lbl">Valeur totale du portefeuille</div>
       <div class="val" id="sTotal">—</div>
       <div class="lbl" id="sDate" style="margin-top:8px"></div>
-    </div>
-
-    <div class="compte ct-tfsa">
-      <h2>🟦 TFSA — Cœur permanent : bandes</h2>
-      <p class="note">Entrer le nombre d'actions détenues dans le TFSA. La page compare au cœur fixe et
-      indique si un placement sort de sa bande. Hors bande → <strong>acheter</strong> le sous-pondéré avec de
-      l'argent neuf (jamais vendre).</p>
-      <table>
-        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
-        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
-        <th style="text-align:right">Cible</th><th style="text-align:right">Bande</th>
-        <th style="text-align:right">Action</th></tr></thead>
-        <tbody id="corpsSuiviTfsa"></tbody>
-      </table>
-      <p style="font-size:14px;color:#3d5570;margin-top:12px" id="noteSuiviTfsa"></p>
     </div>
 
     <div class="compte ct-reer">
@@ -491,6 +486,21 @@
         <tbody id="corpsSuiviReer"></tbody>
       </table>
       <p style="font-size:14px;color:#6b5120;margin-top:12px" id="noteSuiviReer"></p>
+    </div>
+
+    <div class="compte ct-celi">
+      <h2>🟦 CELI — Cœur permanent : bandes</h2>
+      <p class="note">Entrer le nombre d'actions détenues dans le CELI. La page compare au cœur fixe et
+      indique si un placement sort de sa bande. Hors bande → <strong>acheter</strong> le sous-pondéré avec de
+      l'argent neuf (jamais vendre).</p>
+      <table>
+        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
+        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Bande</th>
+        <th style="text-align:right">Action</th></tr></thead>
+        <tbody id="corpsSuiviCeli"></tbody>
+      </table>
+      <p style="font-size:14px;color:#3d5570;margin-top:12px" id="noteSuiviCeli"></p>
       <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
         border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
         Tout effacer</button>
@@ -530,8 +540,8 @@
     BCI: "Matières premières — abrdn All Commodity",
     SGOV: "Bons du Trésor US — iShares 0-3 Month"
   };
-  var ORDRE_CŒUR = ["VT","GLDM","IBIT","MCHI","SMH"];
-  var ORDRE_TAC = ["VT","GLDM","SMH","BCI","AIPO","SGOV"];
+  var ORDRE_REER = ["VT","GLDM","SMH","BCI","AIPO","SGOV"];
+  var ORDRE_CELI = ["VT","GLDM","IBIT","MCHI","SMH"];
   var DEADBAND = 5; // points de la manche REER
   var ETAT = null;
 
@@ -561,7 +571,7 @@
   function sauver(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function charger(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function regime() { return ETAT ? ETAT.regime : "NEUTRAL"; }
-  function coeur() { return (ETAT && ETAT.comptes && ETAT.comptes.tfse) || {}; }
+  function celi() { return (ETAT && ETAT.comptes && ETAT.comptes.tfse) || {}; }
   function reer() { return (ETAT && ETAT.comptes && ETAT.comptes.reer) || {}; }
   function ciblesReer() {
     var r = regime();
@@ -605,7 +615,7 @@
     } else if (agir) {
       $("statut").className = "statut agir";
       $("statutGros").textContent = "Quelque chose a changé";
-      $("statutDit").textContent = "Vérifier l'onglet Suivi : rapprocher la manche REER de la colonne " + LIB[r] + ".";
+      $("statutDit").textContent = "Vérifier l'onglet Suivi portefeuille : rapprocher la manche REER de la colonne " + LIB[r] + ".";
     } else {
       $("statut").className = "statut ok";
       $("statutGros").textContent = "Ne rien faire";
@@ -692,16 +702,29 @@
 
     afficherMatrice();
     afficherComb();
-    majCalc();
   }
 
   /* ------------------------------- matrices ------------------------------- */
   function afficherMatrice() {
-    var t = coeur(), c = reer().cibles || {};
-    var corps = $("corpsTfsa");
-    if (!corps.getAttribute("data-fait")) {
-      corps.setAttribute("data-fait", "1");
-      corps.innerHTML = ORDRE_CŒUR.map(function (tk) {
+    var t = celi(), c = reer().cibles || {};
+
+    var corpsR = $("corpsReer");
+    if (!corpsR.getAttribute("data-fait")) {
+      corpsR.setAttribute("data-fait", "1");
+      corpsR.innerHTML = ORDRE_REER.map(function (tk) {
+        return '<tr><td class="tk">' + tk + '</td><td class="desc">' + DESC[tk] + '</td>' +
+          '<td class="d ' + (c.BULL[tk] === 0 ? "zero" : "") + '">' + pct(c.BULL[tk]) + '</td>' +
+          '<td class="d ' + (c.NEUTRAL[tk] === 0 ? "zero" : "") + '">' + pct(c.NEUTRAL[tk]) + '</td>' +
+          '<td class="d ' + (c.BEARISH[tk] === 0 ? "zero" : "") + '">' + pct(c.BEARISH[tk]) + '</td></tr>';
+      }).join("") +
+        '<tr class="total"><td class="tk">Total</td><td></td>' +
+        '<td class="d">100 %</td><td class="d">100 %</td><td class="d">100 %</td></tr>';
+    }
+
+    var corpsC = $("corpsCeli");
+    if (!corpsC.getAttribute("data-fait")) {
+      corpsC.setAttribute("data-fait", "1");
+      corpsC.innerHTML = ORDRE_CELI.map(function (tk) {
         var bande = (t.bandes || {})[tk] || [0, 100];
         return '<tr><td class="tk">' + tk + '</td><td class="desc">' + DESC[tk] + '</td>' +
           '<td class="d">' + pct(t.cible[tk]) + '</td>' +
@@ -711,19 +734,6 @@
         '<tr class="total"><td class="tk">Total</td><td></td><td class="d">100 %</td>' +
         '<td class="d">' + (t.pct || 60) + ' %</td><td></td></tr>';
     }
-
-    var c2 = $("corpsReer");
-    if (!c2.getAttribute("data-fait")) {
-      c2.setAttribute("data-fait", "1");
-      c2.innerHTML = ORDRE_TAC.map(function (tk) {
-        return '<tr><td class="tk">' + tk + '</td><td class="desc">' + DESC[tk] + '</td>' +
-          '<td class="d ' + (c.BULL[tk] === 0 ? "zero" : "") + '">' + pct(c.BULL[tk]) + '</td>' +
-          '<td class="d ' + (c.NEUTRAL[tk] === 0 ? "zero" : "") + '">' + pct(c.NEUTRAL[tk]) + '</td>' +
-          '<td class="d ' + (c.BEARISH[tk] === 0 ? "zero" : "") + '">' + pct(c.BEARISH[tk]) + '</td></tr>';
-      }).join("") +
-        '<tr class="total"><td class="tk">Total</td><td></td>' +
-        '<td class="d">100 %</td><td class="d">100 %</td><td class="d">100 %</td></tr>';
-    }
     reglerHL(regime());
   }
 
@@ -732,7 +742,7 @@
     var corps = $("corpsComb");
     if (corps.getAttribute("data-fait")) return;
     corps.setAttribute("data-fait", "1");
-    var t = coeur().cible || {}, c = reer().cibles || {};
+    var t = celi().cible || {}, c = reer().cibles || {};
     var tous = ["VT","GLDM","IBIT","MCHI","SMH","AIPO","BCI","SGOV"];
     corps.innerHTML = tous.map(function (tk) {
       var base = t[tk] || 0;
@@ -749,7 +759,7 @@
   }
 
   /* ----------------------------- calculatrice ----------------------------- */
-  function fabriquerCalc(id, ordre, cibleFn) {
+  function fabriquerCalc(id, ordre) {
     var corps = $(id);
     if (corps.getAttribute("data-fait")) return corps;
     corps.setAttribute("data-fait", "1");
@@ -766,7 +776,8 @@
     corps.querySelectorAll(".prix").forEach(function (input) {
       var t = input.closest("tr").getAttribute("data-t");
       var garde = charger("v4Prix:" + t);
-      var val = garde !== null && garde !== "" ? garde : ((ETAT.prix[t]) ? String(ETAT.prix[t]) : "");
+      var prixT = (ETAT && ETAT.prix && ETAT.prix[t]) ? String(ETAT.prix[t]) : "";
+      var val = garde !== null && garde !== "" ? garde : prixT;
       input.value = val;
       input.addEventListener("input", function () {
         sauver("v4Prix:" + t, input.value);
@@ -777,13 +788,10 @@
   }
 
   function majCalc() {
-    var invCoeur = lire("mCoeur"), invTac = lire("mTac");
-    sauver("v4Coeur", $("mCoeur").value); sauver("v4Tac", $("mTac").value);
-    var prix = (ETAT && ETAT.prix) || {};
-    var coeurObj = coeur(), ciblesC = coeurObj.cible || {};
-    var ciblesT = ciblesReer();
-    var corpsC = fabriquerCalc("corpsCalcTfsa", ORDRE_CŒUR, null);
-    var corpsT = fabriquerCalc("corpsCalcReer", ORDRE_TAC, null);
+    var invReer = lire("mReer"), invCeli = lire("mCeli");
+    sauver("v4Reer", $("mReer").value); sauver("v4Celi", $("mCeli").value);
+    var corpsR = fabriquerCalc("corpsCalcReer", ORDRE_REER);
+    var corpsC = fabriquerCalc("corpsCalcCeli", ORDRE_CELI);
 
     function traiter(corps, mont, cibles, totMontId, totActId) {
       var restes = 0, investi = 0, sansPrix = [];
@@ -812,10 +820,10 @@
       return { restes: restes, sansPrix: sansPrix };
     }
 
-    var rC = traiter(corpsC, invCoeur, ciblesC, "totcorpsCalcTfsaMont", "totcorpsCalcTfsaAct");
-    var rT = traiter(corpsT, invTac, ciblesT, "totcorpsCalcReerMont", "totcorpsCalcReerAct");
+    var rR = traiter(corpsR, invReer, ciblesReer(), "totcorpsCalcReerMont", "totcorpsCalcReerAct");
+    var rC = traiter(corpsC, invCeli, celi().cible || {}, "totcorpsCalcCeliMont", "totcorpsCalcCeliAct");
 
-    var total = invCoeur + invTac;
+    var total = invReer + invCeli;
     $("totVal").textContent = total > 0 ? argent(total) : "—";
     var dateTxt = ETAT && ETAT.prixDate ? "Prix de la clôture du " + dateFr(ETAT.prixDate) : "";
     $("totDate").textContent = total > 0 ? dateTxt : "";
@@ -823,8 +831,8 @@
     var msg = "";
     if (total > 0) {
       msg = "Actions arrondies vers le bas. Reste non investi : environ " +
-        argent(rC.restes + rT.restes) + ".";
-      var manq = rC.sansPrix.concat(rT.sansPrix);
+        argent(rR.restes + rC.restes) + ".";
+      var manq = rR.sansPrix.concat(rC.sansPrix);
       if (manq.length) msg += " Prix manquant pour : " + manq.join(", ") + ". Le corriger à la main.";
     } else {
       msg = "Entrer un montant pour chaque compte afin de voir la répartition et le nombre d'actions.";
@@ -835,31 +843,34 @@
   /* -------------------------------- suivi -------------------------------- */
   function majSuivi() {
     var prix = (ETAT && ETAT.prix) || {};
-    var coeurObj = coeur(), bandes = coeurObj.bandes || {}, ciblesC = coeurObj.cible || {};
+    var celiObj = celi(), bandes = celiObj.bandes || {}, ciblesC = celiObj.cible || {};
     var ciblesT = ciblesReer();
 
-    var corpsT = $("corpsSuiviTfsa");
-    if (!corpsT.getAttribute("data-fait")) {
-      corpsT.setAttribute("data-fait", "1");
-      corpsT.innerHTML = ORDRE_CŒUR.map(function (t) {
-        return '<tr><td class="tk">' + t + '</td>' +
-          '<td style="text-align:right"><input class="mini sAct" data-compte="tfsa" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
-          '<td class="mont" data-v="' + t + '"></td><td class="mont" data-r="' + t + '"></td>' +
-          '<td class="mont" data-c="' + t + '"></td><td class="ecart" data-b="' + t + '"></td>' +
-          '<td class="acte" data-a="' + t + '"></td></tr>';
-      }).join("");
-    }
+    // REER (premier)
     var corpsR = $("corpsSuiviReer");
     if (!corpsR.getAttribute("data-fait")) {
       corpsR.setAttribute("data-fait", "1");
-      corpsR.innerHTML = ORDRE_TAC.map(function (t) {
-        return '<tr><td class="tk">' + t + '</td>' +
+      corpsR.innerHTML = ORDRE_REER.map(function (t) {
+        return '<tr data-t="' + t + '"><td class="tk">' + t + '</td>' +
           '<td style="text-align:right"><input class="mini sAct" data-compte="reer" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
-          '<td class="mont" data-v="' + t + '"></td><td class="mont" data-r="' + t + '"></td>' +
-          '<td class="mont" data-c="' + t + '"></td><td class="ecart" data-e="' + t + '"></td>' +
-          '<td class="acte" data-a="' + t + '"></td></tr>';
+          '<td class="mont"></td><td class="mont"></td>' +
+          '<td class="mont"></td><td class="ecart"></td>' +
+          '<td class="acte"></td></tr>';
       }).join("");
     }
+    // CELI (second)
+    var corpsC = $("corpsSuiviCeli");
+    if (!corpsC.getAttribute("data-fait")) {
+      corpsC.setAttribute("data-fait", "1");
+      corpsC.innerHTML = ORDRE_CELI.map(function (t) {
+        return '<tr data-t="' + t + '"><td class="tk">' + t + '</td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-compte="celi" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td class="mont"></td><td class="mont"></td>' +
+          '<td class="mont"></td><td class="ecart"></td>' +
+          '<td class="acte"></td></tr>';
+      }).join("");
+    }
+
     document.querySelectorAll(".sAct").forEach(function (i) {
       var key = "v4act:" + i.getAttribute("data-compte") + ":" + i.getAttribute("data-t");
       if (!i.getAttribute("data-init")) {
@@ -877,41 +888,11 @@
       total += vals[k];
     });
 
-    // TFSA : bandes
-    var totT = 0;
-    ORDRE_CŒUR.forEach(function (t) {
-      totT += vals["tfsa:" + t] || 0;
-    });
-    var grosTfsa = 0, grosReer = 0;
-    ORDRE_CŒUR.forEach(function (t) {
-      var v = vals["tfsa:" + t] || 0;
-      var ciblePct = ciblesC[t] || 0;
-      var bande = bandes[t] || [0, 100];
-      var reel = totT > 0 ? v / totT * 100 : 0;
-      var action, etat;
-      if (totT <= 0) { action = "—"; etat = ""; }
-      else if (reel < bande[0] || reel > bande[1]) { action = "ACHETER si argent neuf"; etat = " rebal"; }
-      else { action = "GARDER"; etat = " garder"; }
-      if (reel < bande[0] || reel > bande[1]) grosTfsa = 1;
-      var ctd = corpsT.querySelector('[data-t="' + t + '"]');
-      if (ctd) {
-        var cells = ctd.querySelectorAll("td");
-        cells[2].textContent = v > 0 ? argent(v) : "—";
-        cells[3].textContent = totT > 0 ? reel.toFixed(1) + " %" : "—";
-        cells[4].textContent = pct(ciblePct);
-        cells[5].textContent = bande[0] + "–" + bande[1] + " %";
-        cells[6].textContent = action;
-        cells[6].className = "acte" + etat;
-      }
-    });
-    $("noteSuiviTfsa").textContent = totT > 0
-      ? (grosTfsa ? "⚠ Un placement sort de sa bande : acheter le sous-pondéré avec de l'argent neuf (jamais vendre). Maximum 4 transactions par année." : "Tout est dans sa bande. Ne rien vendre, rien acheter.")
-      : "Entrer le nombre d'actions TFSA pour vérifier les bandes.";
-
-    // REER : cible → réel → écart
+    // REER : cible → réel → écart → action
     var totR = 0;
-    ORDRE_TAC.forEach(function (t) { totR += vals["reer:" + t] || 0; });
-    ORDRE_TAC.forEach(function (t) {
+    ORDRE_REER.forEach(function (t) { totR += vals["reer:" + t] || 0; });
+    var grosReer = 0;
+    ORDRE_REER.forEach(function (t) {
       var v = vals["reer:" + t] || 0;
       var ciblePct = ciblesT[t] !== undefined ? ciblesT[t] : 0;
       var reel = totR > 0 ? v / totR * 100 : 0;
@@ -920,7 +901,7 @@
       if (totR <= 0) { action = "—"; etat = ""; }
       else if (Math.abs(ecartPts) > DEADBAND) { action = "RÉÉQUILIBRER"; etat = Math.abs(ecartPts) > 15 ? " hors" : " rebal"; grosReer = Math.max(grosReer, Math.abs(ecartPts)); }
       else { action = "GARDER"; etat = " garder"; }
-      var ctr = corpsR.querySelector('[data-t="' + t + '"]');
+      var ctr = corpsR.querySelector('tr[data-t="' + t + '"]');
       if (ctr) {
         var cells = ctr.querySelectorAll("td");
         cells[2].textContent = v > 0 ? argent(v) : "—";
@@ -932,41 +913,70 @@
       }
     });
 
+    // CELI : bandes
+    var totC = 0;
+    ORDRE_CELI.forEach(function (t) { totC += vals["celi:" + t] || 0; });
+    var grosCeli = false;
+    ORDRE_CELI.forEach(function (t) {
+      var v = vals["celi:" + t] || 0;
+      var ciblePct = ciblesC[t] || 0;
+      var bande = bandes[t] || [0, 100];
+      var reel = totC > 0 ? v / totC * 100 : 0;
+      var hors = totC > 0 && (reel < bande[0] || reel > bande[1]);
+      if (hors) grosCeli = true;
+      var ctd = corpsC.querySelector('tr[data-t="' + t + '"]');
+      if (ctd) {
+        var cells = ctd.querySelectorAll("td");
+        cells[2].textContent = v > 0 ? argent(v) : "—";
+        cells[3].textContent = totC > 0 ? reel.toFixed(1) + " %" : "—";
+        cells[4].textContent = pct(ciblePct);
+        cells[5].textContent = bande[0] + "–" + bande[1] + " %";
+        cells[6].textContent = totC <= 0 ? "—" : (hors ? "ACHETER si argent neuf" : "GARDER");
+        cells[6].className = "acte" + (totC > 0 ? (hors ? " rebal" : " garder") : "");
+      }
+    });
+
     var noteR = "Réel et Cible en % de la manche REER. GARDER si l'écart reste dans ±" + DEADBAND +
       " pts ; RÉÉQUILIBRER sinon.";
     if (grosReer > 15) noteR += " ⚠ Écart supérieur à 15 points : exécuter en 3 tranches hebdomadaires (33 / 33 / 34 %).";
     $("noteSuiviReer").textContent = noteR;
+    $("noteSuiviCeli").textContent = totC > 0
+      ? (grosCeli ? "⚠ Un placement sort de sa bande : acheter le sous-pondéré avec de l'argent neuf (jamais vendre). Maximum 4 transactions par année." : "Tout est dans sa bande. Ne rien vendre, rien acheter.")
+      : "Entrer le nombre d'actions CELI pour vérifier les bandes.";
 
     $("sTotal").textContent = total > 0 ? argent(total) : "—";
     $("sDate").textContent = (ETAT && ETAT.prixDate) ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
   }
 
   /* -------------------------------- onglets ------------------------------- */
-  function onglet(actif) {
-    var p = actif === "suivi";
-    $("ongPlan").className  = "onglet" + (p ? "" : " actif");
-    $("ongSuivi").className = "onglet" + (p ? " actif" : "");
-    $("panPlan").className  = "panneau" + (p ? "" : " actif");
-    $("panSuivi").className = "panneau" + (p ? " actif" : "");
-    if (p) majSuivi();
+  function onglet(nom) {
+    var tabs = { plan: "ongPlan", calc: "ongCalc", suivi: "ongSuivi" };
+    var pans = { plan: "panPlan", calc: "panCalc", suivi: "panSuivi" };
+    Object.keys(tabs).forEach(function (k) {
+      $(tabs[k]).className = "onglet" + (k === nom ? " actif" : "");
+      $(pans[k]).className = "panneau" + (k === nom ? " actif" : "");
+    });
+    if (nom === "calc") majCalc();
+    if (nom === "suivi") majSuivi();
   }
   $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
+  $("ongCalc").addEventListener("click", function(){ onglet("calc"); });
   $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
 
-  $("mCoeur").addEventListener("input", majCalc);
-  $("mTac").addEventListener("input", majCalc);
+  $("mReer").addEventListener("input", majCalc);
+  $("mCeli").addEventListener("input", majCalc);
   $("sEffacer").addEventListener("click", function () {
     if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
     try {
       Object.keys(localStorage).forEach(function (k) {
         if (k.indexOf("v4Prix:") === 0 || k.indexOf("v4act:") === 0 ||
-            k === "v4Coeur" || k === "v4Tac") localStorage.removeItem(k);
+            k === "v4Reer" || k === "v4Celi") localStorage.removeItem(k);
       });
     } catch (e) {}
     location.reload();
   });
-  $("mCoeur").value = charger("v4Coeur") || "";
-  $("mTac").value = charger("v4Tac") || "";
+  $("mReer").value = charger("v4Reer") || "";
+  $("mCeli").value = charger("v4Celi") || "";
 
   var SECOURS = { regime: "NEUTRAL", actionRequise: false, changeLe: "", verifieLe: "" };
   var fichierLocal = location.protocol === "file:";
