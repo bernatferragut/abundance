@@ -16,9 +16,9 @@
   },
   "prixDate": "2026-08-18",
   "composite": {
-    "score": 82,
-    "brut": 44,
-    "macroScore": 9,
+    "score": 81,
+    "brut": 43.6,
+    "macroScore": 8.6,
     "hullBias": 10,
     "vpocScore": 15,
     "vixAdjust": 5,
@@ -26,10 +26,10 @@
     "macro": {
       "copperGold": 0.001,
       "hygIef": 0.857,
-      "cuivreOrRoc4s": -8.62,
-      "hygIefRoc4s": 0.8,
+      "cuivreOrRoc4s": -8.54,
+      "hygIefRoc4s": 0.6,
       "cuOrScore": 0,
-      "hygIefScore": 9
+      "hygIefScore": 8.6
     },
     "hull": {
       "hma": 159.33,
@@ -45,11 +45,11 @@
       "position": "risqueON",
       "vpocScore": 15
     },
-    "vix": 15.74,
+    "vix": 15.78,
     "courbe": {
       "t10": 4.74,
       "t3": 3.71,
-      "ecartPct": 1.02
+      "ecartPct": 1.03
     }
   },
   "atr": {
