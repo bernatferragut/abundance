@@ -59,6 +59,20 @@ Contraintes dures :
 - **Reset annuel** : le 1er janvier, retour forcé de la manche au Neutral.
 - **Repli** : données VPOC/VAL manquantes → Neutral + alerte.
 
+## Comment entrer sur le marché
+
+Personne ne peut prédire le marché — on entre donc **par étapes**, sans tout miser d'un coup :
+**25 % maintenant, 25 % plus tard, 50 % d'ici janvier 2027**.
+
+| Étape | Quand | Combien | Où | Condition |
+| ----- | ----- | ------: | -- | --------- |
+| 1 | Maintenant | 25 % | CELI (cœur) | Immédiat |
+| 2 | Oct – Nov | 25 % | REER (tactique) | Baisse ≥ 10 % ou peur faible |
+| 3 | Déc – Janv. | 50 % | Les deux comptes | Au plus tard le 1er janvier |
+
+**Frein d'urgence :** si le disjoncteur ATR se déclenche (volatilité de VT > 25 %), on met le
+déploiement en pause jusqu'à ce que la volatilité redescende sous 20 %.
+
 ## Le moteur de signal (`gate_engine`)
 
 Le rulebook décrit un moteur Python (`gate_engine.py`) sur un cluster local de

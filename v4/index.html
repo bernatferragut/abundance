@@ -222,18 +222,20 @@
     <details class="info">
       <summary>Comment le moteur décide : le score composite<span class="chev">›</span></summary>
       <div class="corps">
-        <p>Le <strong>gate_engine</strong> évalue le système chaque <strong>vendredi à la clôture</strong>.
-        Il compile un score de 0 à 100 à partir de cinq composantes, puis choisit l'état :</p>
+        <p>Chaque <strong>vendredi</strong>, un petit cerveau (le moteur P3) met une note au marché,
+        de 0 à 100, à partir de 5 indices simples. Selon la note, il choisit l'état :</p>
         <table id="tableDetail">
-          <thead><tr><th>Composante</th><th style="text-align:right">Note</th><th style="text-align:right">Détail</th></tr></thead>
+          <thead><tr><th>Ce qu'on regarde</th><th style="text-align:right">Points</th></tr></thead>
           <tbody></tbody>
         </table>
-        <p style="margin-top:10px"><strong>Sortie de la machine d'état :</strong> score ≥ 70 → 🟢 BULL ;
-        40–69 → 🟡 NEUTRAL (le point de contrôle) ; < 40 → 🔴 BEARISH.</p>
+        <p style="margin-top:10px">
+          🟢 Note de 70 ou plus → <strong>BULL</strong> (on prend du risque)<br>
+          🟡 Note de 40 à 69 → <strong>NEUTRAL</strong> (on équilibre — c'est la maison)<br>
+          🔴 Note sous 40 → <strong>BEARISH</strong> (on se protège)
+        </p>
         <p id="atrLigne" style="margin-top:10px"></p>
-        <p>Les prix se rafraîchissent chaque jour, mais le <strong>régime ne change que le samedi</strong>
-        (le moteur utilise la clôture du vendredi) — sauf si le <strong>disjoncteur ATR</strong> force la
-        sécurité immédiatement. Ne pas prédire : observer.</p>
+        <p>Les prix se mettent à jour chaque jour, mais le <strong>régime ne change que le samedi</strong>
+        — sauf si le <strong>disjoncteur ATR</strong> force la sécurité immédiatement.</p>
       </div>
     </details>
 
@@ -241,64 +243,58 @@
       <summary>Le plan, compte par compte<span class="chev">›</span></summary>
       <div class="corps">
         <h3>🟧 REER — la manche tactique (40 %)</h3>
-        <p>Le point de contrôle (NEUTRAL) est la maison : VT 30 · GLDM 20 · SMH 10 · BCI 10 · AIPO 15 ·
-        SGOV 15.</p>
-        <p><strong>🟢 BULL (RISK ON)</strong> — on profite : VT 35 · GLDM 25 · SMH 15 · BCI 10 · AIPO 15 ·
-        SGOV 0.</p>
-        <p><strong>🔴 BEARISH (RISK OFF)</strong> — on se défend : VT 15 · GLDM 30 · SMH 0 · BCI 15 ·
-        AIPO 0 · SGOV 40.</p>
+        <p>Elle change avec le régime :</p>
+        <ul>
+          <li>🟢 <strong>BULL</strong> : VT 35 · GLDM 25 · SMH 15 · BCI 10 · AIPO 15 · SGOV 0</li>
+          <li>🟡 <strong>NEUTRAL</strong> : VT 30 · GLDM 20 · SMH 10 · BCI 10 · AIPO 15 · SGOV 15</li>
+          <li>🔴 <strong>BEARISH</strong> : VT 15 · GLDM 30 · SMH 0 · BCI 15 · AIPO 0 · SGOV 40</li>
+        </ul>
         <h3>🟦 CELI (TFSA) — le cœur permanent (60 %)</h3>
-        <p>VT 40 · GLDM 27,5 · IBIT 15 · MCHI 7,5 · SMH 10 (de la partie). Aucun signal, aucune vente.
-        Bande VT 35–45, GLDM 22,5–32,5, IBIT 10–20, MCHI 5–10, SMH 7,5–12,5. Rééquilibrage uniquement
-        avec de l'argent neuf, max 4 transactions/an.</p>
+        <p>Il ne change jamais : VT 40 · GLDM 27,5 · IBIT 15 · MCHI 7,5 · SMH 10. On n'achète qu'avec de
+        l'argent neuf, jamais de vente, maximum 4 fois par année.</p>
         <h3>La réinitialisation annuelle</h3>
-        <p>Chaque <strong>1er janvier</strong>, la manche tactique revient de force au Neutral, quoi que dise
-        le score, pour verrouiller les gains cycliques et remettre le risque à zéro.</p>
-        <h3>Pourquoi ce découpage ?</h3>
-        <p>L'ARC surveille le <strong>CELI (TFSA)</strong> : faire du « négoce actif » (transactions
-        fréquentes, détention courte) peut imposer les gains à 100 % comme revenu d'entreprise. Le CELI
-        achète donc la fondation et ne la vend jamais — quitte à subir 15 % de retenue américaine sur les
-        dividendes. Le <strong>REER</strong>, lui, autorise le négoce actif (l'impôt est payé au retrait,
-        plus tard) et bénéficie même d'une retenue américaine de 0 % grâce au traité fiscal.</p>
+        <p>Chaque <strong>1er janvier</strong>, la manche tactique revient au Neutral, quoi que dise le
+        score. C'est le moment de repartir de zéro.</p>
+        <h3>Pourquoi deux comptes ?</h3>
+        <p>L'ARC peut imposer les gains d'un <strong>CELI</strong> si on y fait du négoce fréquent. Le CELI
+        achète donc la fondation et ne la vend jamais. Le <strong>REER</strong>, lui, autorise le négoce
+        actif (l'impôt est payé plus tard, au retrait) — c'est là que le moteur P3 agit chaque semaine.</p>
       </div>
     </details>
 
     <details class="info">
       <summary>L'exécution : tranches, ATR, glissement<span class="chev">›</span></summary>
       <div class="corps">
-        <h3>Le disjoncteur ATR</h3>
-        <p>L'<strong>ATR 14 jours annualisé</strong> de VT mesure la panique. S'il dépasse <strong>25 %</strong>,
-        le système force <strong>Neutral</strong> (pause du risque) ; s'il dépasse <strong>40 %</strong>, il force
-        <strong>Bearish</strong> (défense d'urgence). Il s'applique immédiatement, sans attendre le vendredi.</p>
-        <h3>Les tranches étalées</h3>
-        <p>Quand un changement de régime exige un écart de <strong>plus de 15 points</strong> sur un placement
-        (ex. SGOV 0 → 40, ou SMH 15 → 0), la réallocation est découpée : <strong>33 % la semaine 1, 33 % la
-        semaine 2, 34 % la semaine 3</strong>. Si le disjoncteur ATR est déclenché, on exécute
-        <strong>50 % immédiatement</strong> et le reste sur deux semaines.</p>
-        <h3>Contraintes d'exécution</h3>
-        <p><strong>CELI :</strong> seules des <strong>ordres d'achat</strong> sont permis, avec de l'argent
-        neuf — aucune vente, maximum 4 transactions par année. <strong>REER :</strong> ordres delta automatisés
-        via IBKR, sans limite. <strong>BSOL (Solana) et SPCX (SpaceX) sont exclus</strong> pour garder une
-        liquidité d'ETF pure et simple.</p>
+        <h3>Le disjoncteur ATR (le bouton de panique)</h3>
+        <p>Si le marché devient trop agité (volatilité de VT > 25 %), le système se met en sécurité
+        <strong>immédiatement</strong> : Neutral, ou Bearish s'il est très agité (> 40 %). Pas besoin
+        d'attendre vendredi.</p>
+        <h3>Les tranches (on ne bouge pas tout d'un coup)</h3>
+        <p>Quand on doit beaucoup changer (plus de 15 points sur un placement), on le fait en
+        <strong>3 semaines</strong> (33 % à chaque fois). Cela évite de tout vendre en panique et de faire
+        baisser le prix contre soi.</p>
+        <h3>Les règles d'exécution</h3>
+        <ul>
+          <li><strong>CELI :</strong> achats seulement, avec de l'argent neuf — jamais de vente, max 4/an.</li>
+          <li><strong>REER :</strong> exécuté automatiquement, sans limite.</li>
+          <li>Pas de BSOL (Solana) ni de SPCX (SpaceX) : ETF purs et liquides uniquement.</li>
+        </ul>
       </div>
     </details>
 
     <details class="info">
       <summary>L'architecture et le flux de données<span class="chev">›</span></summary>
       <div class="corps">
-        <h3>Qui calcule quoi</h3>
-        <p>Le rulebook P3 décrit un moteur <strong>Python (gate_engine.py)</strong> sur un cluster local de
-        Mac mini M4, qui agrège OHLCV, les ratios macro, le VIX et exécute via IBKR. Cette page est le
-        <strong>portail public</strong> : un port Node sans dépendance de ce même moteur tourne dans GitHub
-        Actions et publie <code>state.json</code> que la page lit.</p>
-        <h3>Le cycle hebdomadaire</h3>
-        <p>Vendredi 15:30 : ingestion des données → 16:00 : le moteur sort <code>{ régime, score }</code> →
-        16:05 : on lit les poids réels → 16:10 : on génère les ordres delta du REER → 16:15-17:00 :
-        exécution → 17:15 : journalisation.</p>
-        <h3>Surveillance</h3>
-        <p>Un LLM sur le cluster surveille le flux et alerte si le régime oscille Bull ↔ Bearish plus de
-        3 fois en 6 semaines (whipsaw), si le glissement cumulé du REER dépasse 0,50 % en une réallocation,
-        ou si une <strong>vente CELI</strong> est tentée (ne devrait jamais arriver — verrouillée dans le code).</p>
+        <h3>Qui fait le calcul ?</h3>
+        <p>Cette page est la <strong>version publique</strong> du moteur P3. Le même calcul complet tourne
+        sur un petit ordinateur local (un cluster de Mac mini). La page se met à jour <strong>toute
+        seule</strong> chaque jour : prix, score et régime sont recalculés automatiquement.</p>
+        <h3>Quand ça se passe ?</h3>
+        <p>Le vendredi à la clôture, le moteur sort <code>{ régime, score }</code>. Le REER est ensuite
+        rééquilibré automatiquement vers sa cible. Le CELI, lui, ne fait que « acheter et garder ».</p>
+        <h3>La surveillance</h3>
+        <p>Un système d'alerte surveille en continu : il prévient si le régime change trop souvent, si le
+        glissement dépasse 0,50 %, ou si une vente CELI est tentée (ne devrait jamais arriver).</p>
       </div>
     </details>
 
@@ -397,6 +393,31 @@
         </blockquote>
         <p>Voilà. Pas de ressenti, pas de nouvelles à la télé, pas d'interviews de PDG. Juste des chiffres
         froids et durs qui posent trois questions simples. C'est pour ça que ça marche.</p>
+      </div>
+    </details>
+
+    <details class="info">
+      <summary>Comment entrer sur le marché<span class="chev">›</span></summary>
+      <div class="corps">
+        <p>Personne ne peut prédire le marché. Mais on peut entrer <strong>sans tout miser d'un coup</strong>.
+        L'idée en une ligne : <strong>25 % maintenant, 25 % plus tard, 50 % d'ici janvier 2027</strong>.</p>
+        <table>
+          <thead><tr><th>Étape</th><th>Quand</th><th style="text-align:right">Combien</th><th>Où</th><th>Condition</th></tr></thead>
+          <tbody>
+            <tr><td class="tk">1</td><td>Maintenant</td><td class="d">25 %</td><td>CELI (cœur)</td><td>Immédiat</td></tr>
+            <tr><td class="tk">2</td><td>Oct – Nov</td><td class="d">25 %</td><td>REER (tactique)</td><td>Baisse ≥ 10 % <em>ou</em> peur faible</td></tr>
+            <tr><td class="tk">3</td><td>Déc – Janv.</td><td class="d">50 %</td><td>Les deux comptes</td><td>Au plus tard le 1er janvier</td></tr>
+          </tbody>
+        </table>
+        <h3>Le frein d'urgence</h3>
+        <p>Si le disjoncteur ATR se déclenche (volatilité de VT > 25 %), on <strong>met le déploiement en
+        pause</strong> jusqu'à ce que la tempête passe (volatilité < 20 %).</p>
+        <h3>Pourquoi c'est bien</h3>
+        <ul>
+          <li>On n'est pas « tout d'un coup » au sommet : on garde 75 % de munitions si ça baisse.</li>
+          <li>On n'est pas « tout en liquide » : on a déjà 25 % d'exposition si ça monte.</li>
+          <li>C'est le système P3 lui-même qui guide (score, disjoncteur, reset annuel).</li>
+        </ul>
       </div>
     </details>
 
@@ -641,26 +662,16 @@
     // Détail du signal
     var tbody = $("tableDetail").querySelector("tbody");
     tbody.innerHTML = "";
-    function ligne(nom, note, det) {
+    function ligne(nom, note) {
       var tr = document.createElement("tr");
-      tr.innerHTML = '<td class="tk">' + nom + '</td><td style="text-align:right;font-weight:700">' + note + '</td>' +
-        '<td style="text-align:right;color:var(--gris);font-size:13px">' + det + '</td>';
+      tr.innerHTML = '<td class="tk">' + nom + '</td><td style="text-align:right;font-weight:700">' + note + '</td>';
       tbody.appendChild(tr);
     }
-    var mac = c.macro;
-    ligne("A · Gate macro (0–30)", c.macroScore + "/30",
-      mac ? "Cu/Or ROC4s " + mac.cuivreOrRoc4s + " % · HYG/IEF ROC4s " + mac.hygIefRoc4s + " %" : "—");
-    var hu = c.hull;
-    ligne("B · Hull (biais ±10)", (c.hullBias >= 0 ? "+" : "") + c.hullBias,
-      hu ? "HMA " + hu.hma + " → pente " + (hu.pente === "hausse" ? "hausse 🟢" : "baisse 🔴") : "—");
-    var vp = c.vpoc;
-    ligne("C · Volume Profile (±15)", (c.vpocScore >= 0 ? "+" : "") + c.vpocScore,
-      vp ? "VPOC " + vp.vpoc + " · VAL " + vp.val + " · prix " + vp.prix + " → " + vp.position : "—");
-    ligne("D · VIX (−15 / 0 / +5)", (c.vixAdjust >= 0 ? "+" : "") + c.vixAdjust,
-      c.vix !== null && c.vix !== undefined ? "VIX " + c.vix : "—");
-    var co = c.courbe;
-    ligne("D · Courbe 10Y−3M (−10 / 0 / +5)", (c.yieldAdjust >= 0 ? "+" : "") + c.yieldAdjust,
-      co ? "10Y " + co.t10 + " % · 3M " + co.t3 + " % · écart " + co.ecartPct + " pts" : "—");
+    ligne("L'économie (cuivre + crédit)", c.macroScore + "/30");
+    ligne("La tendance (ligne lissée)", (c.hullBias >= 0 ? "+" : "") + c.hullBias);
+    ligne("La foule (Volume Profile)", (c.vpocScore >= 0 ? "+" : "") + c.vpocScore);
+    ligne("La peur (VIX)", (c.vixAdjust >= 0 ? "+" : "") + c.vixAdjust);
+    ligne("La courbe de taux", (c.yieldAdjust >= 0 ? "+" : "") + c.yieldAdjust);
 
     var atr = s.atr || {};
     if (atr.pctAnnualise !== null && atr.pctAnnualise !== undefined) {
