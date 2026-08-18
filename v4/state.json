@@ -1,0 +1,95 @@
+{
+  "regime": "BULL",
+  "actionRequise": true,
+  "changeLe": "2026-08-18",
+  "verifieLe": "2026-08-18",
+  "note": "",
+  "prix": {
+    "VT": 162.25,
+    "GLDM": 86.58,
+    "IBIT": 35.63,
+    "SMH": 587.82,
+    "BSOL": 10.24,
+    "MCHI": 54.63,
+    "BCI": 24.55,
+    "SGOV": 100.56
+  },
+  "prixDate": "2026-08-18",
+  "composite": {
+    "score": 82,
+    "brut": 44,
+    "macroScore": 9,
+    "hullBias": 10,
+    "vpocScore": 15,
+    "vixAdjust": 5,
+    "yieldAdjust": 5,
+    "macro": {
+      "copperGold": 0.001,
+      "hygIef": 0.857,
+      "cuivreOrRoc4s": -8.62,
+      "hygIefRoc4s": 0.8,
+      "cuOrScore": 0,
+      "hygIefScore": 9
+    },
+    "hull": {
+      "hma": 159.33,
+      "hmaAvant4s": 159.29,
+      "pente": "hausse",
+      "hullBias": 10
+    },
+    "vpoc": {
+      "vpoc": 142.62,
+      "val": 125.62,
+      "vah": 158.59,
+      "prix": 162.25,
+      "position": "risqueON",
+      "vpocScore": 15
+    },
+    "vix": 15.74,
+    "courbe": {
+      "t10": 4.74,
+      "t3": 3.71,
+      "ecartPct": 1.02
+    }
+  },
+  "atr": {
+    "pctAnnualise": 15.89,
+    "actif": false,
+    "force": null
+  },
+  "cibles": {
+    "BULL": {
+      "VT": 35,
+      "GLDM": 10,
+      "IBIT": 15,
+      "SMH": 15,
+      "BSOL": 10,
+      "MCHI": 10,
+      "BCI": 5,
+      "SGOV": 0
+    },
+    "NEUTRAL": {
+      "VT": 30,
+      "GLDM": 15,
+      "IBIT": 10,
+      "SMH": 10,
+      "BSOL": 5,
+      "MCHI": 10,
+      "BCI": 5,
+      "SGOV": 15
+    },
+    "BEARISH": {
+      "VT": 20,
+      "GLDM": 30,
+      "IBIT": 5,
+      "SMH": 0,
+      "BSOL": 0,
+      "MCHI": 5,
+      "BCI": 10,
+      "SGOV": 30
+    }
+  },
+  "fallback": false,
+  "resetAnnuel": false,
+  "macroErr": null
+}

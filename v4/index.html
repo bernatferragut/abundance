@@ -1,0 +1,827 @@
+<!doctype html>
+<html lang="fr-CA">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Abundance 4.0 — P3 : le plan du point de contrôle</title>
+<style>
+  :root{
+    --encre:#1a1a1a; --gris:#5f6670; --ligne:#dfe3e8; --fond:#f7f9fb; --carte:#fff;
+    --vert:#1f7a3d; --vertbg:#e8f5ec; --ambre:#8a5a00; --ambrebg:#fdf3e0;
+    --bleu:#1a4f7a; --bleubg:#e8f1f8; --rouge:#8f2626; --rougebg:#fbeeee;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:20px 16px 60px;background:var(--fond);color:var(--encre);
+    font:18px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-text-size-adjust:100%}
+  .wrap{max-width:700px;margin:0 auto}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--gris);font-size:16px;margin:0 0 18px}
+
+  .versions{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .ver{padding:6px 14px;border-radius:999px;font-size:14px;font-weight:700;color:var(--gris);
+    background:var(--carte);border:1px solid var(--ligne);text-decoration:none}
+  .ver.actif{color:#fff;background:var(--bleu);border-color:var(--bleu)}
+  .ver:hover{text-decoration:underline}
+
+  .statut{border-radius:16px;padding:26px 22px;text-align:center;margin-bottom:18px;border:2px solid}
+  .statut .gros{font-size:34px;line-height:1.15;font-weight:800;margin:0 0 6px}
+  .statut .dit{font-size:18px;margin:0}
+  .ok{background:var(--vertbg);border-color:#a8d5b8;color:var(--vert)}
+  .agir{background:var(--ambrebg);border-color:#e0c68a;color:var(--ambre)}
+  .err{background:var(--rougebg);border-color:#e0b4b4;color:var(--rouge)}
+  .pastille{display:inline-block;padding:6px 16px;border-radius:999px;font-size:15px;font-weight:700;margin-top:12px}
+  .pBULL{background:var(--vertbg);color:var(--vert);border:1px solid #a8d5b8}
+  .pNEUTRAL{background:var(--ambrebg);color:var(--ambre);border:1px solid #e0c68a}
+  .pBEARISH{background:var(--rougebg);color:var(--rouge);border:1px solid #e0b4b4}
+
+  .scorebox{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:18px 20px;margin-bottom:18px}
+  .scorebox .lbl{display:flex;justify-content:space-between;font-size:14px;color:var(--gris);font-weight:600;margin-bottom:8px}
+  .scorebox .scv{font-size:26px;font-weight:800;color:var(--bleu)}
+  .scorebar{position:relative;height:16px;background:linear-gradient(90deg,var(--rougebg),var(--ambrebg) 39%,var(--vertbg) 69%,var(--vertbg));
+    border:1px solid var(--ligne);border-radius:999px;overflow:hidden}
+  .scorefill{position:absolute;top:0;left:0;bottom:0;background:var(--bleu);border-radius:999px;opacity:.85}
+  .scoremark{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--encre);opacity:.5}
+  .scoremark.m40{left:40%} .scoremark.m70{left:70%}
+  .scoreleg{display:flex;justify-content:space-between;font-size:12px;color:var(--gris);margin-top:6px}
+
+  .banniere{border-radius:12px;padding:13px 16px;font-size:15px;margin-bottom:18px}
+  .bn-atr{background:var(--rougebg);border:1px solid #e0b4b4;color:var(--rouge)}
+  .bn-reset{background:var(--bleubg);border:1px solid #b3d0e6;color:var(--bleu)}
+  .bn-fallback{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre)}
+  .bn-vieux{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre)}
+  .apercu{background:#eef2f7;border:1px dashed #9fb0c4;color:#3d5570;border-radius:12px;
+    padding:12px;text-align:center;font-size:14px;margin-bottom:18px}
+
+  .carte{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;padding:20px;margin-bottom:18px}
+  .carte h2{font-size:19px;margin:0 0 4px}
+  .carte p.note{color:var(--gris);font-size:15px;margin:0 0 14px}
+
+  table{width:100%;border-collapse:collapse;font-size:16px}
+  th{text-align:left;font-size:13px;color:var(--gris);font-weight:600;padding:0 10px 8px 0;border-bottom:2px solid var(--ligne)}
+  td{padding:10px 10px 10px 0;border-bottom:1px solid var(--ligne);vertical-align:middle}
+  tr:last-child td{border-bottom:none}
+  tr.total td{border-top:2px solid var(--ligne);font-weight:700;border-bottom:none}
+  .tk{font-weight:700;white-space:nowrap}
+  .desc{color:var(--gris);font-size:13px}
+  .d{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;padding-left:8px}
+  .mont{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;color:var(--bleu);font-weight:700;padding-left:8px}
+  .actions{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700;padding-left:8px}
+  .actions .dollar{color:var(--gris);font-size:13px;font-weight:600;display:block}
+  .zero{color:#aab0b8;font-weight:600}
+  .hlBULL{background:var(--vertbg)} .hlNEUTRAL{background:var(--ambrebg)} .hlBEARISH{background:var(--rougebg)}
+  input.prix{width:92px;padding:7px 8px;font-size:14px;text-align:right;border:1px solid var(--ligne);
+    border-radius:7px;font-variant-numeric:tabular-nums}
+  input.prix:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+
+  .champ label{display:block;font-size:14px;color:var(--gris);margin-bottom:6px;font-weight:600}
+  .champ input{width:100%;padding:13px 14px;font-size:22px;font-weight:700;
+    border:1px solid var(--ligne);border-radius:10px;font-variant-numeric:tabular-nums}
+  .champ input:focus{outline:2px solid var(--bleu);outline-offset:-1px}
+
+  .total{background:var(--bleubg);border:1px solid #b3d0e6;border-radius:14px;
+    padding:20px;text-align:center;margin-bottom:18px}
+  .total .lbl{font-size:14px;color:var(--gris)}
+  .total .val{font-size:30px;font-weight:800;color:var(--bleu);margin:2px 0}
+
+  .reste{background:var(--vertbg);border:1px solid #a8d5b8;color:var(--vert);
+    border-radius:12px;padding:14px;font-size:15px;margin-bottom:18px}
+  .regles{background:var(--rougebg);border:1px solid #e0b4b4;border-radius:14px;padding:20px;margin-bottom:18px}
+  .regles h2{color:var(--rouge);font-size:19px;margin:0 0 10px}
+  .regles ul{margin:0;padding-left:22px} .regles li{margin-bottom:8px}
+
+  .mini{width:70px;padding:7px 8px;font-size:14px;border:1px solid var(--ligne);border-radius:7px;
+    text-align:right;font-variant-numeric:tabular-nums}
+  .ecart{text-align:right;font-variant-numeric:tabular-nums;font-size:14px}
+  .acte{text-align:right;font-weight:700;font-size:14px;white-space:nowrap;padding-left:10px}
+  .acte.garder{color:var(--vert)} .acte.rebal{color:var(--ambre)} .acte.hors{color:var(--rouge);font-weight:800}
+
+  details.info{background:var(--carte);border:1px solid var(--ligne);border-radius:14px;margin-bottom:18px;overflow:hidden}
+  details.info summary{cursor:pointer;padding:18px 20px;font-size:18px;font-weight:700;list-style:none;
+    display:flex;justify-content:space-between;align-items:center}
+  details.info summary::-webkit-details-marker{display:none}
+  .chev{color:var(--gris);font-size:24px;transition:transform .18s;display:inline-block}
+  details.info[open] .chev{transform:rotate(90deg)}
+  .corps{padding:0 20px 20px;border-top:1px solid var(--ligne)}
+  .corps h3{font-size:16px;margin:18px 0 6px;color:var(--bleu)}
+  .corps p{margin:0 0 10px;font-size:16px;line-height:1.6}
+  .corps table{font-size:15px}
+  .calme{background:var(--vertbg);border:1px solid #a8d5b8;border-radius:14px;padding:20px;margin-bottom:18px}
+  .calme h2{color:var(--vert);font-size:19px;margin:0 0 8px}
+
+  .meta{color:var(--gris);font-size:14px;text-align:center;margin-top:26px;line-height:1.7}
+  .cache{display:none}
+  .onglets{display:flex;gap:8px;margin-bottom:20px;border-bottom:2px solid var(--ligne)}
+  .onglet{padding:10px 18px;cursor:pointer;font-size:16px;font-weight:700;color:var(--gris);
+    border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px}
+  .onglet.actif{color:var(--bleu);border-bottom-color:var(--bleu)}
+  .panneau{display:none} .panneau.actif{display:block}
+  @media(max-width:520px){ .desc{display:none} table{font-size:15px} .statut .gros{font-size:29px} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="versions">
+    <a class="ver" href="../">V2</a>
+    <a class="ver" href="../v3/">V3</a>
+    <a class="ver actif" href="./">V4 · P3</a>
+  </div>
+
+  <h1>Abundance 4.0 — P3</h1>
+  <p class="sub">Le plan du point de contrôle. Un régime, une allocation, un geste à la fois.</p>
+
+  <div id="apercu" class="apercu cache"></div>
+  <div id="bnVieux" class="banniere bn-vieux cache"></div>
+  <div id="bnATR" class="banniere bn-atr cache"></div>
+  <div id="bnReset" class="banniere bn-reset cache"></div>
+  <div id="bnFallback" class="banniere bn-fallback cache"></div>
+
+  <div class="onglets">
+    <button class="onglet actif" id="ongPlan" type="button">Plan</button>
+    <button class="onglet" id="ongSuivi" type="button">Suivi</button>
+  </div>
+
+  <div id="panPlan" class="panneau actif">
+
+    <div id="statut" class="statut ok">
+      <p class="gros" id="statutGros">Chargement…</p>
+      <p class="dit" id="statutDit">On vérifie le plan.</p>
+      <div id="pastille"></div>
+      <p class="dit" id="statutSignal" style="margin-top:10px;font-size:14px"></p>
+    </div>
+
+    <div class="scorebox">
+      <div class="lbl"><span>Score composite</span><span class="scv" id="scoreVal">—</span></div>
+      <div class="scorebar">
+        <div class="scorefill" id="scoreFill" style="width:0"></div>
+        <span class="scoremark m40"></span><span class="scoremark m70"></span>
+      </div>
+      <div class="scoreleg"><span>0 · BEARISH</span><span>40 · NEUTRAL</span><span>70 · BULL</span></div>
+      <p style="font-size:14px;color:var(--gris);margin:12px 0 0" id="scoreDet"></p>
+    </div>
+
+    <div class="carte">
+      <h2>La matrice d'allocation</h2>
+      <p class="note" id="noteMatrice">Le régime en cours colore la colonne à suivre. Les déviations
+      (Bull / Bearish) sont tactiques et temporaires ; le point de contrôle (Neutral) est la maison.</p>
+      <table>
+        <thead>
+          <tr><th>Placement</th><th class="thdesc">Ce que c'est</th>
+          <th style="text-align:right" id="thBULL">🟢 BULL</th>
+          <th style="text-align:right" id="thNEUTRAL">🟡 NEUTRAL</th>
+          <th style="text-align:right" id="thBEARISH">🔴 BEARISH</th></tr>
+        </thead>
+        <tbody id="corpsMatrice"></tbody>
+      </table>
+      <p class="note" style="margin:12px 0 0">BSOL plafonné (10 / 5 / 0), SGOV plafonné à 30 % en Bearish,
+      SMH et BSOL en circuit coupé en Bearish. Chaque ligne fait un travail précis.</p>
+    </div>
+
+    <div class="calc carte">
+      <h2>Calculatrice d'achat</h2>
+      <p class="note">Entrer l'argent neuf disponible. La page répartit selon la colonne du régime en cours
+      et calcule le nombre d'actions (arrondies vers le bas).</p>
+      <div class="champ">
+        <label for="mInvest">Argent à investir (US$)</label>
+        <input id="mInvest" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 20000">
+      </div>
+      <div class="total" style="margin-top:14px">
+        <div class="lbl">Montant total à investir</div>
+        <div class="val" id="totVal">—</div>
+        <div class="lbl" id="totDate"></div>
+      </div>
+      <table>
+        <thead><tr><th>Placement</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">Cible</th>
+        <th style="text-align:right">Montant</th><th style="text-align:right">Prix (US$)</th>
+        <th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="corpsCalc"></tbody>
+      </table>
+      <p class="note" style="margin:14px 0 0" id="resteCalc"></p>
+    </div>
+
+    <details class="info">
+      <summary>Comment le moteur décide : le score composite<span class="chev">›</span></summary>
+      <div class="corps">
+        <p>Le <strong>gate_engine</strong> évalue le système chaque <strong>vendredi à la clôture</strong>.
+        Il compile un score de 0 à 100 à partir de cinq composantes, puis choisit l'état :</p>
+        <table id="tableDetail">
+          <thead><tr><th>Composante</th><th style="text-align:right">Note</th><th style="text-align:right">Détail</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p style="margin-top:10px"><strong>Sortie de la machine d'état :</strong> score ≥ 70 → 🟢 BULL ;
+        40–69 → 🟡 NEUTRAL (le point de contrôle) ; < 40 → 🔴 BEARISH.</p>
+        <p id="atrLigne" style="margin-top:10px"></p>
+        <p>Les prix se rafraîchissent chaque jour, mais le <strong>régime ne change que le samedi</strong>
+        (le moteur utilise la clôture du vendredi) — sauf si le <strong>disjoncteur ATR</strong> force la
+        sécurité immédiatement. Ne pas prédire : observer.</p>
+      </div>
+    </details>
+
+    <details class="info">
+      <summary>Le plan, régime par régime<span class="chev">›</span></summary>
+      <div class="corps">
+        <h3>Le point de contrôle (POC)</h3>
+        <p>Le <strong>Neutral</strong> est le centre structurel du portefeuille, son état par défaut quand
+        la macro est ambiguë. Les déviations Bull et Bearish sont tactiques, temporaires et
+        <strong>moyenne-réversives</strong> : on revient au POC.</p>
+        <h3>🟢 BULL (RISK ON) — on profite</h3>
+        <p>VT 35 · GLDM 10 · IBIT 15 · SMH 15 · BSOL 10 · MCHI 10 · BCI 5 · SGOV 0.</p>
+        <h3>🟡 NEUTRAL (POC) — la maison</h3>
+        <p>VT 30 · GLDM 15 · IBIT 10 · SMH 10 · BSOL 5 · MCHI 10 · BCI 5 · SGOV 15.</p>
+        <h3>🔴 BEARISH (RISK OFF) — on se défend</h3>
+        <p>VT 20 · GLDM 30 · IBIT 5 · SMH 0 · BSOL 0 · MCHI 5 · BCI 10 · SGOV 30.</p>
+        <h3>La réinitialisation annuelle</h3>
+        <p>Chaque <strong>1er janvier</strong>, le portefeuille revient de force au Neutral, quoi que dise le
+        score, pour verrouiller les gains cycliques et remettre le risque à zéro.</p>
+      </div>
+    </details>
+
+    <details class="info">
+      <summary>L'exécution : tranches, ATR, glissement<span class="chev">›</span></summary>
+      <div class="corps">
+        <h3>Le disjoncteur ATR</h3>
+        <p>L'<strong>ATR 14 jours annualisé</strong> de VT mesure la panique. S'il dépasse <strong>25 %</strong>,
+        le système force <strong>Neutral</strong> (pause du risque) ; s'il dépasse <strong>40 %</strong>, il force
+        <strong>Bearish</strong> (défense d'urgence). Il s'applique immédiatement, sans attendre le vendredi.</p>
+        <h3>Les tranches étalées</h3>
+        <p>Quand un changement de régime exige un écart de <strong>plus de 15 points</strong> sur un placement
+        (ex. BSOL 10 → 0), la réallocation est découpée : <strong>33 % la semaine 1, 33 % la semaine 2,
+        34 % la semaine 3</strong>. Si le disjoncteur ATR est déclenché, on exécute <strong>50 % immédiatement</strong>
+        et le reste sur deux semaines.</p>
+        <h3>Protection contre le glissement (BSOL)</h3>
+        <p>Avant d'échanger du BSOL via Jupiter, le module crypto vérifie la <strong>profondeur de marché à 1 %</strong> :
+        si la commande dépasse 30 % de cette profondeur, elle est découpée en 3 swaps espacés d'une heure.</p>
+      </div>
+    </details>
+
+    <details class="info">
+      <summary>L'architecture et le flux de données<span class="chev">›</span></summary>
+      <div class="corps">
+        <h3>Qui calcule quoi</h3>
+        <p>Le rulebook P3 décrit un moteur <strong>Python (gate_engine.py)</strong> sur un cluster local de
+        Mac mini M4, qui agrège OHLCV, les ratios macro, le VIX et exécute via IBKR (TradFi) et Jupiter (crypto).
+        Cette page est le <strong>portail public</strong> : un port Node sans dépendance de ce même moteur tourne
+        dans GitHub Actions et publie <code>state.json</code> que la page lit.</p>
+        <h3>Le cycle hebdomadaire</h3>
+        <p>Vendredi 15:30 : ingestion des données → 16:00 : le moteur sort <code>{ régime, score }</code> →
+        16:05 : on lit les poids réels → 16:10 : on génère les ordres delta → 16:15-17:00 : exécution →
+        17:15 : journalisation.</p>
+        <h3>Surveillance</h3>
+        <p>Un LLM sur le cluster surveille le flux et alerte si le régime oscille Bull ↔ Bearish plus de
+        3 fois en 6 semaines (whipsaw), si le glissement cumulé dépasse 0,50 % en une réallocation, ou si
+        un swap BSOL échoue.</p>
+      </div>
+    </details>
+
+    <div class="regles">
+      <h2>Les règles qu'on ne brise jamais</h2>
+      <ul>
+        <li><strong>Pas de « ressenti ».</strong> Le moteur suit strictement le score composite. Aucune
+        dérogation manuelle, sauf le disjoncteur ATR.</li>
+        <li><strong>Zéro SpaceX (SPCX).</strong> Explicitement exclu du système.</li>
+        <li><strong>BSOL plafonné.</strong> 10 % max en Bull, 5 % en Neutral, 0 % en Bearish.</li>
+        <li><strong>Reset annuel.</strong> Le 1er janvier, retour forcé au Neutral, quoi qu'il arrive.</li>
+        <li><strong>Repli.</strong> Si les données VPOC/VAL sont corrompues ou manquantes → Neutral + alerte.</li>
+      </ul>
+    </div>
+
+    <details class="info">
+      <summary>Comment ça marche, en clair<span class="chev">›</span></summary>
+      <div class="corps">
+        <p>On va décortiquer ça en français simple — pas de jargon, pas d'acronymes. Pense à une
+        <strong>météo pour ton argent</strong> : chaque vendredi, le système vérifie trois
+        « thermomètres » pour décider s'il fait soleil (Bull), nuageux (Neutral) ou orageux (Bearish).</p>
+        <p>Voici la logique, étape par étape, comme un arbre de décision :</p>
+
+        <h3>Question 1 — L'économie mondiale est-elle en santé ou malade ? (le check « Macro »)</h3>
+        <p>Imagine l'économie mondiale comme un moteur de voiture.</p>
+        <ul style="padding-left:22px;margin:0 0 10px">
+          <li>Le système regarde deux choses : le <strong>prix du cuivre</strong> (le cuivre sert partout —
+          usines, câbles, bâtiments) et <strong>le coût d'emprunt des entreprises</strong> (combien ça coûte
+          aux entreprises risquées d'emprunter).</li>
+          <li><strong>Si le cuivre monte</strong> ET <strong>que les entreprises empruntent à bon compte</strong>
+          → le moteur ronronne. Le système dit : « OK, on peut prendre des risques. »</li>
+          <li><strong>Si le cuivre baisse</strong> ET <strong>que les coûts d'emprunt explosent</strong>
+          → le moteur tousse. Le système dit : « Danger, on ralentit. »</li>
+        </ul>
+
+        <h3>Question 2 — Le marché boursier monte-t-il ou descend-il ? (le check « Momentum »)</h3>
+        <p>Le système regarde maintenant le grand marché (VT).</p>
+        <ul style="padding-left:22px;margin:0 0 10px">
+          <li>Il trace une <strong>« ligne lissée »</strong> (la moyenne Hull) qui filtre les hauts et les bas
+          quotidiens pour voir la vraie direction.</li>
+          <li><strong>Si cette ligne monte</strong> → le système pense : « La tendance est notre amie. »</li>
+          <li><strong>Si cette ligne descend</strong> → le système pense : « La tendance est cassée. »</li>
+        </ul>
+
+        <h3>Question 3 — Où achètent les grosses baleines ? (le check « Volume »)</h3>
+        <p>C'est la partie la plus maligne. Le système ne s'intéresse pas qu'au prix — il regarde
+        <strong>où la majorité du volume d'échange (l'argent) change de mains</strong>.</p>
+        <ul style="padding-left:22px;margin:0 0 10px">
+          <li>Imagine un stade. Le <strong>Volume Point of Control (VPOC)</strong> est l'endroit où 70 % de la
+          foule est assise. C'est le « centre de gravité ».</li>
+          <li><strong>Si le prix actuel est AU-DESSUS du VPOC</strong> → les baleines achètent et poussent le
+          prix plus haut. Le système dit : « Plein gaz (Bull). »</li>
+          <li><strong>Si le prix est ENTRE le VPOC et le bord inférieur (VAL)</strong> → les baleines hésitent.
+          Le système dit : « On attend de voir (Neutral). »</li>
+          <li><strong>Si le prix tombe SOUS le bord inférieur (VAL)</strong> → les baleines vendent et le
+          marché casse. Le système dit : « Dégage de là (Bearish). »</li>
+        </ul>
+
+        <h3>Comment le système combine ces trois réponses</h3>
+        <p>Le système donne des <strong>points</strong> pour chaque réponse. Pense à un examen noté de 0 à 100.</p>
+        <table>
+          <thead><tr><th>Condition</th><th style="text-align:right">Points</th></tr></thead>
+          <tbody>
+            <tr><td>L'économie est en santé</td><td class="d">+30 points</td></tr>
+            <tr><td>La ligne de momentum monte</td><td class="d">+10 points</td></tr>
+            <tr><td>Le prix est au-dessus de la zone des baleines (VPOC)</td><td class="d">+15 points</td></tr>
+            <tr><td><em>Bonus :</em> le marché est calme (VIX bas)</td><td class="d">+5 points</td></tr>
+            <tr><td><em>Bonus :</em> la courbe de taux est normale</td><td class="d">+5 points</td></tr>
+            <tr><td><em>Pénalité :</em> le marché panique (VIX haut)</td><td class="d">−15 points</td></tr>
+            <tr><td><em>Pénalité :</em> la courbe de taux est inversée</td><td class="d">−10 points</td></tr>
+          </tbody>
+        </table>
+        <p style="margin-top:10px">
+          <strong>Score de 70 ou plus</strong> → 🟢 <strong>BULL</strong> (soleil. On déploie tout le capital
+          dans la croissance : actions, IA, bitcoin).<br>
+          <strong>Score entre 40 et 69</strong> → 🟡 <strong>NEUTRAL</strong> (nuageux. On garde un mélange
+          équilibré et un peu de réserve).<br>
+          <strong>Score sous 40</strong> → 🔴 <strong>BEARISH</strong> (orageux. On vend le risqué, on se cache
+          dans l'or et le cash).
+        </p>
+
+        <h3>La dérogation d'urgence (le disjoncteur)</h3>
+        <p>Même si le score dit « Bull » le vendredi, le système a un bouton de panique.</p>
+        <ul style="padding-left:22px;margin:0 0 10px">
+          <li>Il surveille sans cesse la violence des mouvements quotidiens (la volatilité).</li>
+          <li>Si le marché se met à sauter dans tous les sens comme des montagnes russes (pic d'ATR), le
+          système <strong>ignore immédiatement</strong> le score du vendredi et force le portefeuille en
+          Neutral ou Bearish <strong>en pleine semaine</strong>.</li>
+          <li>Pourquoi ? Parce que pendant un krach, attendre vendredi est trop tard. Cette dérogation te
+          protège des chutes soudaines « cygne noir ».</li>
+        </ul>
+
+        <h3>Et la règle d'or : pas de gestes brusques</h3>
+        <p>Si le système doit vendre beaucoup de risqué (bitcoin, actions IA) parce qu'on passe de Bull à
+        Bearish, il <strong>ne vend pas tout d'un coup</strong>.</p>
+        <ul style="padding-left:22px;margin:0 0 10px">
+          <li>Il vend en <strong>trois tranches hebdomadaires</strong> (33 % par semaine).</li>
+          <li>Pourquoi ? Parce que tout vendre le même jour, en pleine panique, ferait baisser le prix contre
+          toi. En étalant, tu obtiens de meilleurs prix et tu n'affoles pas le marché.</li>
+        </ul>
+
+        <h3>En résumé (pour un enfant de 5 ans)</h3>
+        <blockquote style="margin:0 0 10px;padding:12px 16px;background:var(--fond);border-left:4px solid var(--bleu);border-radius:8px;font-size:16px">
+          <em>« Chaque vendredi, l'ordinateur vérifie si l'économie mondiale est heureuse, si le marché
+          boursier monte, et si les gros investisseurs achètent ou vendent. Si les trois disent « oui », on
+          avance vite. Si deux disent « non », on ralentit. Si les trois disent « non », on cache notre argent
+          dans l'or et le cash. Et si le marché se met à tressauter sauvagement, on n'attend pas vendredi —
+          on se cache immédiatement. »</em>
+        </blockquote>
+        <p>Voilà. Pas de ressenti, pas de nouvelles à la télé, pas d'interviews de PDG. Juste des chiffres
+        froids et durs qui posent trois questions simples. C'est pour ça que ça marche.</p>
+      </div>
+    </details>
+
+    <div class="calme">
+      <h2>Si jamais tu n'es pas certaine</h2>
+      <p style="margin:0"><strong>Ne fais rien, et demande.</strong> Attendre une semaine n'a presque jamais
+      coûté quoi que ce soit. Agir dans la confusion a coûté très cher à bien du monde.</p>
+    </div>
+
+  </div><!-- /panPlan -->
+
+  <div id="panSuivi" class="panneau">
+    <div class="total">
+      <div class="lbl">Valeur totale du portefeuille</div>
+      <div class="val" id="sTotal">—</div>
+      <div class="lbl" id="sDate" style="margin-top:8px"></div>
+    </div>
+
+    <div class="carte">
+      <h2>Système d'exécution : cible → réel → écart → action</h2>
+      <p class="note">Entrer le nombre d'actions détenues. La page compare au régime en cours, puis indique
+      GARDER ou RÉÉQUILIBRER. Un écart de plus de 15 points est exécuté en 3 tranches hebdomadaires.
+      Tout reste dans ce navigateur.</p>
+      <div class="champ" style="margin-bottom:12px">
+        <label for="invTotal">Montant total investi (US$) — optionnel</label>
+        <input id="invTotal" type="number" inputmode="decimal" min="0" step="100" placeholder="ex. 50000" style="padding:10px 12px;font-size:17px;font-weight:600">
+      </div>
+      <table>
+        <thead><tr><th>Placement</th><th style="text-align:right">Actions</th>
+        <th style="text-align:right">Valeur</th><th style="text-align:right">Réel</th>
+        <th style="text-align:right">Cible</th><th style="text-align:right">Écart</th>
+        <th style="text-align:right">Action</th></tr></thead>
+        <tbody id="corpsSuivi"></tbody>
+      </table>
+      <p style="font-size:14px;color:var(--gris);margin-top:12px" id="sNote"></p>
+      <button type="button" id="sEffacer" style="margin-top:14px;padding:9px 16px;font-size:15px;
+        border:1px solid var(--ligne);background:var(--fond);border-radius:9px;cursor:pointer">
+        Tout effacer</button>
+    </div>
+
+    <div class="calme">
+      <h2>Pourquoi une fois par semaine suffit</h2>
+      <p style="margin:0">Le système évalue le vendredi, pas en continu. Regarder tous les jours pousse à
+      réagir, et réagir coûte cher. Ce qui compte, c'est la direction sur des années — pas le mouvement
+      d'aujourd'hui.</p>
+    </div>
+  </div><!-- /panSuivi -->
+
+  <p class="meta">
+    Régime changé le : <strong id="mChange">—</strong><br>
+    Page vérifiée le : <strong id="mVerifie">—</strong>
+  </p>
+  <p class="meta" style="font-size:13px">
+    Plan familial personnel. Ce n'est pas un conseil financier professionnel.
+  </p>
+
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août",
+              "septembre","octobre","novembre","décembre"];
+  var LIB = { BULL: "BULL (RISK ON)", NEUTRAL: "NEUTRAL (POC)", BEARISH: "BEARISH (RISK OFF)" };
+  var ORDER = ["VT","GLDM","IBIT","SMH","BSOL","MCHI","BCI","SGOV"];
+  var DESC = {
+    VT: "Actions mondiales — Vanguard Total World",
+    GLDM: "Or — SPDR Gold MiniShares",
+    IBIT: "Bitcoin — iShares Bitcoin Trust",
+    SMH: "Semi-conducteurs / IA — VanEck",
+    BSOL: "Solana en staking — Bitwise Solana Staking ETF",
+    MCHI: "Chine / émergents — iShares MSCI China",
+    BCI: "Matières premières — abrdn All Commodity",
+    SGOV: "Bons du Trésor US — iShares 0-3 Month"
+  };
+  var DEADBAND = 5; // points du portefeuille entier
+  var ETAT = null;
+
+  function dateFr(s) {
+    if (!s) return "non défini";
+    var p = String(s).split("-");
+    if (p.length !== 3) return s;
+    var m = MOIS[parseInt(p[1], 10) - 1];
+    return m ? parseInt(p[2], 10) + " " + m + " " + p[0] : s;
+  }
+  function joursDepuis(s) {
+    var d = new Date(s + "T00:00:00");
+    if (isNaN(d)) return null;
+    return Math.floor((Date.now() - d.getTime()) / 86400000);
+  }
+  function pct(v) {
+    return v % 1 === 0 ? v + " %" : v.toFixed(1) + " %";
+  }
+  function argent(n) {
+    return "$" + n.toLocaleString("fr-CA", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+  function lire(id) {
+    var v = parseFloat(($(id).value || "").replace(/[^0-9.]/g, ""));
+    return (isFinite(v) && v > 0) ? v : 0;
+  }
+  function sauver(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function charger(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function ciblesActives() {
+    var r = ETAT.regime;
+    return (ETAT.cibles && ETAT.cibles[r]) || {};
+  }
+  function regime() { return ETAT ? ETAT.regime : "NEUTRAL"; }
+
+  function echec(msg) {
+    $("statut").className = "statut err";
+    $("statutGros").textContent = "Impossible de charger le plan";
+    $("statutDit").textContent = msg + " Ne rien faire tant que tu ne peux pas demander.";
+    $("pastille").innerHTML = "";
+  }
+
+  function reglerHL(r) {
+    ["thBULL","thNEUTRAL","thBEARISH"].forEach(function (id) {
+      $(id).classList.remove("hlBULL","hlNEUTRAL","hlBEARISH");
+    });
+    var map = { BULL: ["thBULL","hlBULL"], NEUTRAL: ["thNEUTRAL","hlNEUTRAL"], BEARISH: ["thBEARISH","hlBEARISH"] };
+    var m = map[r];
+    $(m[0]).classList.add(m[1]);
+    // Surligne aussi les cellules de la colonne active dans la matrice.
+    document.querySelectorAll("#corpsMatrice tr").forEach(function (tr) {
+      tr.querySelectorAll("td").forEach(function (td) {
+        td.classList.remove("hlBULL","hlNEUTRAL","hlBEARISH");
+      });
+      var col = { BULL: 2, NEUTRAL: 3, BEARISH: 4 }[r];
+      var cell = tr.querySelectorAll("td")[col];
+      if (cell) cell.classList.add(m[1]);
+    });
+  }
+
+  function afficher(s) {
+    ETAT = s;
+    var r = (s.regime === "BULL" || s.regime === "NEUTRAL" || s.regime === "BEARISH") ? s.regime : "NEUTRAL";
+    reglerHL(r);
+
+    var agir = s.actionRequise === true;
+    if (s.fallback) {
+      $("statut").className = "statut err";
+      $("statutGros").textContent = "Repli : données manquantes";
+      $("statutDit").textContent = "Le plan est forcé en Neutral par sécurité. L'alerte est journalisée.";
+    } else if (agir) {
+      $("statut").className = "statut agir";
+      $("statutGros").textContent = "Quelque chose a changé";
+      $("statutDit").textContent = "Vérifier l'onglet Suivi : rapprocher les poids réels de la colonne " + LIB[r] + ".";
+    } else {
+      $("statut").className = "statut ok";
+      $("statutGros").textContent = "Ne rien faire";
+      $("statutDit").textContent = "Tout est comme ça doit être. Rien à acheter ni à vendre aujourd'hui.";
+    }
+    $("pastille").innerHTML = '<span class="pastille p' + r + '">Régime : ' + LIB[r] + "</span>";
+
+    var c = s.composite || {};
+    var sc = (c.score === undefined || c.score === null) ? null : c.score;
+    $("scoreVal").textContent = sc === null ? "—" : sc + " / 100";
+    $("scoreFill").style.width = (sc === null ? 0 : Math.max(0, Math.min(100, sc))) + "%";
+    if (sc !== null) {
+      $("scoreDet").textContent = "Détail : Macro " + c.macroScore + "/30 · Hull " +
+        (c.hullBias >= 0 ? "+" : "") + c.hullBias + " · VPOC " +
+        (c.vpocScore >= 0 ? "+" : "") + c.vpocScore + " · VIX " +
+        (c.vixAdjust >= 0 ? "+" : "") + c.vixAdjust + " · Courbe " +
+        (c.yieldAdjust >= 0 ? "+" : "") + c.yieldAdjust + ".";
+    }
+
+    $("noteMatrice").textContent = "Régime en cours : " + LIB[r] +
+      ". Suivre la colonne « " + LIB[r] + " ». Les déviations sont tactiques et temporaires ; le point de contrôle (Neutral) est la maison.";
+
+    // Détail du signal
+    var tbody = $("tableDetail").querySelector("tbody");
+    tbody.innerHTML = "";
+    function ligne(nom, note, det) {
+      var tr = document.createElement("tr");
+      tr.innerHTML = '<td class="tk">' + nom + '</td><td style="text-align:right;font-weight:700">' + note + '</td>' +
+        '<td style="text-align:right;color:var(--gris);font-size:13px">' + det + '</td>';
+      tbody.appendChild(tr);
+    }
+    var mac = c.macro;
+    ligne("A · Gate macro (0–30)", c.macroScore + "/30",
+      mac ? "Cu/Or ROC4s " + mac.cuivreOrRoc4s + " % · HYG/IEF ROC4s " + mac.hygIefRoc4s + " %" : "—");
+    var hu = c.hull;
+    ligne("B · Hull (biais ±10)", (c.hullBias >= 0 ? "+" : "") + c.hullBias,
+      hu ? "HMA " + hu.hma + " → pente " + (hu.pente === "hausse" ? "hausse 🟢" : "baisse 🔴") : "—");
+    var vp = c.vpoc;
+    ligne("C · Volume Profile (±15)", (c.vpocScore >= 0 ? "+" : "") + c.vpocScore,
+      vp ? "VPOC " + vp.vpoc + " · VAL " + vp.val + " · prix " + vp.prix + " → " + vp.position : "—");
+    ligne("D · VIX (−15 / 0 / +5)", (c.vixAdjust >= 0 ? "+" : "") + c.vixAdjust,
+      c.vix !== null && c.vix !== undefined ? "VIX " + c.vix : "—");
+    var co = c.courbe;
+    ligne("D · Courbe 10Y−3M (−10 / 0 / +5)", (c.yieldAdjust >= 0 ? "+" : "") + c.yieldAdjust,
+      co ? "10Y " + co.t10 + " % · 3M " + co.t3 + " % · écart " + co.ecartPct + " pts" : "—");
+
+    // ATR
+    var atr = s.atr || {};
+    if (atr.pctAnnualise !== null && atr.pctAnnualise !== undefined) {
+      var msg = "Disjoncteur ATR 14 j annualisé : <strong>" + atr.pctAnnualise + " %</strong>.";
+      if (atr.force) msg += " → <strong>FORCÉ " + LIB[atr.force] + "</strong> (défense immédiate).";
+      else msg += " → sous les seuils (25 % / 40 %), pas de forçage.";
+      $("atrLigne").innerHTML = msg;
+    }
+
+    $("statutSignal").textContent = sc !== null ? "Score composite " + sc + "/100 → état " + LIB[r] : "";
+
+    // Bannières
+    function show(id, ok) { if (ok) $(id).classList.remove("cache"); else $(id).classList.add("cache"); }
+    var a = s.atr || {};
+    if (a.force) {
+      $("bnATR").textContent = "🚨 Disjoncteur ATR déclenché : volatilité annualisée " +
+        a.pctAnnualise + " %. Plan forcé en " + LIB[a.force] + " immédiatement.";
+    }
+    show("bnATR", !!a.force);
+    if (s.resetAnnuel) {
+      $("bnReset").textContent = "🗓️ Réinitialisation annuelle : retour forcé au Neutral pour l'année.";
+    }
+    show("bnReset", s.resetAnnuel === true);
+    if (s.fallback) {
+      $("bnFallback").textContent = "⚠️ Repli de sécurité : données VPOC/VAL manquantes. Le plan reste en Neutral jusqu'à ce que les données reviennent.";
+    }
+    show("bnFallback", s.fallback === true);
+
+    $("mChange").textContent = dateFr(s.changeLe);
+    $("mVerifie").textContent = dateFr(s.verifieLe);
+
+    if (s.prixDate) {
+      var age = joursDepuis(s.prixDate);
+      if (age !== null && age > 10) {
+        $("bnVieux").textContent = "Les prix datent du " + dateFr(s.prixDate) + " (" + age +
+          " jours). Le nombre d'actions est approximatif — vérifier avant d'acheter.";
+        show("bnVieux", true);
+      } else show("bnVieux", false);
+    } else show("bnVieux", false);
+
+    afficherMatrice();
+    majCalc();
+  }
+
+  /* ------------------------------- matrice ------------------------------- */
+  function afficherMatrice() {
+    var c = ETAT.cibles || {};
+    var corps = $("corpsMatrice");
+    if (corps.getAttribute("data-fait")) return;
+    corps.setAttribute("data-fait", "1");
+    corps.innerHTML = ORDER.map(function (t) {
+      var zB = c.BULL[t] === 0, zN = c.NEUTRAL[t] === 0, zF = c.BEARISH[t] === 0;
+      return '<tr>' +
+        '<td class="tk" data-t="' + t + '">' + t + '</td>' +
+        '<td class="desc">' + DESC[t] + '</td>' +
+        '<td class="d ' + (zB ? "zero" : "") + '">' + pct(c.BULL[t]) + '</td>' +
+        '<td class="d ' + (zN ? "zero" : "") + '">' + pct(c.NEUTRAL[t]) + '</td>' +
+        '<td class="d ' + (zF ? "zero" : "") + '">' + pct(c.BEARISH[t]) + '</td>' +
+        '</tr>';
+    }).join("") +
+      '<tr class="total"><td class="tk">Total</td><td></td>' +
+      '<td class="d">100 %</td><td class="d">100 %</td><td class="d">100 %</td></tr>';
+    reglerHL(regime());
+  }
+
+  /* ----------------------------- calculatrice ----------------------------- */
+  function majCalc() {
+    var inv = lire("mInvest");
+    sauver("v4Invest", $("mInvest").value);
+    var prix = (ETAT && ETAT.prix) || {};
+    var cibles = ciblesActives();
+    var corps = $("corpsCalc");
+
+    if (!corps.getAttribute("data-fait")) {
+      corps.setAttribute("data-fait", "1");
+      corps.innerHTML = ORDER.map(function (t) {
+        return '<tr data-t="' + t + '"><td class="tk">' + t + '</td>' +
+          '<td class="desc">' + DESC[t] + '</td>' +
+          '<td class="d cible"></td>' +
+          '<td class="mont"></td>' +
+          '<td style="text-align:right"><input class="prix" type="number" step="0.01" min="0"></td>' +
+          '<td class="actions"></td></tr>';
+      }).join("") +
+        '<tr class="total"><td class="tk">Total</td><td></td><td class="d">100 %</td>' +
+        '<td class="mont" id="totMont"></td><td></td><td class="actions" id="totAct"></td></tr>';
+      corps.querySelectorAll(".prix").forEach(function (input) {
+        var t = input.closest("tr").getAttribute("data-t");
+        var garde = charger("v4Prix:" + t);
+        var val = garde !== null && garde !== "" ? garde : (prix[t] ? String(prix[t]) : "");
+        input.value = val;
+        input.addEventListener("input", function () {
+          sauver("v4Prix:" + t, input.value);
+          majCalc();
+        });
+      });
+    }
+
+    var restes = 0, investi = 0, sansPrix = [];
+    corps.querySelectorAll("tr[data-t]").forEach(function (tr) {
+      var t = tr.getAttribute("data-t");
+      var pctV = cibles[t] !== undefined ? cibles[t] : 0;
+      tr.querySelector(".cible").textContent = pct(pctV);
+      tr.querySelector(".cible").classList.toggle("zero", pctV === 0);
+      var montant = inv * pctV / 100;
+      tr.querySelector(".mont").textContent = inv > 0 ? argent(montant) : "—";
+
+      var input = tr.querySelector(".prix");
+      var p = parseFloat(input.value);
+      p = (isFinite(p) && p > 0) ? p : 0;
+      var act = tr.querySelector(".actions");
+      if (inv <= 0) { act.innerHTML = ""; return; }
+      if (!p) { act.textContent = "?"; if (montant > 0) sansPrix.push(t); return; }
+      var n = Math.floor(montant / p);
+      var cout = n * p;
+      restes += montant - cout;
+      investi += cout;
+      act.innerHTML = (n > 0 ? n : 0) + ' <span class="dollar">≈ ' + argent(cout) + '</span>';
+    });
+
+    $("totVal").textContent = inv > 0 ? argent(inv) : "—";
+    $("totMont").textContent = inv > 0 ? argent(inv) : "—";
+    $("totAct").innerHTML = inv > 0 ? argent(investi) : "";
+    var dateTxt = ETAT && ETAT.prixDate ? "Prix de la clôture du " + dateFr(ETAT.prixDate) : "";
+    $("totDate").textContent = inv > 0 ? dateTxt : "";
+
+    var msg = "";
+    if (inv > 0) {
+      msg = "Actions arrondies vers le bas. Reste non investi : environ " + argent(restes) + ".";
+      if (sansPrix.length) msg += " Prix manquant pour : " + sansPrix.join(", ") + ". Le corriger à la main.";
+    } else {
+      msg = "Entrer un montant pour voir la répartition et le nombre d'actions.";
+    }
+    $("resteCalc").textContent = msg;
+  }
+
+  /* -------------------------------- suivi -------------------------------- */
+  function majSuivi() {
+    var prix = (ETAT && ETAT.prix) || {};
+    var cibles = ciblesActives();
+    var corps = $("corpsSuivi");
+
+    if (!corps.getAttribute("data-fait")) {
+      corps.setAttribute("data-fait", "1");
+      corps.innerHTML = ORDER.map(function (t) {
+        return '<tr><td class="tk">' + t + '</td>' +
+          '<td style="text-align:right"><input class="mini sAct" data-t="' + t + '" type="number" min="0" step="any" placeholder="0"></td>' +
+          '<td class="mont" data-v="' + t + '"></td><td class="mont" data-r="' + t + '"></td>' +
+          '<td class="mont" data-c="' + t + '"></td><td class="ecart" data-e="' + t + '"></td>' +
+          '<td class="acte" data-a="' + t + '"></td></tr>';
+      }).join("");
+      corps.querySelectorAll(".sAct").forEach(function (i) {
+        i.value = charger("v4act:" + i.getAttribute("data-t")) || "";
+        i.addEventListener("input", function () {
+          sauver("v4act:" + i.getAttribute("data-t"), i.value);
+          majSuivi();
+        });
+      });
+    }
+
+    var total = 0, vals = {};
+    corps.querySelectorAll(".sAct").forEach(function (i) {
+      var t = i.getAttribute("data-t");
+      var n = parseFloat(i.value) || 0, p = prix[t] || 0;
+      vals[t] = n * p;
+      total += vals[t];
+    });
+
+    var inv = lire("invTotal"); sauver("invTotal", $("invTotal").value);
+    var baseTotal = inv > 0 ? inv : total;
+
+    var gros = 0;
+    ORDER.forEach(function (t) {
+      var v = vals[t] || 0;
+      var ciblePct = cibles[t] !== undefined ? cibles[t] : 0;
+      var reel = baseTotal > 0 ? v / baseTotal * 100 : 0;
+      var ecartPts = reel - ciblePct;
+      var action = baseTotal > 0 ? (Math.abs(ecartPts) > DEADBAND ? "RÉÉQUILIBRER" : "GARDER") : "—";
+      if (Math.abs(ecartPts) > DEADBAND) gros = Math.max(gros, Math.abs(ecartPts));
+
+      var cv = corps.querySelector('[data-v="' + t + '"]');
+      var cr = corps.querySelector('[data-r="' + t + '"]');
+      var cc = corps.querySelector('[data-c="' + t + '"]');
+      var ce = corps.querySelector('[data-e="' + t + '"]');
+      var ca = corps.querySelector('[data-a="' + t + '"]');
+      if (cv) cv.textContent = v > 0 ? argent(v) : "—";
+      if (cr) cr.textContent = baseTotal > 0 ? reel.toFixed(1) + " %" : "—";
+      if (cc) cc.textContent = pct(ciblePct);
+      if (ce) ce.textContent = baseTotal > 0 ? (ecartPts >= 0 ? "+" : "−") + Math.abs(ecartPts).toFixed(1) + " pts" : "—";
+      if (ca) {
+        ca.textContent = action;
+        ca.className = "acte" + (action === "RÉÉQUILIBRER" ? (Math.abs(ecartPts) > 15 ? " hors" : " rebal") : action === "GARDER" ? " garder" : "");
+      }
+    });
+
+    $("sTotal").textContent = total > 0 ? argent(total) : "—";
+    $("sDate").textContent = (ETAT && ETAT.prixDate) ? "Prix de la fermeture du " + dateFr(ETAT.prixDate) : "";
+
+    var note = "Réel et Cible en % du portefeuille entier. GARDER si l'écart reste dans ±" + DEADBAND +
+      " pts ; RÉÉQUILIBRER sinon.";
+    if (gros > 15) note += " ⚠ Écart supérieur à 15 points détecté : exécuter en 3 tranches hebdomadaires (33 % / 33 % / 34 %).";
+    $("sNote").textContent = note;
+  }
+
+  /* -------------------------------- onglets ------------------------------- */
+  function onglet(actif) {
+    var p = actif === "suivi";
+    $("ongPlan").className  = "onglet" + (p ? "" : " actif");
+    $("ongSuivi").className = "onglet" + (p ? " actif" : "");
+    $("panPlan").className  = "panneau" + (p ? "" : " actif");
+    $("panSuivi").className = "panneau" + (p ? " actif" : "");
+    if (p) majSuivi();
+  }
+  $("ongPlan").addEventListener("click", function(){ onglet("plan"); });
+  $("ongSuivi").addEventListener("click", function(){ onglet("suivi"); });
+
+  $("mInvest").addEventListener("input", majCalc);
+  $("invTotal").addEventListener("input", majSuivi);
+  $("sEffacer").addEventListener("click", function () {
+    if (!confirm("Effacer toutes les données entrées dans ce navigateur ?")) return;
+    try {
+      Object.keys(localStorage).forEach(function (k) {
+        if (k.indexOf("v4Prix:") === 0 || k.indexOf("v4act:") === 0 ||
+            k === "v4Invest" || k === "invTotal") localStorage.removeItem(k);
+      });
+    } catch (e) {}
+    location.reload();
+  });
+  $("mInvest").value = charger("v4Invest") || "";
+  $("invTotal").value = charger("invTotal") || "";
+
+  var SECOURS = { regime: "NEUTRAL", actionRequise: false, changeLe: "", verifieLe: "" };
+  var fichierLocal = location.protocol === "file:";
+
+  fetch("state.json?t=" + Date.now())
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(afficher)
+    .catch(function (e) {
+      if (fichierLocal) {
+        var a = $("apercu");
+        a.textContent = "Aperçu seulement — le fichier est ouvert localement, donc ces données sont un exemple, pas le vrai régime.";
+        a.classList.remove("cache");
+        afficher(SECOURS);
+      } else {
+        echec("La page n'a pas pu lire ses réglages (" + e.message + ").");
+      }
+    });
+})();
+</script>
+</body>
+</html>

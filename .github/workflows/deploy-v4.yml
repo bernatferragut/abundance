@@ -1,0 +1,78 @@
+name: Deploy Abundance 4.0 (P3)
+
+on:
+  push:
+    branches: [v.4.0]
+  workflow_dispatch:
+  schedule:
+    # Quotidien 02:30 UTC — prix quotidiens ; régime changé le samedi (clôture du vendredi).
+    - cron: "30 2 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-v4
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: v.4.0
+          path: src
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Jour du signal ?
+        id: jour
+        run: |
+          # Samedi (6) = seul jour où le régime peut changer (clôture du vendredi).
+          if [ "$(date -u +%u)" = "6" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "signal=1" >> $GITHUB_OUTPUT
+          else
+            echo "signal=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Calcul du signal (gate_engine P3)
+        env:
+          JOUR_SIGNAL: ${{ steps.jour.outputs.signal }}
+        run: node src/v4/scripts/gate_engine.mjs
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: site
+
+      - name: Synchroniser v4/ vers main (site live)
+        run: |
+          cd site
+          rm -rf v4
+          cp -r ../src/v4 ./v4
+          git config user.name "abundance4-bot"
+          git config user.email "abundance4-bot@users.noreply.github.com"
+          git add v4
+          if git diff --cached --quiet; then
+            echo "Aucun changement pour main"
+          else
+            git commit -m "maj v4.0: $(date -u +%Y-%m-%d)"
+            git push origin main
+            echo "main mis à jour"
+          fi
+
+      - name: Garder la branche v.4.0 à jour (skip ci)
+        run: |
+          cd src
+          git config user.name "abundance4-bot"
+          git config user.email "abundance4-bot@users.noreply.github.com"
+          git add v4/state.json
+          if git diff --cached --quiet; then
+            echo "Aucun changement de prix"
+          else
+            git commit -m "maj prix v4.0 [skip ci]: $(date -u +%Y-%m-%d)"
+            git push origin v.4.0
+          fi

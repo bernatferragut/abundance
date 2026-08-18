@@ -1,3 +1,13 @@
+# Abundance — pages familiales
+
+| Version | Page | Description |
+| ------- | ---- | ----------- |
+| **2.0** | [`index.html`](index.html) · <https://bernatferragut.github.io/abundance/> | Permanent + tactique, régime 200 jours, disjoncteur de crédit. |
+| **3.0** | [`v3/`](v3) · <https://bernatferragut.github.io/abundance/v3/> | Calculatrice d'achat simple (100 %). |
+| **4.0 (P3)** | [`v4/`](v4) · <https://bernatferragut.github.io/abundance/v4/> | Plan du point de contrôle : régime BULL/NEUTRAL/BEARISH, score composite, matrices, calculatrice, suivi. |
+
+---
+
 # Abundance 2.0 — page familiale
 
 Une page qui dit une seule chose : **ne rien faire**, ou **voici ce qui a changé**.
