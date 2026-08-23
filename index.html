@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Abundance 2.0</title>
+<title>Abundance 4.5</title>
 <style>
   :root{
     --encre:#1a1a1a; --gris:#5f6670; --ligne:#dfe3e8; --fond:#f7f9fb; --carte:#fff;
@@ -109,6 +109,10 @@
   .disj .t{font-size:24px;font-weight:800;margin:0 0 8px}
   .disj p{margin:0;font-size:16px;line-height:1.55}
   .disj .d{font-size:13px;opacity:.85;margin-top:10px}
+  .disjt{background:var(--mauve);color:#fff;border-radius:14px;padding:22px;margin-bottom:18px;text-align:center}
+  .disjt .t{font-size:24px;font-weight:800;margin:0 0 8px}
+  .disjt p{margin:0;font-size:16px;line-height:1.55}
+  .disjt .d{font-size:13px;opacity:.85;margin-top:10px}
   .cache{display:none}
 
   .depl table{font-size:14px;margin:8px 0}
@@ -123,7 +127,7 @@
 <body>
 <div class="wrap">
 
-  <h1>Abundance 2.0</h1>
+  <h1>Abundance 4.5</h1>
   <p class="sub">Quoi faire aujourd'hui.</p>
 
   <div class="onglets">
@@ -137,6 +141,12 @@
     <p class="t">Disjoncteur de crédit déclenché</p>
     <p id="disjTxt"></p>
     <p class="d" id="disjDet"></p>
+  </div>
+
+  <div id="disjoncteurTaux" class="disjt cache">
+    <p class="t">Disjoncteur de taux déclenché</p>
+    <p id="disjTauxTxt"></p>
+    <p class="d" id="disjTauxDet"></p>
   </div>
 
   <div id="apercu" class="apercu cache"></div>
@@ -179,14 +189,13 @@
       <thead><tr><th>Acheter</th><th class="thdesc">Ce que c'est</th><th style="text-align:right">% de la partie</th><th style="text-align:right" class="colcalc">Montant</th><th style="text-align:right" class="colcalc">Actions</th></tr></thead>
       <tbody>
         <tr><td class="tk" data-t="VT">VT</td><td class="desc">Posséder l'économie productive du monde</td><td class="pc">40 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
-        <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">Parer l'instabilité monétaire et géopolitique</td><td class="pc">27,5 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
+        <tr><td class="tk" data-t="GLDM">GLDM</td><td class="desc">Parer l'instabilité monétaire et géopolitique</td><td class="pc">35 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
         <tr><td class="tk" data-t="IBIT">IBIT</td><td class="desc">Participer à un futur système monétaire possible</td><td class="pc">15 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
-        <tr><td class="tk" data-t="MCHI">MCHI</td><td class="desc">La croissance de la Chine et du monde multipolaire</td><td class="pc">7,5 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
         <tr><td class="tk" data-t="SMH">SMH</td><td class="desc">La croissance séculaire des semi-conducteurs et de l'IA</td><td class="pc">10 %</td><td class="mont colcalc"></td><td class="act colcalc"></td></tr>
       </tbody>
     </table>
-    <p class="note" style="margin:12px 0 0">Bandes de rééquilibrage : VT 35–45 %, GLDM 22,5–32,5 %, IBIT 10–20 %,
-    MCHI 5–10 %, SMH 7,5–12,5 % (de la partie). On laisse les gagnants courir.</p>
+    <p class="note" style="margin:12px 0 0">Bandes de rééquilibrage : VT 35–45 %, GLDM 30–40 %, IBIT 10–20 %,
+    SMH 7,5–12,5 % (de la partie). On laisse les gagnants courir.</p>
     <p class="note" style="margin:12px 0 0"><strong>Honnêtement :</strong> le permanent n'est pas conçu
     pour éviter les grosses baisses. Dans un marché baissier sévère, une baisse d'environ <strong>35 à
     45 %</strong> est possible, et certains composants — surtout le bitcoin — peuvent chuter beaucoup plus.
@@ -271,6 +280,13 @@
       dépasse sa moyenne 200 jours de plus de 50 % pendant deux fermetures, on force le RISK OFF
       immédiatement, sans attendre. Réarmement sous 1,20 fois. Il ne peut qu'aller vers la sécurité.</p>
 
+      <h3>Le disjoncteur de taux (4.5)</h3>
+      <p>Dans un monde de déficits permanents, l'accident typique est une crise des taux longs —
+      souvent pendant que les actions sont encore au-dessus de leur 200 jours, là où VT est aveugle.
+      Si le taux 10 ans américain ferme au-dessus de <strong>5,00 %</strong> deux fermetures de suite,
+      le régime est plafonné à NEUTRAL, sans attendre le samedi. Réarmement sous 4,75 %.
+      Comme le disjoncteur de crédit, il ne peut qu'aller vers la sécurité — jamais vers le risque.</p>
+
       <h3>Qui fait le calcul ?</h3>
       <p>Un programme récupère les prix chaque jour et met cette page à jour tout seul. Le régime et le
       cadran ne changent que le samedi. Ne pas prédire : observer.</p>
@@ -327,11 +343,12 @@
     <summary>Comment tout le plan fonctionne<span class="chev">›</span></summary>
     <div class="corps">
       <h3>Les trois couches</h3>
-      <p><strong>🟦 POSSÉDER — CELI, 60 %.</strong> J'OWN. VT / GLDM / IBIT / MCHI / SMH. Aucun signal de
+      <p><strong>🟦 POSSÉDER — CELI, 60 %.</strong> J'OWN. VT / GLDM / IBIT / SMH. Aucun signal de
       synchronisation. Sa protection vient de la diversification, de la possession à long terme et du
       refus des sorties émotionnelles — pas d'un signal.</p>
       <p><strong>🟧 S'ADAPTER — REER, 40 %.</strong> J'ADAPTE. Le 200 jours de VT décide du régime ;
-      SMH décide de l'intensité satellite ; le crédit décide d'un éventuel forçage défensif.</p>
+      SMH décide de l'intensité satellite ; le crédit et le taux 10 ans décident d'un éventuel
+      forçage (ou plafonnement) défensif.</p>
       <p><strong>🟩 MUNITIONS — SGOV et cotisations neuves.</strong> J'ATTENDS. Les règles de déploiement
       selon la baisse décident quand accélérer.</p>
       <p><strong>La philosophie :</strong> POSSÉDER ce en quoi tu crois. S'ADAPTER à ce que fait
@@ -344,7 +361,6 @@
           <tr><td class="tk">VT</td><td>Posséder l'économie productive du monde</td></tr>
           <tr><td class="tk">GLDM</td><td>Parer l'instabilité monétaire et géopolitique</td></tr>
           <tr><td class="tk">IBIT</td><td>Participer à un potentiel nouveau système monétaire</td></tr>
-          <tr><td class="tk">MCHI</td><td>La croissance de la Chine et du monde multipolaire</td></tr>
           <tr><td class="tk">SMH</td><td>La croissance séculaire des semi-conducteurs et de l'IA</td></tr>
           <tr><td class="tk">BCI</td><td>Hedger l'inflation / la rareté des matières premières</td></tr>
           <tr><td class="tk">SGOV</td><td>Garder de la liquidité et fournir des munitions</td></tr>
@@ -538,6 +554,16 @@
         ". Se réarme sous 1,20 fois.";
       $("disjoncteur").classList.remove("cache");
     }
+    var dtaux = s.disjoncteurTaux;
+    if (dtaux && dtaux.actif === true) {
+      $("disjTauxTxt").textContent = "Le taux 10 ans américain dépasse 5,00 %. Le régime est " +
+        "plafonné à NEUTRAL, peu importe ce que dit le signal habituel. Suivre la colonne NEUTRAL " +
+        "de la partie tactique.";
+      $("disjTauxDet").textContent =
+        "10 ans US à " + (dtaux.taux !== null && dtaux.taux !== undefined ? dtaux.taux.toFixed(2) : "?") +
+        " %" + (dtaux.date ? " au " + dateFr(dtaux.date) : "") + ". Se réarme sous 4,75 %.";
+      $("disjoncteurTaux").classList.remove("cache");
+    }
     if (s.prixDate) {
       var ap = joursDepuis(s.prixDate);
       if (ap !== null && ap > 10) {
@@ -567,6 +593,9 @@
           " % vs sa 50 jours, " + (sat2.smhVs200Pct >= 0 ? "+" : "") + sat2.smhVs200Pct.toFixed(1) +
           " % vs sa 200 jours → cadran " + (sat2.facteur * 100) + " %.";
       }
+      if (dtaux && dtaux.taux !== null && dtaux.taux !== undefined) {
+        ligne += " 10 ans US à " + dtaux.taux.toFixed(2) + " %" + (dtaux.actif ? " → plafond NEUTRAL." : ".");
+      }
       sl.textContent = ligne;
     }
   }
@@ -585,7 +614,7 @@
 
   /* ---------------- cibles ---------------- */
   // Permanent : % de la partie permanente (60 % du portefeuille).
-  var CIBLE_PERM = { VT:40, GLDM:27.5, IBIT:15, MCHI:7.5, SMH:10 };
+  var CIBLE_PERM = { VT:40, GLDM:35, IBIT:15, SMH:10 };
   // Tactique : % du portefeuille ENTIER (somme = 40 %). Le serveur fournit la cible
   // effective (régime + cadran satellite) dans state.json.tactiqueCible.
   var CIBLE_TAC = {

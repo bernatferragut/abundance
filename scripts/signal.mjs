@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Abundance 2.0 — calcul du régime (« système d'exploitation du portefeuille »).
+ * Abundance 4.5 — calcul du régime (« système d'exploitation du portefeuille »).
  *
  * Architecture révisée :
  *   - VT est le PATRON du régime : VT > 200 jours ET momentum 50 jours -> RISK ON ;
@@ -8,6 +8,8 @@
  *   - SMH est le CADRAN SATELLITE : > 50 jours -> 100 % ; entre 50 et 200 jours -> 50 % ;
  *     < 200 jours -> 0 % du couple SMH/AIPO.
  *   - Disjoncteur de crédit : force le RISK OFF (il ne peut qu'aller vers la sécurité).
+ *   - Disjoncteur de taux (4.5) : le 10 ans US au-dessus de 5,00 % plafonne le régime
+ *     à NEUTRAL (lui aussi ne peut qu'aller vers la sécurité).
  *
  * La cible tactique EFFECTIVE (régime + satellite appliqué) est écrite dans state.json.
  * Le navigateur n'a qu'à comparer Réel -> Cible -> Écart -> Action (deadband ±5 pts).
@@ -182,7 +184,9 @@ export function appliquerSatellite(base, sat) {
 
 /* ------------------------------------------------------------------ main */
 
-const TITRES = ["VT","GLDM","MCHI","SMH","IBIT","SGOV","AIPO","BCI"];
+// 4.5 : MCHI retiré du permanent (ses 7,5 points sont passés à GLDM) — on ne suit
+// plus son prix. Seuls les titres de cette liste sont conservés dans state.json.
+const TITRES = ["VT","GLDM","SMH","IBIT","SGOV","AIPO","BCI"];
 
 /**
  * Valide qu'un nouveau prix est raisonnable comparé au prix précédent.
@@ -227,6 +231,35 @@ export function parseFred(csv) {
   return bars.sort((a, b) => (a.date < b.date ? -1 : 1));
 }
 
+/* ============================ DISJONCTEUR DE TAUX ==============================
+ * Taux 10 ans américain (DGS10, via FRED). Ajout 4.5 : en régime de dominance
+ * budgétaire, l'accident signature est une crise de prime de terme — souvent
+ * pendant que les actions sont encore au-dessus de leur 200 jours, là où le
+ * patron VT est aveugle. Au-dessus de 5,00 % pendant 2 fermetures -> le régime
+ * ne peut plus être ON (plafond NEUTRAL). Réarmement sous 4,75 %.
+ * Il ne peut QUE mettre à l'abri.
+ */
+const FRED_SERIE_TAUX = "DGS10";
+const DISJ_TAUX = { seuilHaut: 5.0, seuilBas: 4.75, confirm: 2 };
+
+export function evaluerDisjoncteurTaux(bars, actifAvant = false, cfg = DISJ_TAUX) {
+  if (bars.length < cfg.confirm + 1) {
+    throw new Error(`Disjoncteur de taux: ${cfg.confirm + 1} jours requis, ${bars.length} reçus`);
+  }
+  let actif = actifAvant, cnt = 0, dernier = null;
+
+  for (const b of bars) {
+    if (!actif) {
+      if (b.close > cfg.seuilHaut) { cnt++; if (cnt >= cfg.confirm) { actif = true; cnt = 0; } }
+      else cnt = 0;
+    } else if (b.close < cfg.seuilBas) {
+      actif = false; cnt = 0;
+    }
+    dernier = { date: b.date, taux: b.close };
+  }
+  return { actif, dernier };
+}
+
 export function evaluerDisjoncteur(bars, actifAvant = false, cfg = DISJ) {
   if (bars.length < cfg.maLength + cfg.confirm) {
     throw new Error(`Disjoncteur: ${cfg.maLength + cfg.confirm} jours requis, ${bars.length} reçus`);
@@ -249,17 +282,17 @@ export function evaluerDisjoncteur(bars, actifAvant = false, cfg = DISJ) {
   return { actif, dernier };
 }
 
-async function fetchFred() {
-  const url = `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${FRED_SERIE}`;
+async function fetchFred(serie = FRED_SERIE) {
+  const url = `https://fred.stlouisfed.org/graph/fredgraph.csv?id=${serie}`;
   for (let i = 1; i <= 3; i++) {
     try {
       const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; plan-signal/1.0)" } });
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       const bars = parseFred(await r.text());
-      console.log(`  ${FRED_SERIE}: ${bars.length} jours, dernier ${bars.at(-1).date} @ ${bars.at(-1).close}`);
+      console.log(`  ${serie}: ${bars.length} jours, dernier ${bars.at(-1).date} @ ${bars.at(-1).close}`);
       return bars;
     } catch (e) {
-      console.warn(`  FRED essai ${i}/3: ${e.message}`);
+      console.warn(`  ${serie} essai ${i}/3: ${e.message}`);
       if (i < 3) await new Promise((r) => setTimeout(r, 2000 * i));
     }
   }
@@ -286,7 +319,7 @@ async function fetchPrices(prevPrices = {}) {
 }
 
 async function main() {
-  console.log(`Abundance 2.0 — régime ${CFG.regimeTitre} (patron ${CFG.maRegime}j), satellite ${CFG.satellite}, confirmation ${CFG.confirmDays} fermetures\n`);
+  console.log(`Abundance 4.5 — régime ${CFG.regimeTitre} (patron ${CFG.maRegime}j), satellite ${CFG.satellite}, confirmation ${CFG.confirmDays} fermetures\n`);
 
   const [vt, smh] = await Promise.all([fetchSymbol(CFG.regimeTitre), fetchSymbol(CFG.satellite)]);
   const sig = computeRegime(vt);
@@ -296,8 +329,8 @@ async function main() {
   const ageDays = Math.floor((Date.now() - new Date(sig.dernier.date + "T00:00:00Z").getTime()) / 86400000);
   if (ageDays > 7) throw new Error(`Données vieilles de ${ageDays} jours — refus d'écrire.`);
 
-  console.log("\nDisjoncteur de crédit :");
-  const oas = await fetchFred();
+  console.log("\nDisjoncteurs (crédit et taux) :");
+  const [oas, dgs] = await Promise.all([fetchFred(FRED_SERIE), fetchFred(FRED_SERIE_TAUX)]);
 
   let prev = {};
   if (existsSync(STATE_PATH)) {
@@ -328,12 +361,33 @@ async function main() {
     if (prevLu.disjoncteur) disj = { ...prevLu.disjoncteur, indisponible: true };
   }
 
+  let disjTaux = { actif: false, taux: null, date: "", indisponible: true };
+  if (dgs) {
+    try {
+      const prevActifT = (prevLu.disjoncteurTaux && prevLu.disjoncteurTaux.actif) === true;
+      const t = evaluerDisjoncteurTaux(dgs, prevActifT);
+      disjTaux = {
+        actif: t.actif,
+        taux: Math.round(t.dernier.taux * 100) / 100,
+        date: t.dernier.date,
+        indisponible: false,
+      };
+      console.log(`  10 ans US = ${disjTaux.taux} %  ->  ${t.actif ? "DÉCLENCHÉ (plafond NEUTRAL)" : "normal"}`);
+    } catch (e) {
+      console.warn(`  disjoncteur de taux non évalué: ${e.message}`);
+    }
+  } else {
+    console.warn("  DGS10 indisponible — disjoncteur de taux inactif ce tour, ancien état conservé");
+    if (prevLu.disjoncteurTaux) disjTaux = { ...prevLu.disjoncteurTaux, indisponible: true };
+  }
+
   // Les prix se rafraîchissent chaque jour, mais régime et satellite ne changent
   // que le jour du signal (samedi). Le 200 jours bouge lentement : pas de va-et-vient.
   const jourSignal = process.env.JOUR_SIGNAL === "1";
   let regimeEffectif = jourSignal ? sig.state : (prev.regime ?? sig.state);
   let satEffectif = jourSignal ? sat : (prev.satellite ?? sat);
-  if (disj.actif) regimeEffectif = "OFF";   // le disjoncteur prime sur tout
+  if (disjTaux.actif && regimeEffectif === "ON") regimeEffectif = "NEUTRAL";  // plafond taux
+  if (disj.actif) regimeEffectif = "OFF";   // le disjoncteur de crédit prime sur tout
 
   const regimeChanged = prev.regime !== regimeEffectif;
   const satChanged = prev.satellite && prev.satellite.facteur !== satEffectif.facteur;
@@ -353,13 +407,17 @@ async function main() {
     verifieLe: today,
     note: prev.note ?? "",
     // Fusion : un symbole en échec conserve son prix précédent plutôt que disparaître.
-    prix: { ...(prev.prix ?? {}), ...prixNeufs },
+    // On ne garde que les titres suivis (TITRES) — les anciens (ex. MCHI) disparaissent.
+    prix: Object.fromEntries(
+      Object.entries({ ...(prev.prix ?? {}), ...prixNeufs }).filter(([k]) => TITRES.includes(k))
+    ),
     prixDate: Object.keys(prixNeufs).length ? sig.dernier.date : (prev.prixDate ?? ""),
     regimeSignal: sig.dernier,
     satellite: satEffectif,
     cibles: CIBLES_BASE,
     tactiqueCible,
     disjoncteur: disj,
+    disjoncteurTaux: disjTaux,
   };
 
   console.log(`\n  Régime      : ${regimeEffectif}${regimeChanged ? `  (CHANGÉ depuis ${prev.regime ?? "aucun"})` : ""}`);
@@ -371,6 +429,10 @@ async function main() {
   console.log(`  Basculements : ${sig.flips.length}`);
   console.log(`  Action requise : ${next.actionRequise}`);
   console.log(`  Disjoncteur  : ${disj.actif ? "ACTIF — RISK OFF forcé" : (disj.indisponible ? "données indisponibles" : "normal")}`);
+  const msgTaux = disjTaux.actif
+    ? "ACTIF — plafond NEUTRAL (10 ans " + disjTaux.taux + " %)"
+    : (disjTaux.indisponible ? "données indisponibles" : "normal (10 ans " + disjTaux.taux + " %)");
+  console.log("  Disj. taux   : " + msgTaux);
   console.log(`  Prix obtenus : ${Object.keys(prixNeufs).length} / ${TITRES.length}`);
 
   writeFileSync(STATE_PATH, JSON.stringify(next, null, 2) + "\n");

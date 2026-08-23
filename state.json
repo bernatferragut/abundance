@@ -7,7 +7,6 @@
   "prix": {
     "VT": 160.77,
     "GLDM": 91.32,
-    "MCHI": 55.66,
     "SMH": 560.42,
     "IBIT": 43.68,
     "SGOV": 100.63,
@@ -25,11 +24,11 @@
   },
   "satellite": {
     "facteur": 0.5,
-    "smhClose": 560.42,
-    "smhMa200": 466.97,
-    "smhMa50": 589.3,
-    "smhVs200Pct": 20,
-    "smhVs50Pct": -4.9
+    "smhClose": 587.82,
+    "smhMa200": 461.82,
+    "smhMa50": 591.49,
+    "smhVs200Pct": 27.3,
+    "smhVs50Pct": -0.6
   },
   "cibles": {
     "ON": {
@@ -68,6 +67,12 @@
   "disjoncteur": {
     "actif": false,
     "ratio": 0.96,
+    "date": "2026-08-20",
+    "indisponible": false
+  },
+  "disjoncteurTaux": {
+    "actif": false,
+    "taux": 4.69,
     "date": "2026-08-20",
     "indisponible": false
   }

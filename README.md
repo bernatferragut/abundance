@@ -2,13 +2,13 @@
 
 | Version | Page | Description |
 | ------- | ---- | ----------- |
-| **2.0** | [`index.html`](index.html) · <https://bernatferragut.github.io/abundance/> | Permanent + tactique, régime 200 jours, disjoncteur de crédit. |
+| **4.5** | [`index.html`](index.html) · <https://bernatferragut.github.io/abundance/> | Permanent + tactique, régime 200 jours, disjoncteurs de crédit et de taux. |
 | **3.0** | [`v3/`](v3) · <https://bernatferragut.github.io/abundance/v3/> | Calculatrice d'achat simple (100 %). |
 | **4.0 (P3)** | [`v4/`](v4) · <https://bernatferragut.github.io/abundance/v4/> | Plan du point de contrôle : régime BULL/NEUTRAL/BEARISH, score composite, matrices, calculatrice, suivi. |
 
 ---
 
-# Abundance 2.0 — page familiale
+# Abundance 4.5 — page familiale
 
 Une page qui dit une seule chose : **ne rien faire**, ou **voici ce qui a changé**.
 Toi seul la modifies. Les autres ne font que la lire.
@@ -17,7 +17,7 @@ Toi seul la modifies. Les autres ne font que la lire.
 
 ## Les trois couches
 
-- **🟦 POSSÉDER — Permanent, 60 % (CELI)** : VT 40, GLDM 27,5, IBIT 15, MCHI 7,5, SMH 10
+- **🟦 POSSÉDER — Permanent, 60 % (CELI)** : VT 40, GLDM 35, IBIT 15, SMH 10
   (de la partie). On ne vend jamais. Rééquilibrage par bandes d'environ ±5 points
   de la partie, uniquement avec de l'argent neuf. **Aucun signal** — sa protection
   vient de la diversification, de la possession à long terme et du refus des sorties
@@ -38,6 +38,11 @@ Toi seul la modifies. Les autres ne font que la lire.
 - **Disjoncteur de crédit** : écart de crédit à plus de 50 % au-dessus de sa moyenne
   200 jours pendant deux fermetures → RISK OFF forcé, sans attendre le samedi.
   Réarmement sous 1,20 fois. Il ne peut qu'aller vers la sécurité.
+- **Disjoncteur de taux (4.5)** : le 10 ans américain au-dessus de 5,00 % pendant deux
+  fermetures → le régime est plafonné à NEUTRAL, sans attendre le samedi. Réarmement
+  sous 4,75 %. Dans un régime de déficits permanents, l'accident typique est une crise
+  des taux longs pendant que les actions sont encore au-dessus de leur 200 jours — là
+  où VT est aveugle. Lui non plus ne peut qu'aller vers la sécurité.
 
 ## Les trois régimes (cibles de base, en % du portefeuille entier)
 
@@ -73,7 +78,7 @@ La page ne « donne pas d'ordres » : elle calcule **Cible → Réel → Écart 
   "changeLe": "2026-08-14",
   "verifieLe": "2026-08-14",
   "note": "",
-  "prix": { "VT": 162.16, "GLDM": 86.55, "MCHI": 54.63, "SMH": 586.61,
+  "prix": { "VT": 162.16, "GLDM": 86.55, "SMH": 586.61,
             "IBIT": 35.62, "SGOV": 100.56, "AIPO": 30.93, "BCI": 24.57 },
   "prixDate": "2026-08-14",
   "regimeSignal": {
@@ -86,7 +91,8 @@ La page ne « donne pas d'ordres » : elle calcule **Cible → Réel → Écart 
   },
   "cibles": { "ON": { }, "NEUTRAL": { }, "OFF": { } },
   "tactiqueCible": { "SGOV": 10, "VT": 10, "SMH": 7.5, "GLDM": 5, "BCI": 5, "AIPO": 2.5 },
-  "disjoncteur": { "actif": false, "ratio": 0.94, "date": "2026-08-13", "indisponible": false }
+  "disjoncteur": { "actif": false, "ratio": 0.94, "date": "2026-08-13", "indisponible": false },
+  "disjoncteurTaux": { "actif": false, "taux": 4.74, "date": "2026-08-21", "indisponible": false }
 }
 ```
 
@@ -102,6 +108,7 @@ La page ne « donne pas d'ordres » : elle calcule **Cible → Réel → Écart 
 | `cibles` | Cibles de base des trois régimes. |
 | `tactiqueCible` | Cible effective du régime en cours (cadran appliqué). |
 | `disjoncteur` | État du disjoncteur de crédit. |
+| `disjoncteurTaux` | État du disjoncteur de taux (10 ans US, plafond NEUTRAL). |
 
 Le robot met à jour toutes ces valeurs sauf `note`. Après avoir fait les transactions,
 remets `actionRequise` à `false` — la seule étape manuelle du fonctionnement normal.
@@ -170,10 +177,16 @@ Un regard extérieur, août 2026 — ce qui rend ce plan solide pour 2026-2030 :
 - **Rien de superflu.** Chaque ligne a une job, chaque règle bloque une erreur humaine.
   C'est simple en surface parce que c'est sérieux en dessous.
 
-La dernière retouche (MCHI 7,5, GLDM 27,5) vise la concentration cachée dans le
-détroit de Taïwan : dans ce scénario-là, la Chine, les semi-conducteurs et une bonne
-partie de VT tomberaient en même temps. On a déplacé 2,5 points vers l'or — l'actif
-qui, historiquement, monte exactement quand ça arrive.
+La retouche 4.5 (août 2026) fait deux choses. D'abord, elle termine le commerce de
+Taïwan commencé avec MCHI 10 → 7,5 : les derniers 7,5 points de MCHI passent à GLDM
+(35). Dans le scénario du détroit, la Chine tombe le plus fort, les semi-conducteurs
+et une bonne partie de VT suivent — et l'or est l'actif qui, historiquement, monte
+exactement quand ça arrive. Ensuite, elle ajoute le disjoncteur de taux : dans le
+régime Bessent (rachats de dette longue doublés, émissions en bons du Trésor,
+déficits permanents), l'accident signature est une crise de prime de terme pendant
+que les actions sont encore au-dessus de leur 200 jours. Le patron VT y est aveugle ;
+le 10 ans américain, lui, le voit. Plafond NEUTRAL au-dessus de 5,00 %, réarmement
+sous 4,75 %, et — comme toujours — il ne peut qu'aller vers la sécurité.
 
 — K3
 
