@@ -27,6 +27,9 @@
  *       ATR% > 25 -> force NEUTRAL ; ATR% > 40 -> force BEARISH.
  *       Il s'applique immédiatement (pas besoin d'attendre le jour du signal).
  *
+ *   Disjoncteur de taux (4.5) : 10 ans US > 5,00 % pendant 2 fermetures
+ *       -> plafond NEUTRAL (jamais BULL). Réarmement sous 4,75 %. Défensif seulement.
+ *
  *   Réinitialisation annuelle : le 1er janvier -> NEUTRAL obligatoire.
  *
  *   Repli (rulebook §7.5) : données VPOC/VAL corrompues ou manquantes -> NEUTRAL
@@ -48,14 +51,18 @@ const CFG = {
   atrForceBearish: 40,  // % annualisé
 };
 
+// 4.5 — disjoncteur de taux : plafond NEUTRAL quand le 10 ans US dépasse 5,00 %.
+const DISJ_TAUX = { seuilHaut: 5.0, seuilBas: 4.75, confirm: 2 };
+
 // Tickers du portefeuille (prix pour la page) — ordre d'affichage.
-const TITRES = ["VT", "GLDM", "IBIT", "MCHI", "SMH", "AIPO", "BCI", "SGOV"];
+// 4.5 : MCHI retiré du cœur (ses 7,5 points sont passés à GLDM).
+const TITRES = ["VT", "GLDM", "IBIT", "SMH", "AIPO", "BCI", "SGOV"];
 
 // ---- Architecture finale deux comptes (conforme CRA) ----
 // TFSA (60 %) : le cœur PERMANENT — achat seulement, jamais vendre, max 4 transactions/an.
-const CORE_TFSA = { VT: 40, GLDM: 27.5, IBIT: 15, MCHI: 7.5, SMH: 10 };
+const CORE_TFSA = { VT: 40, GLDM: 35, IBIT: 15, SMH: 10 };   // 4.5 : MCHI -> GLDM
 const BANDES_TFSA = {           // % de la partie TFSA — vérifiées au trimestre
-  VT: [35, 45], GLDM: [22.5, 32.5], IBIT: [10, 20], MCHI: [5, 10], SMH: [7.5, 12.5],
+  VT: [35, 45], GLDM: [30, 40], IBIT: [10, 20], SMH: [7.5, 12.5],
 };
 // REER/RRSP (40 %) : la manche TACTIQUE — moteur P3, matrices par régime (100 % de la manche).
 // BSOL et SPCX sont exclus (liquidité d'ETF pure, zéro SpaceX).
@@ -386,6 +393,28 @@ async function main() {
     courbe = { t10: arr2(dix), t3: arr2(trois), ecartPct: arr2(dix - trois) };
   } catch (e) { console.warn(`  Courbe de taux indisponible: ${e.message}`); }
 
+  /* ---- D2. Disjoncteur de taux (4.5) — 10 ans US, plafond NEUTRAL -------------- */
+  // En régime de dominance budgétaire, l'accident signature est une crise de prime
+  // de terme pendant que les actions sont encore au-dessus de leur tendance — là où
+  // le score composite est aveugle. > 5,00 % (2 fermetures) -> jamais BULL.
+  let disjTaux = { actif: false, taux: null, date: "", indisponible: true };
+  try {
+    const tnx = await fetchBars("^TNX", "3mo", "1d", 2);   // clôtures en % réel (ex. 4.74)
+    let actif = prev.disjoncteurTaux?.actif === true, cnt = 0;
+    for (const b of tnx) {
+      if (!actif) {
+        if (b.close > DISJ_TAUX.seuilHaut) { cnt++; if (cnt >= DISJ_TAUX.confirm) { actif = true; cnt = 0; } }
+        else cnt = 0;
+      } else if (b.close < DISJ_TAUX.seuilBas) { actif = false; cnt = 0; }
+    }
+    const d = tnx.at(-1);
+    disjTaux = { actif, taux: arr2(d.close), date: d.date, indisponible: false };
+    console.log(`  Disjoncteur de taux : 10 ans US ${disjTaux.taux} % -> ${actif ? "DÉCLENCHÉ (plafond NEUTRAL)" : "normal"}`);
+  } catch (e) {
+    console.warn(`  Disjoncteur de taux NON ÉVALUÉ: ${e.message} — ancien état conservé`);
+    if (prev.disjoncteurTaux) disjTaux = { ...prev.disjoncteurTaux, indisponible: true };
+  }
+
   /* ---- Score composite -------------------------------------------------------- */
   const vixAdjust = vix === null ? 0 : vix < 18 ? 5 : vix > 25 ? -15 : 0;
   const yieldAdjust = courbe === null ? 0 : courbe.ecartPct > 0.5 ? 5 : courbe.ecartPct < -0.5 ? -10 : 0;
@@ -427,6 +456,9 @@ async function main() {
     if (!atr.force && !resetAnnuel) regimeEffectif = "NEUTRAL";
   }
 
+  // 4.5 — plafond de taux : jamais BULL quand le 10 ans US dépasse 5,00 %.
+  if (disjTaux.actif && regimeEffectif === "BULL") regimeEffectif = "NEUTRAL";
+
   const changed = prev.regime !== regimeEffectif;
 
   /* ---- Prix du portefeuille ------------------------------------------------------ */
@@ -463,6 +495,7 @@ async function main() {
       courbe: courbe ?? prev.composite?.courbe ?? null,
     },
     atr,
+    disjoncteurTaux: disjTaux,
     cibles: CIBLES,
     comptes: {
       tfse: { pct: 60, cible: CORE_TFSA, bandes: BANDES_TFSA },
@@ -477,6 +510,7 @@ async function main() {
   console.log(`  État calculé    : ${etatCalcule}${jourSignal ? " (jour du signal)" : " (prix quotidiens, régime conservé)"}`);
   console.log(`  Régime effectif : ${regimeEffectif}${changed ? `  (CHANGÉ depuis ${prev.regime ?? "aucun"})` : ""}`);
   if (atr.force) console.log(`  Disjoncteur ATR : ACTIF -> forcé ${atr.force}`);
+  if (disjTaux.actif) console.log(`  Disj. taux      : ACTIF -> plafond NEUTRAL (10 ans ${disjTaux.taux} %)`);
   if (resetAnnuel) console.log(`  Reset annuel    : 1er janvier -> NEUTRAL forcé`);
   if (fallback) console.log(`  REPLI           : données VPOC/VAL manquantes -> NEUTRAL (alerte)`);
   console.log(`  Action requise  : ${next.actionRequise}`);

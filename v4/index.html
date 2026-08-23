@@ -47,6 +47,7 @@
 
   .banniere{border-radius:12px;padding:13px 16px;font-size:15px;margin-bottom:18px}
   .bn-atr{background:var(--rougebg);border:1px solid #e0b4b4;color:var(--rouge)}
+  .bn-taux{background:#f1ebf9;border:1px solid #d3c3ec;color:#5b3a86}
   .bn-reset{background:var(--bleubg);border:1px solid #b3d0e6;color:var(--bleu)}
   .bn-fallback{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre)}
   .bn-vieux{background:var(--ambrebg);border:1px solid #e0c68a;color:var(--ambre)}
@@ -147,6 +148,7 @@
   <div id="apercu" class="apercu cache"></div>
   <div id="bnVieux" class="banniere bn-vieux cache"></div>
   <div id="bnATR" class="banniere bn-atr cache"></div>
+  <div id="bnTaux" class="banniere bn-taux cache"></div>
   <div id="bnReset" class="banniere bn-reset cache"></div>
   <div id="bnFallback" class="banniere bn-fallback cache"></div>
 
@@ -235,7 +237,8 @@
         </p>
         <p id="atrLigne" style="margin-top:10px"></p>
         <p>Les prix se mettent à jour chaque jour, mais le <strong>régime ne change que le samedi</strong>
-        — sauf si le <strong>disjoncteur ATR</strong> force la sécurité immédiatement.</p>
+        — sauf si le <strong>disjoncteur ATR</strong> force la sécurité immédiatement, ou si le
+        <strong>disjoncteur de taux</strong> plafonne le régime à NEUTRAL (10 ans US > 5,00 %).</p>
       </div>
     </details>
 
@@ -250,7 +253,7 @@
           <li>🔴 <strong>BEARISH</strong> : VT 15 · GLDM 30 · SMH 0 · BCI 15 · AIPO 0 · SGOV 40</li>
         </ul>
         <h3>🟦 CELI (TFSA) — le cœur permanent (60 %)</h3>
-        <p>Il ne change jamais : VT 40 · GLDM 27,5 · IBIT 15 · MCHI 7,5 · SMH 10. On n'achète qu'avec de
+        <p>Il ne change jamais : VT 40 · GLDM 35 · IBIT 15 · SMH 10. On n'achète qu'avec de
         l'argent neuf, jamais de vente, maximum 4 fois par année.</p>
         <h3>La réinitialisation annuelle</h3>
         <p>Chaque <strong>1er janvier</strong>, la manche tactique revient au Neutral, quoi que dise le
@@ -269,6 +272,11 @@
         <p>Si le marché devient trop agité (volatilité de VT > 25 %), le système se met en sécurité
         <strong>immédiatement</strong> : Neutral, ou Bearish s'il est très agité (> 40 %). Pas besoin
         d'attendre vendredi.</p>
+        <h3>Le disjoncteur de taux (4.5)</h3>
+        <p>Si le taux 10 ans américain ferme au-dessus de <strong>5,00 %</strong> deux fermetures de
+        suite, le régime est plafonné à Neutral — même si le score dit BULL. Réarmement sous 4,75 %.
+        Dans un monde de déficits permanents, la crise des taux longs arrive souvent pendant que les
+        actions sont encore en hausse ; le score, lui, ne la voit pas. Défensif seulement.</p>
         <h3>Les tranches (on ne bouge pas tout d'un coup)</h3>
         <p>Quand on doit beaucoup changer (plus de 15 points sur un placement), on le fait en
         <strong>3 semaines</strong> (33 % à chaque fois). Cela évite de tout vendre en panique et de faire
@@ -555,14 +563,13 @@
     VT: "Actions mondiales — Vanguard Total World",
     GLDM: "Or — SPDR Gold MiniShares",
     IBIT: "Bitcoin — iShares Bitcoin Trust",
-    MCHI: "Chine / émergents — iShares MSCI China",
     SMH: "Semi-conducteurs / IA — VanEck",
     AIPO: "Satellite IA / croissance — Renaissance IPO ETF",
     BCI: "Matières premières — abrdn All Commodity",
     SGOV: "Bons du Trésor US — iShares 0-3 Month"
   };
   var ORDRE_REER = ["VT","GLDM","SMH","BCI","AIPO","SGOV"];
-  var ORDRE_CELI = ["VT","GLDM","IBIT","MCHI","SMH"];
+  var ORDRE_CELI = ["VT","GLDM","IBIT","SMH"];
   var DEADBAND = 5; // points de la manche REER
   var ETAT = null;
 
@@ -690,6 +697,13 @@
         a.pctAnnualise + " %. Manche tactique forcée en " + LIB[a.force] + " immédiatement.";
     }
     show("bnATR", !!a.force);
+    var dt = s.disjoncteurTaux || {};
+    if (dt.actif === true) {
+      $("bnTaux").textContent = "🚨 Disjoncteur de taux déclenché : le 10 ans US à " +
+        (dt.taux !== null && dt.taux !== undefined ? dt.taux.toFixed(2) : "?") +
+        " % dépasse 5,00 %. Régime plafonné à NEUTRAL — réarmement sous 4,75 %.";
+    }
+    show("bnTaux", dt.actif === true);
     if (s.resetAnnuel) {
       $("bnReset").textContent = "🗓️ Réinitialisation annuelle : retour forcé de la manche tactique au Neutral.";
     }
@@ -754,7 +768,7 @@
     if (corps.getAttribute("data-fait")) return;
     corps.setAttribute("data-fait", "1");
     var t = celi().cible || {}, c = reer().cibles || {};
-    var tous = ["VT","GLDM","IBIT","MCHI","SMH","AIPO","BCI","SGOV"];
+    var tous = ["VT","GLDM","IBIT","SMH","AIPO","BCI","SGOV"];
     corps.innerHTML = tous.map(function (tk) {
       var base = t[tk] || 0;
       var b = (c.BULL[tk] || 0), n = (c.NEUTRAL[tk] || 0), f = (c.BEARISH[tk] || 0);

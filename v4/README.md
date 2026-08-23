@@ -28,15 +28,19 @@ Page publiée : <https://bernatferragut.github.io/abundance/v4/>
 | Placement | % de la partie | % du total | Bande |
 | --------- | -------------: | ---------: | :--- |
 | VT        |             40 |         24 | 35–45 |
-| GLDM      |           27,5 |       16,5 | 22,5–32,5 |
+| GLDM      |             35 |         21 | 30–40 |
 | IBIT      |             15 |          9 | 10–20 |
-| MCHI      |            7,5 |        4,5 | 5–10 |
 | SMH       |             10 |          6 | 7,5–12,5 |
 | **Total** |        **100** |      **60** | |
 
 Bandes vérifiées au trimestre (janv., avr., juil., oct.). Hors bande → **acheter**
 le sous-pondéré avec de l'argent neuf ; sans argent neuf, ne rien faire. Maximum
 **4 transactions par année**.
+
+> **Retouche 4.5 (août 2026)** : MCHI est retiré du cœur — ses 7,5 points passent à
+> GLDM (35). Dans le scénario du détroit de Taïwan, la Chine tombe la première et
+> l'or est l'actif qui monte exactement quand ça arrive ; dans le régime Bessent
+> (tarifs, fragmentation, déficits), MCHI était le maillon faible du permanent.
 
 ## 🟧 REER — Manche tactique (40 % du portefeuille)
 
@@ -95,6 +99,12 @@ Score brut (min −50, max +65) → **normalisé 0–100**. Machine d'état :
 **Disjoncteur ATR** (14 j annualisé sur VT) : > 25 % → force **NEUTRAL** ;
 > 40 % → force **BEARISH**. Il s'applique immédiatement, sans attendre le vendredi.
 
+**Disjoncteur de taux (4.5)** : le 10 ans US au-dessus de **5,00 %** pendant deux
+fermetures → le régime est plafonné à **NEUTRAL** (jamais BULL). Réarmement sous
+4,75 %. Défensif seulement : dans un régime de déficits permanents, la crise des
+taux longs survient souvent pendant que les actions sont encore au-dessus de leur
+tendance — là où le score composite est aveugle.
+
 > **Note de conception** : le rulebook annonce un score « 0–100 » mais ses plages de
 > composantes donnent un brut entre −50 et +65. Pour respecter les seuils 70 / 40,
 > le port normalise : `score = (brut + 50) / 115 × 100`.
@@ -103,7 +113,7 @@ Score brut (min −50, max +65) → **normalisé 0–100**. Machine d'état :
 
 | Donnée | Source |
 | ------ | ------ |
-| OHLCV des ETF (VT, GLDM, IBIT, MCHI, SMH, AIPO, BCI, SGOV) | Yahoo Finance |
+| OHLCV des ETF (VT, GLDM, IBIT, SMH, AIPO, BCI, SGOV) | Yahoo Finance |
 | Cuivre (`HG=F`), Or (`GC=F`), HYG, IEF | Yahoo Finance |
 | VIX (`^VIX`), 10Y (`^TNX`), 3M (`^IRX`) | Yahoo Finance |
 
@@ -113,7 +123,7 @@ Score brut (min −50, max +65) → **normalisé 0–100**. Machine d'état :
 {
   "regime": "BULL",
   "actionRequise": true,
-  "prix": { "VT": 162.25, "GLDM": 86.58, "IBIT": 35.63, "MCHI": 54.63,
+  "prix": { "VT": 162.25, "GLDM": 86.58, "IBIT": 35.63,
             "SMH": 587.82, "AIPO": 30.93, "BCI": 24.55, "SGOV": 100.56 },
   "composite": {
     "score": 82, "brut": 44,
@@ -128,13 +138,14 @@ Score brut (min −50, max +65) → **normalisé 0–100**. Machine d'état :
     "courbe": { "t10": 4.74, "t3": 3.71, "ecartPct": 1.02 }
   },
   "atr": { "pctAnnualise": 15.89, "actif": false, "force": null },
+  "disjoncteurTaux": { "actif": false, "taux": 4.74, "date": "2026-08-21", "indisponible": false },
   "cibles": { "BULL": { }, "NEUTRAL": { }, "BEARISH": { } },
   "comptes": {
     "tfse": {
       "pct": 60,
-      "cible": { "VT": 40, "GLDM": 27.5, "IBIT": 15, "MCHI": 7.5, "SMH": 10 },
-      "bandes": { "VT": [35, 45], "GLDM": [22.5, 32.5], "IBIT": [10, 20],
-                  "MCHI": [5, 10], "SMH": [7.5, 12.5] }
+      "cible": { "VT": 40, "GLDM": 35, "IBIT": 15, "SMH": 10 },
+      "bandes": { "VT": [35, 45], "GLDM": [30, 40], "IBIT": [10, 20],
+                  "SMH": [7.5, 12.5] }
     },
     "reer": { "pct": 40, "cibles": { "BULL": { }, "NEUTRAL": { }, "BEARISH": { } } }
   },
@@ -150,6 +161,7 @@ Score brut (min −50, max +65) → **normalisé 0–100**. Machine d'état :
 | `prix` / `prixDate` | Prix de clôture pour la calculatrice et le suivi. |
 | `composite` | Sous-scores (macro, hull, VPOC, VIX, courbe) + score normalisé. |
 | `atr` | Disjoncteur ATR : % annualisé et éventuel forçage (`force`). |
+| `disjoncteurTaux` | Disjoncteur de taux : 10 ans US > 5,00 % → plafond NEUTRAL. |
 | `comptes.tfse` | Cœur permanent : cible fixe + bandes, % de la partie (60 %). |
 | `comptes.reer` | Manche tactique : matrices par régime, % de la manche (40 %). |
 | `fallback` / `resetAnnuel` | Drapeaux d'alerte (repli de sécurité / reset du 1er janvier). |

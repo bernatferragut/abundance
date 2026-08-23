@@ -8,7 +8,6 @@
     "VT": 160.77,
     "GLDM": 91.32,
     "IBIT": 43.68,
-    "MCHI": 55.66,
     "SMH": 560.42,
     "AIPO": 28.91,
     "BCI": 25.48,
@@ -26,7 +25,7 @@
     "macro": {
       "copperGold": 0.001,
       "hygIef": 0.858,
-      "cuivreOrRoc4s": -9.58,
+      "cuivreOrRoc4s": -10.85,
       "hygIefRoc4s": 0.71,
       "cuOrScore": 0,
       "hygIefScore": 8.8
@@ -56,6 +55,12 @@
     "pctAnnualise": 14.86,
     "actif": false,
     "force": null
+  },
+  "disjoncteurTaux": {
+    "actif": false,
+    "taux": 4.74,
+    "date": "2026-08-21",
+    "indisponible": false
   },
   "cibles": {
     "BULL": {
@@ -88,9 +93,8 @@
       "pct": 60,
       "cible": {
         "VT": 40,
-        "GLDM": 27.5,
+        "GLDM": 35,
         "IBIT": 15,
-        "MCHI": 7.5,
         "SMH": 10
       },
       "bandes": {
@@ -99,16 +103,12 @@
           45
         ],
         "GLDM": [
-          22.5,
-          32.5
+          30,
+          40
         ],
         "IBIT": [
           10,
           20
-        ],
-        "MCHI": [
-          5,
-          10
         ],
         "SMH": [
           7.5,
