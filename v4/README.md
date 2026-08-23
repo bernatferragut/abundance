@@ -14,14 +14,15 @@ Page publiée : <https://bernatferragut.github.io/abundance/v4/>
 
 | Compte | Part | Rôle | Règle |
 | ------ | ---- | ---- | ----- |
-| **TFSA** | 60 % | Cœur **permanent** | Achat seulement, avec de l'argent neuf. **Jamais vendre.** Max 4 transactions/an (sous le radar de l'ARC). |
+| **TFSA** | 60 % | Cœur **permanent** | Achats d'abord avec de l'argent neuf. Ventes rares et planifiées permises : 2–10 transactions/an restent du rééquilibrage aux yeux de l'ARC, pas du négoce actif. |
 | **REER** | 40 % | Manche **tactique** | Moteur P3 hebdomadaire. Transactions illimitées (impôt payé au retrait). |
 
 > **Pourquoi ce découpage ?** L'ARC considère le « négoce actif » dans un TFSA comme
 > une activité d'entreprise : les gains seraient imposés à 100 %. Le TFSA achète donc
-> la fondation et ne la vend jamais — quitte à subir 15 % de retenue américaine sur les
-> dividendes. Le REER autorise le négoce actif et profite d'une retenue américaine de 0 %
-> grâce au traité fiscal.
+> la fondation et ne la vend presque jamais — quelques transactions par année (2–10)
+> restent du simple rééquilibrage, parfaitement permis — quitte à subir 15 % de retenue
+> américaine sur les dividendes. Le REER autorise le négoce actif et profite d'une
+> retenue américaine de 0 % grâce au traité fiscal.
 
 ## 🟦 TFSA — Cœur permanent (60 % du portefeuille)
 
@@ -37,10 +38,12 @@ Bandes vérifiées au trimestre (janv., avr., juil., oct.). Hors bande → **ach
 le sous-pondéré avec de l'argent neuf ; sans argent neuf, ne rien faire. Maximum
 **4 transactions par année**.
 
-> **Retouche 4.5 (août 2026)** : MCHI est retiré du cœur — ses 7,5 points passent à
-> GLDM (35). Dans le scénario du détroit de Taïwan, la Chine tombe la première et
-> l'or est l'actif qui monte exactement quand ça arrive ; dans le régime Bessent
-> (tarifs, fragmentation, déficits), MCHI était le maillon faible du permanent.
+> **Retouche d'août 2026** : MCHI est retiré du cœur — **vendu une seule fois,
+> délibérément** (une transaction planifiée par année reste du rééquilibrage, pas du
+> négoce actif) — et le produit passe à GLDM (35). Dans le scénario du détroit de
+> Taïwan, la Chine tombe la première et l'or est l'actif qui monte exactement quand
+> ça arrive ; dans le régime Bessent (tarifs, fragmentation, déficits), MCHI était
+> le maillon faible du permanent.
 
 ## 🟧 REER — Manche tactique (40 % du portefeuille)
 
@@ -57,7 +60,8 @@ Matrices par régime, en % de la manche (somme = 100 %).
 | **Total** |  **100** |      **100** |      **100** |
 
 Contraintes dures :
-- **TFSA : zéro vente** — seules des ordres d'achat, max 4/an.
+- **TFSA : ventes rares** — rééquilibrage planifié seulement (2–10 transactions/an
+  maximum), jamais de négoce actif.
 - **REER : automatique** — aucune dérogation manuelle sauf le disjoncteur ATR.
 - **Zéro SPCX (SpaceX) et zéro BSOL (Solana)** — liquidité d'ETF pure.
 - **Reset annuel** : le 1er janvier, retour forcé de la manche au Neutral.
@@ -99,7 +103,7 @@ Score brut (min −50, max +65) → **normalisé 0–100**. Machine d'état :
 **Disjoncteur ATR** (14 j annualisé sur VT) : > 25 % → force **NEUTRAL** ;
 > 40 % → force **BEARISH**. Il s'applique immédiatement, sans attendre le vendredi.
 
-**Disjoncteur de taux (4.5)** : le 10 ans US au-dessus de **5,00 %** pendant deux
+**Disjoncteur de taux** : le 10 ans US au-dessus de **5,00 %** pendant deux
 fermetures → le régime est plafonné à **NEUTRAL** (jamais BULL). Réarmement sous
 4,75 %. Défensif seulement : dans un régime de déficits permanents, la crise des
 taux longs survient souvent pendant que les actions sont encore au-dessus de leur
@@ -218,8 +222,8 @@ s'appuie sur un cluster local de Mac mini M4 :
 
 - **Data Ingestion** (Python) : OHLCV, ratios macro, VIX.
 - **Signal Engine** (`gate_engine.py`) : le même calcul, en Python.
-- **Execution Routing** : **TFSA** = ordres d'achat manuels/planifiés (max 4/an,
-  ventes verrouillées) ; **REER** = ordres delta automatisés via IBKR (illimité).
+- **Execution Routing** : **TFSA** = ordres manuels/planifiés (2–10/an, ventes
+  rares et délibérées) ; **REER** = ordres delta automatisés via IBKR (illimité).
 - **Surveillance** : logs vers un serveur MCP, LLM local qui alerte sur whipsaw
   (BULL ↔ BEARISH > 3 fois en 6 semaines), glissement cumulé du REER > 0,50 %,
   tentative de vente TFSA (ne devrait jamais arriver).

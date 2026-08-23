@@ -27,7 +27,7 @@
  *       ATR% > 25 -> force NEUTRAL ; ATR% > 40 -> force BEARISH.
  *       Il s'applique immédiatement (pas besoin d'attendre le jour du signal).
  *
- *   Disjoncteur de taux (4.5) : 10 ans US > 5,00 % pendant 2 fermetures
+ *   Disjoncteur de taux : 10 ans US > 5,00 % pendant 2 fermetures
  *       -> plafond NEUTRAL (jamais BULL). Réarmement sous 4,75 %. Défensif seulement.
  *
  *   Réinitialisation annuelle : le 1er janvier -> NEUTRAL obligatoire.
@@ -51,16 +51,16 @@ const CFG = {
   atrForceBearish: 40,  // % annualisé
 };
 
-// 4.5 — disjoncteur de taux : plafond NEUTRAL quand le 10 ans US dépasse 5,00 %.
+// Disjoncteur de taux : plafond NEUTRAL quand le 10 ans US dépasse 5,00 %.
 const DISJ_TAUX = { seuilHaut: 5.0, seuilBas: 4.75, confirm: 2 };
 
 // Tickers du portefeuille (prix pour la page) — ordre d'affichage.
-// 4.5 : MCHI retiré du cœur (ses 7,5 points sont passés à GLDM).
+// Août 2026 : MCHI retiré du cœur (ses 7,5 points sont passés à GLDM).
 const TITRES = ["VT", "GLDM", "IBIT", "SMH", "AIPO", "BCI", "SGOV"];
 
 // ---- Architecture finale deux comptes (conforme CRA) ----
 // TFSA (60 %) : le cœur PERMANENT — achat seulement, jamais vendre, max 4 transactions/an.
-const CORE_TFSA = { VT: 40, GLDM: 35, IBIT: 15, SMH: 10 };   // 4.5 : MCHI -> GLDM
+const CORE_TFSA = { VT: 40, GLDM: 35, IBIT: 15, SMH: 10 };   // août 2026 : MCHI -> GLDM
 const BANDES_TFSA = {           // % de la partie TFSA — vérifiées au trimestre
   VT: [35, 45], GLDM: [30, 40], IBIT: [10, 20], SMH: [7.5, 12.5],
 };
@@ -393,7 +393,7 @@ async function main() {
     courbe = { t10: arr2(dix), t3: arr2(trois), ecartPct: arr2(dix - trois) };
   } catch (e) { console.warn(`  Courbe de taux indisponible: ${e.message}`); }
 
-  /* ---- D2. Disjoncteur de taux (4.5) — 10 ans US, plafond NEUTRAL -------------- */
+  /* ---- D2. Disjoncteur de taux — 10 ans US, plafond NEUTRAL -------------------- */
   // En régime de dominance budgétaire, l'accident signature est une crise de prime
   // de terme pendant que les actions sont encore au-dessus de leur tendance — là où
   // le score composite est aveugle. > 5,00 % (2 fermetures) -> jamais BULL.
@@ -456,7 +456,7 @@ async function main() {
     if (!atr.force && !resetAnnuel) regimeEffectif = "NEUTRAL";
   }
 
-  // 4.5 — plafond de taux : jamais BULL quand le 10 ans US dépasse 5,00 %.
+  // Plafond de taux : jamais BULL quand le 10 ans US dépasse 5,00 %.
   if (disjTaux.actif && regimeEffectif === "BULL") regimeEffectif = "NEUTRAL";
 
   const changed = prev.regime !== regimeEffectif;
