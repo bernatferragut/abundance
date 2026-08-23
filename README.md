@@ -2,13 +2,13 @@
 
 | Version | Page | Description |
 | ------- | ---- | ----------- |
-| **4.5** | [`index.html`](index.html) · <https://bernatferragut.github.io/abundance/> | Permanent + tactique, régime 200 jours, disjoncteurs de crédit et de taux. |
+| **2.0** | [`index.html`](index.html) · <https://bernatferragut.github.io/abundance/> | Permanent + tactique, régime 200 jours, disjoncteurs de crédit et de taux. |
 | **3.0** | [`v3/`](v3) · <https://bernatferragut.github.io/abundance/v3/> | Calculatrice d'achat simple (100 %). |
 | **4.0 (P3)** | [`v4/`](v4) · <https://bernatferragut.github.io/abundance/v4/> | Plan du point de contrôle : régime BULL/NEUTRAL/BEARISH, score composite, matrices, calculatrice, suivi. |
 
 ---
 
-# Abundance 4.5 — page familiale
+# Abundance 2.0 — page familiale
 
 Une page qui dit une seule chose : **ne rien faire**, ou **voici ce qui a changé**.
 Toi seul la modifies. Les autres ne font que la lire.
@@ -18,11 +18,12 @@ Toi seul la modifies. Les autres ne font que la lire.
 ## Les trois couches
 
 - **🟦 POSSÉDER — Permanent, 60 % (CELI)** : VT 40, GLDM 35, IBIT 15, SMH 10
-  (de la partie). On ne vend jamais. Rééquilibrage par bandes d'environ ±5 points
-  de la partie, uniquement avec de l'argent neuf. **Aucun signal** — sa protection
-  vient de la diversification, de la possession à long terme et du refus des sorties
-  émotionnelles. Honnêtement : une baisse de 35 à 45 % est possible dans un marché
-  baissier sévère.
+  (de la partie). On ne vend presque jamais : l'ARC tolère quelques transactions
+  par année (2–10) — c'est du rééquilibrage, pas du négoce actif. Rééquilibrage
+  par bandes d'environ ±5 points de la partie, d'abord avec de l'argent neuf.
+  **Aucun signal** — sa protection vient de la diversification, de la possession
+  à long terme et du refus des sorties émotionnelles. Honnêtement : une baisse de
+  35 à 45 % est possible dans un marché baissier sévère.
 - **🟧 S'ADAPTER — Tactique, 40 % (REER)** : un budget de risque, pas des pourcentages fixes.
 - **🟩 MUNITIONS — SGOV et cotisations neuves** : on attend, et les règles de déploiement
   selon la baisse décident quand accélérer.
@@ -38,7 +39,7 @@ Toi seul la modifies. Les autres ne font que la lire.
 - **Disjoncteur de crédit** : écart de crédit à plus de 50 % au-dessus de sa moyenne
   200 jours pendant deux fermetures → RISK OFF forcé, sans attendre le samedi.
   Réarmement sous 1,20 fois. Il ne peut qu'aller vers la sécurité.
-- **Disjoncteur de taux (4.5)** : le 10 ans américain au-dessus de 5,00 % pendant deux
+- **Disjoncteur de taux** : le 10 ans américain au-dessus de 5,00 % pendant deux
   fermetures → le régime est plafonné à NEUTRAL, sans attendre le samedi. Réarmement
   sous 4,75 %. Dans un régime de déficits permanents, l'accident typique est une crise
   des taux longs pendant que les actions sont encore au-dessus de leur 200 jours — là
@@ -153,7 +154,7 @@ python3 -m http.server 8000    # puis http://localhost:8000
 
 Les tableaux sont du HTML ordinaire dans `index.html` (chercher `Permanent` ou
 `Tactique`). Les cibles de base du tactique sont aussi dans `scripts/signal.mjs`
-(`CIBLES_BASE`). **Si un pourcentage change ici, il doit changer dans le PDF aussi.**
+(`CIBLES_BASE`). Le site est la seule source de vérité (plus de PDF à synchroniser).
 
 ---
 
@@ -169,17 +170,19 @@ Un regard extérieur, août 2026 — ce qui rend ce plan solide pour 2026-2030 :
   crise. Lui, il ne peut que mettre à l'abri — jamais l'inverse.
 - **Or et bitcoin au cœur du permanent.** Deux réponses directes à la dévaluation
   monétaire et à un monde qui se fragmente. Pas un pari : une assurance.
-- **La discipline est dans la structure, pas dans la volonté.** On ne vend jamais le
-  permanent, on rééquilibre avec de l'argent neuf seulement, et le CELI reste à l'abri
-  des allers-retours.
+- **La discipline est dans la structure, pas dans la volonté.** On ne vend le permanent
+  que rarement et délibérément, on rééquilibre d'abord avec de l'argent neuf, et le
+  CELI reste à l'abri des allers-retours.
 - **Le robot échoue du bon bord.** Données périmées ? Il refuse d'écrire. Un prix
   manque ? Il garde l'ancien. Quelque chose brise ? Le plan reste intact.
 - **Rien de superflu.** Chaque ligne a une job, chaque règle bloque une erreur humaine.
   C'est simple en surface parce que c'est sérieux en dessous.
 
-La retouche 4.5 (août 2026) fait deux choses. D'abord, elle termine le commerce de
+La retouche d'août 2026 fait deux choses. D'abord, elle termine le commerce de
 Taïwan commencé avec MCHI 10 → 7,5 : les derniers 7,5 points de MCHI passent à GLDM
-(35). Dans le scénario du détroit, la Chine tombe le plus fort, les semi-conducteurs
+(35) — MCHI est **vendu une seule fois, délibérément** : quelques transactions par
+année dans le CELI restent du rééquilibrage aux yeux de l'ARC, pas du négoce actif.
+Dans le scénario du détroit, la Chine tombe le plus fort, les semi-conducteurs
 et une bonne partie de VT suivent — et l'or est l'actif qui, historiquement, monte
 exactement quand ça arrive. Ensuite, elle ajoute le disjoncteur de taux : dans le
 régime Bessent (rachats de dette longue doublés, émissions en bons du Trésor,

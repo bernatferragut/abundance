@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Abundance 4.5 — calcul du régime (« système d'exploitation du portefeuille »).
+ * Abundance 2.0 — calcul du régime (« système d'exploitation du portefeuille »).
  *
  * Architecture révisée :
  *   - VT est le PATRON du régime : VT > 200 jours ET momentum 50 jours -> RISK ON ;
@@ -8,7 +8,7 @@
  *   - SMH est le CADRAN SATELLITE : > 50 jours -> 100 % ; entre 50 et 200 jours -> 50 % ;
  *     < 200 jours -> 0 % du couple SMH/AIPO.
  *   - Disjoncteur de crédit : force le RISK OFF (il ne peut qu'aller vers la sécurité).
- *   - Disjoncteur de taux (4.5) : le 10 ans US au-dessus de 5,00 % plafonne le régime
+ *   - Disjoncteur de taux : le 10 ans US au-dessus de 5,00 % plafonne le régime
  *     à NEUTRAL (lui aussi ne peut qu'aller vers la sécurité).
  *
  * La cible tactique EFFECTIVE (régime + satellite appliqué) est écrite dans state.json.
@@ -184,8 +184,8 @@ export function appliquerSatellite(base, sat) {
 
 /* ------------------------------------------------------------------ main */
 
-// 4.5 : MCHI retiré du permanent (ses 7,5 points sont passés à GLDM) — on ne suit
-// plus son prix. Seuls les titres de cette liste sont conservés dans state.json.
+// Août 2026 : MCHI retiré du permanent (ses 7,5 points sont passés à GLDM) — on ne
+// suit plus son prix. Seuls les titres de cette liste sont conservés dans state.json.
 const TITRES = ["VT","GLDM","SMH","IBIT","SGOV","AIPO","BCI"];
 
 /**
@@ -232,7 +232,7 @@ export function parseFred(csv) {
 }
 
 /* ============================ DISJONCTEUR DE TAUX ==============================
- * Taux 10 ans américain (DGS10, via FRED). Ajout 4.5 : en régime de dominance
+ * Taux 10 ans américain (DGS10, via FRED). Août 2026 : en régime de dominance
  * budgétaire, l'accident signature est une crise de prime de terme — souvent
  * pendant que les actions sont encore au-dessus de leur 200 jours, là où le
  * patron VT est aveugle. Au-dessus de 5,00 % pendant 2 fermetures -> le régime
@@ -319,7 +319,7 @@ async function fetchPrices(prevPrices = {}) {
 }
 
 async function main() {
-  console.log(`Abundance 4.5 — régime ${CFG.regimeTitre} (patron ${CFG.maRegime}j), satellite ${CFG.satellite}, confirmation ${CFG.confirmDays} fermetures\n`);
+  console.log(`Abundance 2.0 — régime ${CFG.regimeTitre} (patron ${CFG.maRegime}j), satellite ${CFG.satellite}, confirmation ${CFG.confirmDays} fermetures\n`);
 
   const [vt, smh] = await Promise.all([fetchSymbol(CFG.regimeTitre), fetchSymbol(CFG.satellite)]);
   const sig = computeRegime(vt);
