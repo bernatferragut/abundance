@@ -2,33 +2,33 @@
   "regime": "ON",
   "actionRequise": false,
   "changeLe": "2026-08-14",
-  "verifieLe": "2026-08-28",
+  "verifieLe": "2026-08-29",
   "note": "",
   "prix": {
-    "VT": 161.85,
-    "GLDM": 91.16,
-    "SMH": 566.39,
-    "IBIT": 44.88,
-    "SGOV": 100.69,
-    "AIPO": 28.93,
-    "BCI": 25.55
+    "VT": 161.57,
+    "GLDM": 91.17,
+    "SMH": 573,
+    "IBIT": 45.29,
+    "SGOV": 100.66,
+    "AIPO": 29.2,
+    "BCI": 25.44
   },
-  "prixDate": "2026-08-28",
+  "prixDate": "2026-08-27",
   "regimeSignal": {
-    "date": "2026-08-28",
-    "vtClose": 161.85,
-    "vtMa200": 148.23,
-    "vtMa50": 157.73,
-    "vtVs200Pct": 9.2,
-    "vtVs50Pct": 2.6
+    "date": "2026-08-27",
+    "vtClose": 161.57,
+    "vtMa200": 148.11,
+    "vtMa50": 157.61,
+    "vtVs200Pct": 9.1,
+    "vtVs50Pct": 2.5
   },
   "satellite": {
     "facteur": 0.5,
-    "smhClose": 587.82,
-    "smhMa200": 461.82,
-    "smhMa50": 591.49,
-    "smhVs200Pct": 27.3,
-    "smhVs50Pct": -0.6
+    "smhClose": 573,
+    "smhMa200": 471.09,
+    "smhMa50": 584.08,
+    "smhVs200Pct": 21.6,
+    "smhVs50Pct": -1.9
   },
   "cibles": {
     "ON": {
@@ -66,14 +66,14 @@
   },
   "disjoncteur": {
     "actif": false,
-    "ratio": 0.94,
-    "date": "2026-08-26",
+    "ratio": 0.92,
+    "date": "2026-08-27",
     "indisponible": false
   },
   "disjoncteurTaux": {
     "actif": false,
-    "taux": 4.66,
-    "date": "2026-08-26",
+    "taux": 4.67,
+    "date": "2026-08-27",
     "indisponible": false
   }
 }
