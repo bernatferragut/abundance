@@ -2,7 +2,7 @@
   "regime": "BULL",
   "actionRequise": false,
   "changeLe": "2026-08-18",
-  "verifieLe": "2026-08-30",
+  "verifieLe": "2026-08-31",
   "note": "",
   "prix": {
     "VT": 161.01,
@@ -13,7 +13,7 @@
     "BCI": 25.44,
     "SGOV": 100.69
   },
-  "prixDate": "2026-08-30",
+  "prixDate": "2026-08-31",
   "composite": {
     "score": 81,
     "brut": 43.3,
@@ -25,7 +25,7 @@
     "macro": {
       "copperGold": 0.001,
       "hygIef": 0.859,
-      "cuivreOrRoc4s": -8.41,
+      "cuivreOrRoc4s": -8.81,
       "hygIefRoc4s": 0.43,
       "cuOrScore": 0,
       "hygIefScore": 8.3
@@ -44,7 +44,7 @@
       "position": "risqueON",
       "vpocScore": 15
     },
-    "vix": 14.43,
+    "vix": 15.23,
     "courbe": {
       "t10": 4.72,
       "t3": 3.73,
