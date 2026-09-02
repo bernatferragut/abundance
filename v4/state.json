@@ -2,64 +2,64 @@
   "regime": "BULL",
   "actionRequise": false,
   "changeLe": "2026-08-18",
-  "verifieLe": "2026-09-01",
+  "verifieLe": "2026-09-02",
   "note": "",
   "prix": {
-    "VT": 160.55,
-    "GLDM": 88.11,
-    "IBIT": 44.67,
-    "SMH": 556.63,
-    "AIPO": 27.9,
-    "BCI": 25.71,
-    "SGOV": 100.69
+    "VT": 159.31,
+    "GLDM": 85.59,
+    "IBIT": 43.76,
+    "SMH": 545.22,
+    "AIPO": 27.66,
+    "BCI": 26.05,
+    "SGOV": 100.41
   },
-  "prixDate": "2026-09-01",
+  "prixDate": "2026-09-02",
   "composite": {
-    "score": 82,
-    "brut": 43.8,
-    "macroScore": 8.8,
+    "score": 81,
+    "brut": 43.5,
+    "macroScore": 8.5,
     "hullBias": 10,
     "vpocScore": 15,
     "vixAdjust": 5,
     "yieldAdjust": 5,
     "macro": {
       "copperGold": 0.001,
-      "hygIef": 0.861,
-      "cuivreOrRoc4s": -7.92,
-      "hygIefRoc4s": 0.72,
+      "hygIef": 0.859,
+      "cuivreOrRoc4s": -5.21,
+      "hygIefRoc4s": 0.51,
       "cuOrScore": 0,
-      "hygIefScore": 8.8
+      "hygIefScore": 8.5
     },
     "hull": {
-      "hma": 160.8,
+      "hma": 160.78,
       "hmaAvant4s": 158.98,
       "pente": "hausse",
       "hullBias": 10
     },
     "vpoc": {
       "vpoc": 142.62,
-      "val": 124.59,
-      "vah": 158.59,
-      "prix": 160.55,
+      "val": 127.68,
+      "vah": 160.65,
+      "prix": 159.31,
       "position": "risqueON",
       "vpocScore": 15
     },
-    "vix": 15.11,
+    "vix": 16.34,
     "courbe": {
-      "t10": 4.76,
-      "t3": 3.73,
-      "ecartPct": 1.03
+      "t10": 4.8,
+      "t3": 3.77,
+      "ecartPct": 1.02
     }
   },
   "atr": {
-    "pctAnnualise": 13,
+    "pctAnnualise": 13.64,
     "actif": false,
     "force": null
   },
   "disjoncteurTaux": {
     "actif": false,
-    "taux": 4.76,
-    "date": "2026-08-31",
+    "taux": 4.8,
+    "date": "2026-09-01",
     "indisponible": false
   },
   "cibles": {
