@@ -2,7 +2,7 @@
   "regime": "ON",
   "actionRequise": false,
   "changeLe": "2026-08-14",
-  "verifieLe": "2026-09-03",
+  "verifieLe": "2026-09-04",
   "note": "",
   "prix": {
     "VT": 160.11,
@@ -17,10 +17,10 @@
   "regimeSignal": {
     "date": "2026-09-02",
     "vtClose": 160.11,
-    "vtMa200": 148.42,
-    "vtMa50": 157.79,
-    "vtVs200Pct": 7.9,
-    "vtVs50Pct": 1.5
+    "vtMa200": 148.54,
+    "vtMa50": 157.92,
+    "vtVs200Pct": 7.8,
+    "vtVs50Pct": 1.4
   },
   "satellite": {
     "facteur": 0.5,
@@ -66,14 +66,14 @@
   },
   "disjoncteur": {
     "actif": false,
-    "ratio": 0.93,
-    "date": "2026-09-01",
+    "ratio": 0.94,
+    "date": "2026-09-02",
     "indisponible": false
   },
   "disjoncteurTaux": {
     "actif": false,
     "taux": 4.79,
-    "date": "2026-09-01",
+    "date": "2026-09-02",
     "indisponible": false
   }
 }
